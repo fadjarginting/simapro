@@ -82,11 +82,11 @@ function toggleDescription(id) {
 
 <template>
 
-    <Head title="ERF Management" />
+    <Head title="Documents Management" />
 
     <template name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            ERF Management
+            Documents Management
         </h2>
     </template>
 
@@ -100,7 +100,7 @@ function toggleDescription(id) {
                         <div
                             class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
                             <!-- Judul Tabel -->
-                            <h6 class="text-2xl font-bold text-gray-900">
+                            <h6 class="dark:text-white text-base font-bold">
                                 ERF Management
                             </h6>
                             <!-- Tombol Add Docs -->
@@ -108,7 +108,7 @@ function toggleDescription(id) {
                                 <Link :href="route('erfs.create')"
                                     class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-green-500 transition duration-300 hover:bg-gradient-to-tl hover:from-green-500 hover:to-teal-400 hover:text-white">
                                 <i class="fas fa-plus mr-2 text-xs leading-none"></i>
-                                <span>add erf</span>
+                                <span>add docs</span>
                                 <i class="ni ni-folder-17 ml-2 leading-none"></i>
                                 </Link>
                             </div>
@@ -165,16 +165,14 @@ function toggleDescription(id) {
                                     <thead class="bg-gray-50">
                                         <tr class="text-sm font-normal text-gray-600 border-t border-b text-left">
                                             <th class="px-4 py-3">
-                                                Document Code
+                                                No.ERF
                                             </th>
-                                            <th class="px-4 py-3">Title</th>
-                                            <th class="px-4 py-3">Version</th>
-                                            <th class="px-4 py-3">
-                                                Document Type
-                                            </th>
+                                            <th class="px-4 py-3">Entry Date by User Request</th>
+                                            <th class="px-4 py-3">Job Title</th>
                                             <th class="px-4 py-3">Status</th>
+                                            <th class="px-4 py-3">Prioritas</th>
                                             <th class="px-4 py-3">
-                                                Publish Date
+                                                Action
                                             </th>
                                             <th class="px-4 py-3"></th>
                                         </tr>

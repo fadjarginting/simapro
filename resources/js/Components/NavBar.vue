@@ -36,11 +36,11 @@ const showingNavigationDropdown = ref(false);
                     <li
                         class="text-sm pl-2 capitalize leading-normal text-white before:float-left before:pr-2 before:text-white before:content-['/']"
                         aria-current="page"
-                    >
+                    > 
                         Dashboard
                     </li>
                 </ol>
-                <h6 class="mb-0 font-bold text-white capitalize">Dashboard</h6>
+                <h6 class="mb-0 font-bold text-white capitalize">ERF Management</h6>
             </nav>
 
             <div
