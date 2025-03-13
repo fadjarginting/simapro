@@ -169,7 +169,7 @@ onBeforeUnmount(() => {
                 <li class="mt-0.5 w-full">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('users')"
+                        :href="route('users.index')"
                     >
                         <div
                             class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-indigo-500"
@@ -186,7 +186,7 @@ onBeforeUnmount(() => {
                 <li class="mt-0.5 w-full">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('roles')"
+                        :href="route('roles.index')"
                     >
                         <div
                             class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-orange-500"

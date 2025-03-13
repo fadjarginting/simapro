@@ -82,11 +82,11 @@ function toggleDescription(id) {
 
 <template>
 
-    <Head title="Documents Management" />
+    <Head title="ERF Management" />
 
     <template name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Documents Management
+            ERF Management
         </h2>
     </template>
 
@@ -108,7 +108,7 @@ function toggleDescription(id) {
                                 <Link :href="route('erfs.create')"
                                     class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-green-500 transition duration-300 hover:bg-gradient-to-tl hover:from-green-500 hover:to-teal-400 hover:text-white">
                                 <i class="fas fa-plus mr-2 text-xs leading-none"></i>
-                                <span>add docs</span>
+                                <span>Add New ERF</span>
                                 <i class="ni ni-folder-17 ml-2 leading-none"></i>
                                 </Link>
                             </div>
@@ -153,12 +153,10 @@ function toggleDescription(id) {
                                 <input v-model="filterValues.version" type="text" placeholder="Filter Version"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
-
                         </div>
 
 
                         <div class="flex-auto px-0 pt-0 pb-2">
-
 
                             <div class="p-0 overflow-x-auto">
                                 <table class="w-full table-auto">

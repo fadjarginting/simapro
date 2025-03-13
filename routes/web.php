@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,15 +26,12 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// route user management
-Route::get('/users', function () {
-    return Inertia::render('UsersManagement/UserPage');
-})->middleware(['auth', 'verified'])->name('users');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Route User Management
+Route::middleware(['auth'])->group(function () {
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+    
 });
 
 // Route ERF management
@@ -48,7 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('erfs.edit');
 });
 
-// Route In Progress Engineering Document
+// Route Morning Report
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/morning', function () {
         return Inertia::render('MorningReport/Morning');
@@ -56,45 +55,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
 });
 
-// Route Download Request
+// Route Progress Report
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/downloadrequest', function () {
-        return Inertia::render('DownloadRequest/DownloadRequest');
-    })->name('downloadrequest');
-    
+    Route::get('/progress', function () {
+        return Inertia::render('ProgressReport/Progress');
+    })->name('progress');
+    Route::get('/progress/create', function () {
+        return Inertia::render('ProgressReport/CreateProgress');
+    })->name('progress.create');
+    Route::get('/progress/{progres}/edit', function () {
+        return Inertia::render('Progress/EditProgress');
+    })->name('progress.edit');
 });
 
-// route category
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/categories', function () {
-        return Inertia::render('CategoriesManagement/Categories');
-    })->name('categories');
-    Route::get('/categories/create', function () {
-        return Inertia::render('CategoriesManagement/CreateCategory');
-    })->name('categories.create');
-    Route::get('/categories/{category}/edit', function () {
-        return Inertia::render('CategoriesManagement/EditCategory');
-    })->name('categories.edit');
-});
-
-// profile route
+// Profile Route
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Route for role management
+// Route for Role Management
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/roles', function () {
-        return Inertia::render('RolesManagement/Roles');
-    })->name('roles');
-    Route::get('/roles/create', function () {
-        return Inertia::render('RolesManagement/CreateRole');
-    })->name('roles.create');
-    Route::get('/roles/{role}/edit', function () {
-        return Inertia::render('RolesManagement/EditRole');
-    })->name('roles.edit');
+    Route::get('/roles',[RolesController::class, 'index'])->name('roles.index');
+    Route::get('/roles/create', [RolesController::class, 'create'])->name('roles.create');
+    Route::post('/roles', [RolesController::class, 'store'])->name('roles.store');
+    Route::get('/roles/{role}/edit', [RolesController::class, 'edit'])->name('roles.edit');
+    Route::patch('/roles/{role}', [RolesController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{role}', [RolesController::class, 'destroy'])->name('roles.destroy');
 });
 
 // Route for Work Audit Trail
@@ -104,7 +92,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('workaudit');
 });
 
-// Route login audit trail
+// Route for Login Audit Trail
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/loginaudit', function () {
         return Inertia::render('LoginAuditLogs/LoginAudit');

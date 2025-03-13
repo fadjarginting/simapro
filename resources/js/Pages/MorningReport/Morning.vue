@@ -164,7 +164,7 @@ function nextEngdocPage() {
                             class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
                             <!-- Judul Tabel -->
                             <h1 class="text-2xl font-bold text-gray-900">
-                                MONITORING PROGRESS
+                                Morning Report
                             </h1>
                         </div>
                         <div

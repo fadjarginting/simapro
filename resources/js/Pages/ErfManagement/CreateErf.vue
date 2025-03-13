@@ -10,7 +10,7 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Add Documents" />
+    <Head title="Add ERF" />
 
     <!-- form add document -->
     <div class="py-12">

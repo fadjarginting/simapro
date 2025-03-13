@@ -18,11 +18,11 @@ function toggleDescription(id) {
 </script>
 
 <template>
-    <Head title="Documents Management" />
+    <Head title="Login Audit Logs" />
 
     <template name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Documents Management
+            Login Audit Logs
         </h2>
     </template>
 
@@ -54,6 +54,11 @@ function toggleDescription(id) {
                                             <th
                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                             >
+                                                Date & Time
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
                                                 User
                                             </th>
                                             <th
@@ -61,11 +66,7 @@ function toggleDescription(id) {
                                             >
                                                 Action
                                             </th>
-                                            <th
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                Timestamp
-                                            </th>
+                                            
                                             <th
                                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                             >
@@ -84,6 +85,11 @@ function toggleDescription(id) {
                                     >
                                         <!-- Contoh Data -->
                                         <tr>
+                                            <td
+                                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                            >
+                                                2023-08-15 14:32:15
+                                            </td>
                                             <td
                                                 class="px-6 py-4 whitespace-nowrap"
                                             >
@@ -116,11 +122,7 @@ function toggleDescription(id) {
                                             >
                                                 Login Attempt
                                             </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            >
-                                                2023-08-15 14:32:15
-                                            </td>
+                                            
                                             <td
                                                 class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                                             >
@@ -154,6 +156,11 @@ function toggleDescription(id) {
                                         <!-- Contoh Data Failed -->
                                         <tr>
                                             <td
+                                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                            >
+                                                2023-08-15 14:35:22
+                                            </td>
+                                            <td
                                                 class="px-6 py-4 whitespace-nowrap"
                                             >
                                                 <div class="flex items-center">
@@ -185,11 +192,7 @@ function toggleDescription(id) {
                                             >
                                                 Login Attempt
                                             </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            >
-                                                2023-08-15 14:35:22
-                                            </td>
+                                            
                                             <td
                                                 class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                                             >

@@ -74,6 +74,25 @@ defineOptions({
                                                         14:32:05
                                                     </div>
                                                 </td>
+                                                
+                                                <td class="px-6 py-4">
+                                                    <div
+                                                        class="text-sm font-medium"
+                                                    >
+                                                        Laporan-Tahunan-2023.pdf
+                                                    </div>
+                                                    <div
+                                                        class="text-xs text-gray-500"
+                                                    >
+                                                        Size: 2.4 MB
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span
+                                                        class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
+                                                        >Upload</span
+                                                    >
+                                                </td>
                                                 <td class="px-6 py-4">
                                                     <div
                                                         class="flex items-center"
@@ -101,25 +120,7 @@ defineOptions({
                                                     </div>
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    <div
-                                                        class="text-sm font-medium"
-                                                    >
-                                                        Laporan-Tahunan-2023.pdf
-                                                    </div>
-                                                    <div
-                                                        class="text-xs text-gray-500"
-                                                    >
-                                                        Size: 2.4 MB
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <span
-                                                        class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                                                        >Upload</span
-                                                    >
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    Versi 1.0
+                                                    -
                                                 </td>
                                                 <td class="px-6 py-4 text-sm">
                                                     192.168.1.1
