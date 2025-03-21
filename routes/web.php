@@ -17,7 +17,7 @@ use Inertia\Inertia;
 //     ]);
 // });
 
-//redirect to login page
+//Redirect to Login Page
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -30,11 +30,10 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
-    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
-    
+    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');    
 });
 
-// Route ERF management
+// Route ERF Management
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/erfs', function () {
         return Inertia::render('ErfManagement/ErfManage');

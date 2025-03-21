@@ -15,6 +15,11 @@ defineOptions({
     layout: AuthenticatedLayout,
 });
 
+import { defineProps } from "vue";
+defineProps({
+    header: String,
+});
+
 // Tanggal dan waktu
 const currentDate = new Date();
 const formattedDate = `${currentDate.getDate()} ${getMonthName(currentDate.getMonth())} ${currentDate.getFullYear()}`;
@@ -47,8 +52,8 @@ const lineData2024 = [
 const lineData2025 = [
     { name: "Jan", value: 30 }, { name: "Feb", value: 50 }, { name: "Mar", value: 40 },
     { name: "Apr", value: 70 }, { name: "May", value: 60 }, { name: "Jun", value: 80 },
-    { name: "Jul", value: 90 }, { name: "Aug", value: 100 }, { name: "Sep", value: 110 },
-    { name: "Oct", value: 120 }, { name: "Nov", value: 130 }, { name: "Dec", value: 140 },
+    { name: "Jul", value: 90 }, { name: "Aug", value: 100 }, { name: "Sep", value: 100 },
+    { name: "Oct", value: 120 }, { name: "Nov", value: 125 }, { name: "Dec", value: 130 },
 ];
 
 // Filter data berdasarkan tahun yang dipilih
@@ -80,17 +85,21 @@ const workStatusData = [
 ];
 
 const plantTypeData = [
-    { name: "Plant A", value: 40 },
-    { name: "Plant B", value: 30 },
-    { name: "Plant C", value: 20 },
-    { name: "Plant D", value: 10 },
+    { name: "Kajian Engineering", value: 30 },
+    { name: "FEED/DED", value: 55 },
+    { name: "Technical Assist", value: 20 },
+];
+
+const workData = [
+    { name: "In Progress", value: 78.9 },
+    { name: "Closing", value: 4.5 },
+    { name: "Hold", value: 1.1 },
+    { name: "Reject", value: 1.1 },
 ];
 
 const departmentData = [
-    { name: "Production", value: 45 },
-    { name: "HR", value: 15 },
-    { name: "Engineering", value: 25 },
-    { name: "QA", value: 15 },
+    { name: "Executing,", value: 20.24 },
+    { name: "Initiating", value: 58.69 },
 ];
 
 // Data untuk masing-masing Plant Engineering
@@ -122,7 +131,7 @@ const technicalAuditData = [
 
 // Data untuk multi-bar chart
 const multiBarData = {
-    categories: ["Plant A", "Plant B", "Plant C", "Plant D", "Plant E", "Plant F", "Plant G", "Plant H"],
+    categories: ["Tambang", "Indarung II/III", "Indarung IV", "Indarung V", "Indarung VI", "PPI", "PP MALAHAYATI", "GP DUMAI"],
     series: [
         { name: "Working", data: [35, 28, 15, 22, 30, 25, 18, 40], color: "#6A39F7" },
         { name: "Planning", data: [20, 15, 10, 12, 18, 15, 10, 22], color: "#44BFD6" },
@@ -202,15 +211,15 @@ const PIE_COLORS = ["#6A39F7", "#44BFD6", "#93CAED", "#CABFEB"];
                 <!-- Chart Row 2 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <Card class="h-auto flex flex-col">
-                        <h2 class="text-xl font-bold mb-2">Plant Work Job Engineering</h2>
-                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 12,809</div>
+                        <h2 class="text-xl font-bold mb-2">Detail Stats Job Kajian Engineering</h2>
+                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 23 ERF</div>
                         <div class="flex-grow" style="height: 300px;">
                             <BarChart :chart-data="plantEngineeringData" :height="300" />
                         </div>
                     </Card>
                     <Card class="h-auto flex flex-col">
-                        <h2 class="text-xl font-bold mb-2">Digital Data Job HR</h2>
-                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 10,680</div>
+                        <h2 class="text-xl font-bold mb-2">Detail Stats Job FEED/DED</h2>
+                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 53 ERF</div>
                         <div class="flex-grow" style="height: 300px;">
                             <BarChart :chart-data="digitalHRData" :height="300" />
                         </div>
@@ -220,15 +229,15 @@ const PIE_COLORS = ["#6A39F7", "#44BFD6", "#93CAED", "#CABFEB"];
                 <!-- Chart Row 3 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <Card class="h-auto flex flex-col">
-                        <h2 class="text-xl font-bold mb-2">Detail Work Job Technical Audit</h2>
-                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 8,459</div>
+                        <h2 class="text-xl font-bold mb-2">Detail Stats Job Technical Assist</h2>
+                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 8 ERF</div>
                         <div class="flex-grow" style="height: 300px;">
                             <BarChart :chart-data="technicalAuditData" :height="300" />
                         </div>
                     </Card>
                     <Card class="h-auto flex flex-col">
-                        <h2 class="text-xl font-bold mb-2">Total Pekerjaan Berdasarkan Plant</h2>
-                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 34,879</div>
+                        <h2 class="text-xl font-bold mb-2">Total Pekerjaan Berdasarkan Jenis Pekerjaan</h2>
+                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 84 ERF</div>
                         <div class="flex-grow flex items-center justify-center" style="min-height: 300px;">
                             <PieChart :chart-data="plantTypeData" :colors="PIE_COLORS" :height="300" />
                         </div>
@@ -238,12 +247,12 @@ const PIE_COLORS = ["#6A39F7", "#44BFD6", "#93CAED", "#CABFEB"];
                 <!-- Chart tambahan - PieChart sejajar -->
                 <div class="mb-6">
                     <Card class="h-auto flex flex-col">
-                        <h2 class="text-xl font-bold mb-2">Total Pekerjaan Berdasarkan Plant Tahun Ini</h2>
-                        <div class="text-sm text-gray-500 mb-2">Plant Per Bulan</div>
-                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan: 34,679</div>
+                        <h2 class="text-xl font-bold mb-2">Total Pekerjaan Berdasarkan Status</h2>
+                        <div class="text-sm text-gray-500 mb-2">Status, Total, %Total</div>
+                        <div class="text-sm text-gray-500 mb-2">Total Pekerjaan = 84 ERF</div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="flex-grow flex items-center justify-center" style="min-height: 300px;">
-                                <PieChart :chart-data="plantTypeData" :colors="PIE_COLORS" :height="250" />
+                                <PieChart :chart-data="workData" :colors="PIE_COLORS" :height="250" />
                             </div>
                             <div class="flex-grow flex items-center justify-center" style="min-height: 300px;">
                                 <PieChart :chart-data="departmentData" :colors="PIE_COLORS" :height="250" />

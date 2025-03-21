@@ -70,10 +70,7 @@ const renderChart = () => {
     .attr('transform', `translate(0,${innerHeight})`)
     .call(d3.axisBottom(x0Scale))
     .selectAll('text')
-    .attr('transform', 'rotate(-45)')
-    .style('text-anchor', 'end')
-    .attr('dx', '-.8em')
-    .attr('dy', '.15em');
+    .style('text-anchor', 'middle');
 
   // Tambahkan sumbu y
   g.append('g')

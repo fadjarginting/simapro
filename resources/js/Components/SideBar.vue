@@ -1,6 +1,7 @@
 <script setup>
-import { defineProps, ref, onMounted, onBeforeUnmount } from "vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { defineProps, ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { Head, Link, usePage } from "@inertiajs/vue3";
+
 const props = defineProps({
     isOpen: Boolean,
 });
@@ -30,6 +31,9 @@ onBeforeUnmount(() => {
         ps = null;
     }
 });
+
+// Mendapatkan rute saat ini
+const currentRoute = computed(() => usePage().url);
 </script>
 
 <template>
@@ -68,7 +72,7 @@ onBeforeUnmount(() => {
         <div ref="contentRef" class="py-2 relative flex-1 overflow-auto ps">
             <ul class="flex flex-col pl-0 mb-0">
                 <!-- Dashboard -->
-                <li class="mt-0.5 w-full bg-blue-500/13 rounded-lg">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/dashboard' }">
                     <Link
                         class="flex items-center text-sm font-semibold dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('dashboard')"
@@ -83,7 +87,7 @@ onBeforeUnmount(() => {
                 </li>
 
                 <!-- ERF Management -->
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/erfs' }">
                     <div
                         class="flex items-center justify-between px-6 py-2.5 cursor-pointer"
                     >
@@ -105,10 +109,10 @@ onBeforeUnmount(() => {
                 </li>
 
                 <!-- Progress Report -->
-                <li class="mt-0.5 w-full">
-                    <a
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/progress' }">
+                    <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        href=""
+                        :href="route('progress')"
                     >
                         <div
                             class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-yellow-500"
@@ -118,11 +122,11 @@ onBeforeUnmount(() => {
                             ></i>
                         </div>
                         <span>Progress Report</span>
-                    </a>
+                    </Link>
                 </li>
 
                 <!-- Morning Report -->
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/morning' }">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('morning')"
@@ -136,11 +140,10 @@ onBeforeUnmount(() => {
                         </div>
                         <span>Morning Report</span>
                     </Link>
-
-                    <!-- Key Performance Indicator -->
                 </li>
 
-                <li class="mt-0.5 w-full">
+                <!-- Key Performance Indicator -->
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/kpi' }">
                     <a
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         href=""
@@ -166,7 +169,7 @@ onBeforeUnmount(() => {
                 </li>
 
                 <!-- User Management -->
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/users' }">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('users.index')"
@@ -183,7 +186,7 @@ onBeforeUnmount(() => {
                 </li>
 
                 <!-- Role  -->
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/roles' }">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('roles.index')"
@@ -205,7 +208,7 @@ onBeforeUnmount(() => {
                     </h6>
                 </li>
 
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/workaudit' }">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('workaudit')"
@@ -222,7 +225,7 @@ onBeforeUnmount(() => {
                 </li>
 
                 <!-- login audit trail  -->
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/loginaudit' }">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('loginaudit')"
@@ -244,7 +247,7 @@ onBeforeUnmount(() => {
                     </h6>
                 </li>
 
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/profile' }">
                     <Link
                         :href="route('profile.edit')"
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
@@ -276,7 +279,6 @@ onBeforeUnmount(() => {
                         </div>
                         <span>Logout</span>
                     </Link>
-                    <!-- Tambahkan item menu lain sesuai kebutuhan -->
                 </li>
             </ul>
         </div>

@@ -11,11 +11,11 @@ const documents = ref([
     {
         id: 1,
         doc_code: '6001.51.4001-1',
-        title: 'Flow Sheet With Capacity Indarung VI',
-        version: '1.0',
-        doc_type: 'Flow Sheet',
-        status: 'New',
-        publish_date: '03-10-2019'
+        title: '10-03-2025',
+        version: 'Flow Sheet With Capacity Indarung VI',
+        doc_type: 'Finish',
+        status: 'P1',
+        publish_date: ''
     },
     // Tambahkan data lain sesuai kebutuhan
 ]);
@@ -165,7 +165,7 @@ function toggleDescription(id) {
                                             <th class="px-4 py-3">
                                                 No.ERF
                                             </th>
-                                            <th class="px-4 py-3">Entry Date by User Request</th>
+                                            <th class="px-4 py-3">Entry Date by User Req.</th>
                                             <th class="px-4 py-3">Job Title</th>
                                             <th class="px-4 py-3">Status</th>
                                             <th class="px-4 py-3">Prioritas</th>
@@ -188,10 +188,7 @@ function toggleDescription(id) {
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        <Link class="text-gray-700">
-                                                        <i class="fas fa-file-pdf mr-2 text-red-500"></i>
                                                         {{ doc.title }}
-                                                        </Link>
                                                     </div>
                                                 </div>
                                             </td>
@@ -204,9 +201,10 @@ function toggleDescription(id) {
                                             </td>
                                             <td class="px-4">
                                                 <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
+                                                    <span
+                                                        class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                                                         {{ doc.doc_type }}
-                                                    </div>
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td class="px-4">
