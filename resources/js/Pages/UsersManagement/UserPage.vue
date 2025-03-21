@@ -68,7 +68,7 @@ function nextPage() {
                         class="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl sm:rounded-lg bg-clip-border">
                         <div
                             class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
-                            <h6 class="dark:text-white text-base font-bold">
+                            <h6 class="text-2xl font-bold text-gray-900">
                                 Users Management
                             </h6>
 

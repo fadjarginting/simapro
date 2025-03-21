@@ -24,316 +24,221 @@ defineOptions({
                 <!-- FORM -->
                 <div class="max-w-full mt-0 p-6 bg-white rounded-lg shadow-md">
                     <form>
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="mb-4 relative">
+                                <InputLabel for="request-category" value="Request Category" />
+                                <div class="relative">
+                                    <select
+                                        id="request-category"
+                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
+                                    >
+                                        <option>Request Category (CAPEX/OPEX)</option>
+                                        <option>CAPEX</option>
+                                        <option>OPEX</option>
+                                    </select>
+                                    <!-- Ikon panah bawah -->
+                                    <div
+                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+                                    >
+                                        🔽
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="mb-4">
-                                <InputLabel for="job-title" value="Job Title" />
+                                <InputLabel
+                                    for="status-verifikasi"
+                                    value="Status Verifikasi"
+                                />
                                 <TextInput
-                                    id="job-title"
-                                    placeholder="Enter Job Title"
+                                    id="status-verifikasi"
+                                    placeholder="Enter Status Verifikasi ERF"
+                                    class="mt-1 block w-full"
+                                    required
+                                />
+                                <InputError />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="mb-4 relative">
+                                <InputLabel for="pic-mekanikal" value="PIC Mekanikal" />
+                                <div class="relative">
+                                    <select
+                                        id="pic-mekanikal"
+                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
+                                    >
+                                        <option>PIC Mekanikal</option>
+                                        <option>NOV</option>
+                                        <option>Type 2</option>
+                                    </select>
+                                    <!-- Ikon panah bawah -->
+                                    <div
+                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+                                    >
+                                        🔽
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <InputLabel
+                                    for="progress-mekanikal"
+                                    value="Progress Mekanikal"
+                                />
+                                <TextInput
+                                    id="progress-mekanikal"
+                                    placeholder="Enter Progress %"
+                                    class="mt-1 block w-full"
+                                    required
+                                />
+                                <InputError />
+                            </div>
+
+                            
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="mb-4 relative">
+                                <InputLabel
+                                    for="pic-sipil"
+                                    value="PIC Sipil"
+                                />
+                                <div class="relative">
+                                    <select
+                                        id="pic-sipil"
+                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
+                                    >
+                                        <option>PIC Sipil</option>
+                                        <option>AEF</option>
+                                        <option>Type 2</option>
+                                    </select>
+                                    <!-- Ikon panah bawah -->
+                                    <div
+                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+                                    >
+                                        🔽
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <InputLabel
+                                    for="progress-sipil"
+                                    value="Progress Sipil"
+                                />
+                                <TextInput
+                                    id="progress-sipil"
+                                    placeholder="Enter Progress %"
+                                    class="mt-1 block w-full"
+                                    required
+                                />
+                                <InputError />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="mb-4 relative">
+                                <InputLabel
+                                    for="pic-elinst"
+                                    value="PIC Elinst"
+                                />
+                                <div class="relative">
+                                    <select
+                                        id="pic-elinst"
+                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
+                                    >
+                                        <option>PIC Elinst</option>
+                                        <option>MCA</option>
+                                        <option>Type 2</option>
+                                    </select>
+                                    <!-- Ikon panah bawah -->
+                                    <div
+                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+                                    >
+                                        🔽
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <InputLabel
+                                    for="progress-elinst"
+                                    value="Progress Elinst"
+                                />
+                                <TextInput
+                                    id="progress-elinst"
+                                    placeholder="Enter Progress %"
+                                    class="mt-1 block w-full"
+                                    required
+                                />
+                                <InputError />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="mb-4 relative">
+                                <InputLabel
+                                    for="pic-proses"
+                                    value="PIC Proses"
+                                />
+                                <div class="relative">
+                                    <select
+                                        id="pic-proses"
+                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
+                                    >
+                                        <option>
+                                            PIC Proses
+                                        </option>
+                                        <option>MRJ</option>
+                                        <option>Type 2</option>
+                                    </select>
+                                    <!-- Ikon panah bawah -->
+                                    <div
+                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+                                    >
+                                        🔽
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <InputLabel
+                                    for="progress-proses"
+                                    value="Progress Proses"
+                                />
+                                <TextInput
+                                    id="progress-proses"
+                                    placeholder="Enter Progress %"
+                                    class="mt-1 block w-full"
+                                    required
+                                />
+                                <InputError />
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="mb-4">
+                                <InputLabel for="detail-progress" value="Detail Progress" />
+                                <TextInput
+                                    id="detail-progress"
+                                    placeholder="Enter Detail Progress"
                                     class="mt-1 block w-full"
                                     required
                                     autofocus
                                 />
                                 <InputError />
                             </div>
-
+                            
                             <div class="mb-4">
-                                <InputLabel for="no-erf" value="No ERF" />
+                                <InputLabel for="note" value="Note" />
                                 <TextInput
-                                    id="no-erf"
-                                    placeholder="Enter No ERF"
+                                    id="note"
+                                    placeholder="Enter Note"
                                     class="mt-1 block w-full"
                                     required
                                 />
                                 <InputError />
-                            </div>
-
-                            <div class="mb-4">
-                                <InputLabel
-                                    for="requesting-unit"
-                                    value="Requesting Unit"
-                                />
-                                <TextInput
-                                    id="requesting-unit"
-                                    placeholder="Enter Requesting Unit"
-                                    class="mt-1 block w-full"
-                                    required
-                                />
-                                <InputError />
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="mb-4 relative">
-                                <InputLabel for="plant" value="PLANT" />
-                                <div class="relative">
-                                    <select
-                                        id="plant"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option>Select PLANT</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4 relative">
-                                <InputLabel for="job-type" value="Job Type" />
-                                <div class="relative">
-                                    <select
-                                        id="job-type"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option>Select Job Type</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4 relative">
-                                <InputLabel
-                                    for="work-priority"
-                                    value="Work Priority"
-                                />
-                                <div class="relative">
-                                    <select
-                                        id="work-priority"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option>Select Work Piority</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="mb-4 relative">
-                                <InputLabel
-                                    for="request-category"
-                                    value="Request Category"
-                                />
-                                <div class="relative">
-                                    <select
-                                        id="request-category"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option>Select Request Category</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <InputLabel
-                                    for="erf-disetujui"
-                                    value="Tanggal ERF Disetujui"
-                                />
-                                <div class="relative">
-                                    <input
-                                        type="date"
-                                        id="erf-disetujui"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
-                                        required
-                                    />
-                                    <!-- Ikon Kalender -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        📅
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <InputLabel
-                                    for="klarifikasi-erf"
-                                    value="Tanggal Klarifikasi ERF"
-                                />
-                                <div class="relative">
-                                    <input
-                                        type="date"
-                                        id="klarifikasi-erf"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
-                                        required
-                                    />
-                                    <!-- Ikon Kalender -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        📅
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="mb-4">
-                                <InputLabel
-                                    for="erf-disahkan"
-                                    value="Tanggal ERF Disahkan"
-                                />
-                                <div class="relative">
-                                    <input
-                                        type="date"
-                                        id="erf-disahkan"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
-                                        required
-                                    />
-                                    <!-- Ikon Kalender -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        📅
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4 relative">
-                                <InputLabel
-                                    for="assigned-lead"
-                                    value="Assigned Lead Engineering"
-                                />
-                                <div class="relative">
-                                    <select
-                                        id="assigned-lead"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option>
-                                            Select Assigned Lead Engineering
-                                        </option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4 relative">
-                                <InputLabel
-                                    for="status-verifikasi"
-                                    value="Status Verifikasi ERF"
-                                />
-                                <div class="relative">
-                                    <select
-                                        id="status-verifikasi"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option>
-                                            Select Status Verifikasi ERF
-                                        </option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="mb-4 relative">
-                                <InputLabel
-                                    for="keterangan-progres"
-                                    value="Keterangan Progress"
-                                />
-                                <div class="relative">
-                                    <select
-                                        id="keterangan-progres"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option>
-                                            Select Keterangan Progress
-                                        </option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <InputLabel
-                                    for="initiating-phase"
-                                    value="Deadline Initiating Phase"
-                                />
-                                <div class="relative">
-                                    <input
-                                        type="date"
-                                        id="initiating-phase"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
-                                        required
-                                    />
-                                    <!-- Ikon Kalender -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        📅
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <InputLabel
-                                    for="executing-phase"
-                                    value="Deadline Executing Phase"
-                                />
-                                <div class="relative">
-                                    <input
-                                        type="date"
-                                        id="executing-phase"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
-                                        required
-                                    />
-                                    <!-- Ikon Kalender -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        📅
-                                    </div>
-                                </div>
                             </div>
                         </div>
 

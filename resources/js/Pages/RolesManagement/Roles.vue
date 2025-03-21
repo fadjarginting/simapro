@@ -43,7 +43,7 @@ const roles = computed(() => props.roles);
                         <div
                             class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
                             <!-- Judul Tabel -->
-                            <h6 class="dark:text-white text-base font-bold">
+                            <h6 class="text-2xl font-bold text-gray-900">
                                 Roles Management
                             </h6>
                             <!-- Button Add Role -->
