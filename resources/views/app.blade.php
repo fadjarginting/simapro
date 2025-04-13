@@ -10,7 +10,7 @@
         <link rel="icon" type="image/png" href="{{ asset('../assets/img/semen-padang.png')}}" />
         
         {{-- title--}}
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Site-Eng') }}</title>
 
         <!-- <link rel="stylesheet" href="soft-ui-dashboard-tailwind.css" />  -->
         <!-- Fonts and icons -->
@@ -48,13 +48,16 @@
 
     <!-- chart js -->
 
+    <!-- main script file  -->
+    <script src="{{ asset('../assets/js/argon-dashboard-tailwind.js')}}" async></script>
 
     <!-- github button -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <!-- plugin for scrollbar  -->
-    <script src="{{ asset('../assets/js/plugins/chartjs.min.js')}}" async></script>
+    <script src="{{ asset('/assets/js/plugins/chartjs.min.js')}}" async></script>
     <!-- plugin for scrollbar  -->
-    <script src="{{ asset('../assets/js/plugins/perfect-scrollbar.min.js')}}" async></script>
+    <script src="{{ asset('/assets/js/plugins/perfect-scrollbar.min.js')}}" async></script>
     <!-- main script file  -->
-    <script src="{{ asset('./assets/js/argon-dashboard-tailwind.js?v=1.0.1')}}" async></script>
+    <script  async src="{{ asset('/assets/js/argon-dashboard-tailwind.js?v=1.0.1')}}" async></script>
 </html>
+

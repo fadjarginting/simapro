@@ -5,6 +5,19 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import "perfect-scrollbar/css/perfect-scrollbar.css";
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Pastikan body memiliki overflow-y auto dan tinggi penuh
+    document.body.style.overflowY = 'auto';
+    // Inisialisasi Perfect Scrollbar pada body
+    new PerfectScrollbar(document.body, {
+        wheelPropagation: true,
+    });
+});
+
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

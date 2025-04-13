@@ -51,4 +51,37 @@ class UserManagementController extends Controller
 
         return redirect()->route('users.index');
     }
+
+    public function edit(User $user)
+    {
+        $roles = Role::all();
+        return Inertia::render('UsersManagement/EditUser', [
+            'user' => $user,
+            'roles' => $roles,
+        ]);
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        $user->syncRoles($request->role);
+
+        return redirect()->route('users.index');
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        $user->delete();
+        return redirect()->route('users.index');
+    }
+
 }

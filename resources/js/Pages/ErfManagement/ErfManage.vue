@@ -169,10 +169,7 @@ function toggleDescription(id) {
                                             <th class="px-4 py-3">Job Title</th>
                                             <th class="px-4 py-3">Status</th>
                                             <th class="px-4 py-3">Prioritas</th>
-                                            <th class="px-4 py-3">
-                                                Action
-                                            </th>
-                                            <th class="px-4 py-3"></th>
+                                            <th class="px-4 py-3">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-sm font-normal text-gray-700">

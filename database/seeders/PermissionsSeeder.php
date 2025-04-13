@@ -18,31 +18,7 @@ class PermissionsSeeder extends Seeder
         $permissions = [
             // Dashboard
             'dashboard.view',
-
-            // Released Documents
-            'released_documents.view',
-            'released_documents.create',
-            'released_documents.edit',
-            'released_documents.delete',
-            'released_documents.download',
-            'released_documents.add_new_revision',
-            'released_documents.share',
-
-            // In Progress Eng Docs
-            'in_progress_eng_docs.view',
-            'in_progress_eng_docs.create',
-            'in_progress_eng_docs.edit',
-            'in_progress_eng_docs.delete',
-            'in_progress_eng_docs.download',
-            'in_progress_eng_docs.add_new_revision',
-            'in_progress_eng_docs.share',
-
-            // Download Request
-            'download_request.view',            
-
-            // Document Categories
-            'document_categories.manage_document_categories',
-
+            
             // User Management
             'user_management.view',
             'user_management.create',
@@ -66,6 +42,10 @@ class PermissionsSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
         }
+
+        // Assign permission to role
+        $role = Role::create(['name' => 'admin']);
+        $role->givePermissionTo($permissions);
 
         
     }

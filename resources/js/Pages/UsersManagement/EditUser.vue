@@ -13,20 +13,21 @@ defineOptions({
 // Deklarasi props
 const props = defineProps({
     errors: Object,
-    roles: Array
+    roles: Array,
+    user: Object
 });
 
 // Form data menggunakan inertia
 const form = useForm({
-    name: '',
-    email: '',
+    name: props.user.name || '',
+    email: props.user.email || '',
     password: '',
     password_confirmation: '',
-    role: ''
+    role: props.user.role || ''
 });
 
 const submit = () => {
-    form.post(route('users.store'), {
+    form.put(route('users.update', props.user.id), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
@@ -38,14 +39,14 @@ const cancel = () => {
 
 <template>
 
-    <Head title="Add User" />
+    <Head title="Edit User" />
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h2 class="text-2xl font-semibold mb-2">
-                        Please fill in user information
+                        Please update user information
                     </h2>
                 </div>
 
@@ -76,8 +77,7 @@ const cancel = () => {
                                 <InputLabel for="password" value="Password" />
                                 <TextInput id="password" v-model="form.password" type="password"
                                     placeholder="Enter Password" class="mt-1 block w-full"
-                                    :class="{ 'border-red-500': errors.password }" required
-                                    autocomplete="new-password" />
+                                    :class="{ 'border-red-500': errors.password }" autocomplete="new-password" />
                                 <InputError :message="errors.password" />
                             </div>
 
@@ -86,8 +86,7 @@ const cancel = () => {
                                 <InputLabel for="password_confirmation" value="Confirm Password" />
                                 <TextInput id="password_confirmation" v-model="form.password_confirmation"
                                     type="password" placeholder="Confirm Password" class="mt-1 block w-full"
-                                    :class="{ 'border-red-500': errors.password_confirmation }" required
-                                    autocomplete="new-password" />
+                                    :class="{ 'border-red-500': errors.password_confirmation }" autocomplete="new-password" />
                                 <InputError :message="errors.password_confirmation" />
                             </div>
 

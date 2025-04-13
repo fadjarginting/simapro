@@ -49,6 +49,13 @@ const handleCheckboxChange = (event, permissionName) => {
         form.permissions = form.permissions.filter(p => p !== permissionName);
     }
 };
+
+// cancel button
+const cancel = () => {
+    // Redirect ke halaman sebelumnya
+    history.back();
+};
+
 </script>
 
 <template>
@@ -111,7 +118,7 @@ const handleCheckboxChange = (event, permissionName) => {
                                 class="bg-transparent px-4 rounded-lg text-green-500 whitespace-nowrap text-center transition duration-300 hover:bg-green-500 hover:text-white py-1">
                                 <i class="fas fa-save"></i> Save
                             </button>
-                            <button type="button"
+                            <button type="button" @click="cancel"
                                 class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center transition duration-300 hover:bg-red-500 hover:text-white py-1">
                                 <i class="fas fa-times"></i> Cancel
                             </button>

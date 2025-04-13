@@ -3,11 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use League\CommonMark\Node\Block\Document;
+use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Testing\Fluent\Concerns\Has;
-use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
@@ -48,4 +49,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // relasi ke document
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'created_by');
+    }
+
 }
