@@ -72,7 +72,10 @@ const currentRoute = computed(() => usePage().url);
         <div ref="contentRef" class="py-2 relative flex-1 overflow-auto ps">
             <ul class="flex flex-col pl-0 mb-0">
                 <!-- Dashboard -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/dashboard' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/dashboard' }"
+                >
                     <Link
                         class="flex items-center text-sm font-semibold dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('dashboard')"
@@ -87,7 +90,10 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- ERF Management -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/erfs' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/erfs' }"
+                >
                     <div
                         class="flex items-center justify-between px-6 py-2.5 cursor-pointer"
                     >
@@ -109,7 +115,10 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- Progress Report -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/progress' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/progress' }"
+                >
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('progress')"
@@ -126,7 +135,10 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- Morning Report -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/morning' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/morning' }"
+                >
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('morning')"
@@ -143,7 +155,10 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- Key Performance Indicator -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/kpi' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/kpi' }"
+                >
                     <a
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         href=""
@@ -169,7 +184,10 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- User Management -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/users' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/users' }"
+                >
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('users.index')"
@@ -186,7 +204,10 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- Role  -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/roles' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/roles' }"
+                >
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('roles.index')"
@@ -200,6 +221,23 @@ const currentRoute = computed(() => usePage().url);
                     </Link>
                 </li>
 
+                <!-- PLANT  -->
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/roles' }"
+                >
+                    <Link
+                        class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
+                    >
+                        <div
+                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-orange-500"
+                        >
+                            <i class="ni ni-badge text-sm leading-normal"></i>
+                        </div>
+                        <span>Plant</span>
+                    </Link>
+                </li>
+
                 <li class="w-full mt-4">
                     <h6
                         class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60"
@@ -208,7 +246,10 @@ const currentRoute = computed(() => usePage().url);
                     </h6>
                 </li>
 
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/workaudit' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/workaudit' }"
+                >
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('workaudit')"
@@ -225,7 +266,12 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- login audit trail  -->
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/loginaudit' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{
+                        'bg-blue-500/13': currentRoute === '/loginaudit',
+                    }"
+                >
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
                         :href="route('loginaudit')"
@@ -247,7 +293,10 @@ const currentRoute = computed(() => usePage().url);
                     </h6>
                 </li>
 
-                <li class="mt-0.5 w-full" :class="{ 'bg-blue-500/13': currentRoute === '/profile' }">
+                <li
+                    class="mt-0.5 w-full"
+                    :class="{ 'bg-blue-500/13': currentRoute === '/profile' }"
+                >
                     <Link
                         :href="route('profile.edit')"
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
