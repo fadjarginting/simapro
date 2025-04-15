@@ -11,11 +11,18 @@ const documents = ref([
     {
         id: 1,
         doc_code: '6001.51.4001-1',
-        title: '03-10-2019',
-        version: 'Flow Sheet With Capacity Indarung VI',
-        doc_type: 'In Progress',
-        status: 'Indarung VI',
-        publish_date: ''
+        title: 'Flow Sheet With Capacity Indarung VI',
+        version: 'P1',
+        status: 'Finish',
+        publish_date: '10-03-2025'
+    },
+    {
+        id: 1,
+        doc_code: '5001.51.4001-1',
+        title: 'Flow Sheet With Capacity Indarung V',
+        version: 'P1',
+        status: 'Finish',
+        publish_date: '10-04-2025'
     },
     // Tambahkan data lain sesuai kebutuhan
 ]);
@@ -25,7 +32,6 @@ const filterValues = ref({
     docCode: '',
     title: '',
     version: '',
-    docType: '',
     status: '',
     publishDate: ''
 });
@@ -37,7 +43,6 @@ const filteredDocuments = computed(() => {
             doc.doc_code.toLowerCase().includes(filterValues.value.docCode.toLowerCase()) &&
             doc.title.toLowerCase().includes(filterValues.value.title.toLowerCase()) &&
             doc.version.toString().includes(filterValues.value.version) &&
-            doc.doc_type.toLowerCase().includes(filterValues.value.docType.toLowerCase()) &&
             doc.status.toLowerCase().includes(filterValues.value.status.toLowerCase()) &&
             doc.publish_date.includes(filterValues.value.publishDate)
         );
@@ -117,16 +122,7 @@ function toggleDescription(id) {
                         <!-- Filter -->
                         <div
                             class="flex flex-wrap items-center p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent bg-gray-50">
-                            <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <select v-model="filterValues.docType"
-                                    class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Select Document Type</option>
-                                    <option value="Flow Sheet">Flow Sheet</option>
-                                    <option value="Manual">Manual</option>
-                                    <option value="Report">Report</option>
-                                    <!-- Tambahkan opsi lain sesuai kebutuhan -->
-                                </select>
-                            </div>
+                            
                             <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
                                 <select v-model="filterValues.status"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -188,23 +184,15 @@ function toggleDescription(id) {
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.title }}
+                                                        {{ doc.publish_date }}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.version }}
+                                                        {{ doc.title }}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <span
-                                                        class="px-2 py- bg-green-100 text-green-800 text-xs rounded-full">
-                                                        {{ doc.doc_type }}
-                                                    </span>
                                                 </div>
                                             </td>
                                             <td class="px-4">
@@ -217,15 +205,20 @@ function toggleDescription(id) {
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.publish_date }}
+                                                        {{ doc.version }}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="px-4">
+                                            <td class="px-4 py-3">
                                                 <button @click="toggleDescription(`doc-${index}`)"
                                                     class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white">
                                                     <i class="fas fa-info-circle mr-2"></i>
                                                     Detail
+                                                </button>
+                                                <button @click="deleteUsers(user.id)"
+                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-red-500 transition duration-300 hover:bg-gradient-to-tl hover:from-red-500 hover:to-red-400 hover:text-white">
+                                                    <i class="fas fa-trash mr-2 text-xs leading-none"></i>
+                                                    <span>Delete</span>
                                                 </button>
                                             </td>
                                         </tr>

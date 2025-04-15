@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Foundation\Application;
+use Spatie\Permission\Contracts\Role;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,9 +29,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
 });
 
-// Route User Management
+// route user management
 Route::middleware(['auth'])->group(function () {
-    Route::get('/users', [UserManagementController::class, 'index']) 
+    Route::get('/users', [UserManagementController::class, 'index'])
         ->middleware('permission:user_management.view')
         ->name('users.index');
     Route::get('/users/create', [UserManagementController::class, 'create'])
@@ -70,6 +72,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
 });
 
+// Route Key Performance Indicator
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/kpis', function () {
+        return Inertia::render('KpiManagement/Kpi');
+    })->name('kpis');
+});
+
 // Route Progress Report
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/progress', function () {
@@ -90,7 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Route for Role Management
+// Route for role management
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/roles',[RolesController::class, 'index'])
         ->middleware('permission:roles_management.view')

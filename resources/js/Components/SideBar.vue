@@ -1,59 +1,46 @@
 <script setup>
-import { defineProps, ref, onMounted, onBeforeUnmount, computed } from "vue";
-import { Head, Link, usePage } from "@inertiajs/vue3";
+import { defineProps, ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { Link, usePage, Head } from "@inertiajs/vue3";
+import {usePermissions} from "@/composables/permissions";
+
+const {hasPermission} = usePermissions();
 
 const props = defineProps({
     isOpen: Boolean,
 });
 
+// Mengambil informasi halaman dari Inertia
+const page = usePage();
+const currentUrl = computed(() => page.url);
+
+// Fungsi helper untuk memeriksa apakah URL saat ini mengandung fragmen tertentu
+function isActiveRoute(routeFragment) {
+    return currentUrl.value ? currentUrl.value.includes(routeFragment) : false;
+}
+
 // State untuk toggle submenu
 const showSubCategories = ref(false);
-
-// Fungsi toggle submenu
 function toggleSubCategories(e) {
     e.stopPropagation();
     showSubCategories.value = !showSubCategories.value;
 }
 
-const contentRef = ref(null);
-let ps = null;
-
-onMounted(() => {
-    // Inisialisasi Perfect Scrollbar pada konten sidebar (bukan seluruh <aside>)
-    ps = new PerfectScrollbar(contentRef.value, {
-        wheelPropagation: true,
-    });
-});
-
-onBeforeUnmount(() => {
-    if (ps) {
-        ps.destroy();
-        ps = null;
-    }
-});
-
-// Mendapatkan rute saat ini
-const currentRoute = computed(() => usePage().url);
 </script>
 
 <template>
-    <aside
-        :class="[
+    <aside :class="[
             isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0',
             'fixed inset-y-0 flex flex-wrap flex-col bg-white dark:bg-slate-850 border-0 shadow-xl dark:shadow-none max-w-64 ease-nav-brand my-4 z-990 xl:ml-6 rounded-2xl xl:left-0 xl:translate-x-0 transition-transform duration-200',
         ]"
-        aria-expanded="false"
-    >
+        aria-expanded="false">
         <!-- HEADER  -->
         <div
-            class="h-19 px-8 py-6 dark:text-white text-slate-700 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between"
-        >
+            class="h-19 px-8 py-6 dark:text-white text-slate-700 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
             <a class="text-sm whitespace-nowrap flex items-center" href="#">
                 <img
                     src="assets/img/semen-padang.png"
                     class="inline h-full max-w-full transition-all duration-200 dark:hidden ease-nav-brand max-h-8"
-                    alt="main_logo"
-                />
+                    alt="main_logo" />
 
                 <span
                     class="ml-1 font-semibold transition-all duration-200 ease-nav-brand"
@@ -64,25 +51,18 @@ const currentRoute = computed(() => usePage().url);
             <!-- Close button -->
             <button
                 class="absolute top-0 right-0 p-4 opacity-50 cursor-pointer fas fa-times dark:text-white text-slate-400 xl:hidden"
-                @click="$emit('close')"
-            ></button>
+                @click="$emit('close')"></button>
         </div>
 
         <!-- CONTENT -->
         <div ref="contentRef" class="py-2 relative flex-1 overflow-auto ps">
             <ul class="flex flex-col pl-0 mb-0">
                 <!-- Dashboard -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/dashboard' }"
-                >
+                <li :class="['mt-0.5 w-full', isActiveRoute('dashboard') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
                         class="flex items-center text-sm font-semibold dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('dashboard')"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-blue-500"
-                        >
+                        :href="route('dashboard')">
+                        <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-blue-500">
                             <i class="ni ni-tv-2 text-sm leading-normal"></i>
                         </div>
                         <span class="ml-1">Dashboard</span>
@@ -90,24 +70,15 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- ERF Management -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/erfs' }"
-                >
-                    <div
-                        class="flex items-center justify-between px-6 py-2.5 cursor-pointer"
-                    >
-                        <!-- Link ke halaman semua dokumen -->
+                <li :class="['mt-0.5 w-full', isActiveRoute('erfs') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <div class="flex items-center justify-between px-6 py-2.5 cursor-pointer">
+                        <!-- Link ke halaman semua ERF -->
                         <Link
                             :href="route('erfs')"
-                            class="flex items-center text-sm dark:text-white dark:opacity-80"
-                        >
+                            class="flex items-center text-sm dark:text-white dark:opacity-80">
                             <div
-                                class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-emerald-500"
-                            >
-                                <i
-                                    class="ni ni-credit-card text-sm leading-normal"
-                                ></i>
+                                class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-emerald-500">
+                                <i class="ni ni-credit-card text-sm leading-normal"></i>
                             </div>
                             <span>ERF Management</span>
                         </Link>
@@ -115,170 +86,100 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <!-- Progress Report -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/progress' }"
-                >
+                <li :class="['mt-0.5 w-full', isActiveRoute('progress') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('progress')"
-                    >
+                        :href="route('progress')">
                         <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-yellow-500"
-                        >
-                            <i
-                                class="ni ni-folder-17 text-sm leading-normal"
-                            ></i>
+                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-yellow-500">
+                            <i class="ni ni-folder-17 text-sm leading-normal"></i>
                         </div>
                         <span>Progress Report</span>
                     </Link>
                 </li>
 
                 <!-- Morning Report -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/morning' }"
-                >
+                <li :class="['mt-0.5 w-full', isActiveRoute('morning') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('morning')"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-green-500"
-                        >
-                            <i
-                                class="ni ni-cloud-download-95 text-sm leading-normal"
-                            ></i>
+                        :href="route('morning')">
+                        <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-green-500">
+                            <i class="ni ni-cloud-download-95 text-sm leading-normal"></i>
                         </div>
                         <span>Morning Report</span>
                     </Link>
                 </li>
 
                 <!-- Key Performance Indicator -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/kpi' }"
-                >
-                    <a
+                <li :class="['mt-0.5 w-full', isActiveRoute('kpis') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        href=""
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-red-500"
-                        >
-                            <i
-                                class="ni ni-single-copy-04 text-sm leading-normal"
-                            ></i>
+                        :href="route('kpis')">
+                        <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-red-500">
+                            <i class="ni ni-single-copy-04 text-sm leading-normal"></i>
                         </div>
                         <span>Key Performance Indicator</span>
-                    </a>
+                    </Link>
                 </li>
 
-                <!-- Page of Users -->
-                <li class="w-full mt-4">
-                    <h6
-                        class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60"
-                    >
+                <!-- page of users -->
+                <li v-if="hasPermission('user_management.view') || hasPermission('roles_management.view')"
+                    class="w-full mt-4 ">
+                    <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">
                         User Management
                     </h6>
                 </li>
 
                 <!-- User Management -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/users' }"
-                >
-                    <Link
-                        class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('users.index')"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-indigo-500"
-                        >
-                            <i
-                                class="ni ni-circle-08 text-sm leading-normal"
-                            ></i>
-                        </div>
-                        <span>User</span>
+                <li v-if="hasPermission('user_management.view')"
+                    :class="['mt-0.5 w-full', isActiveRoute('users') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Link :href="route('users.index')" class=" flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5
+                        whitespace-nowrap">
+                    <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-indigo-500">
+                        <i class="ni ni-circle-08 text-sm leading-normal"></i>
+                    </div>
+                    <span>User</span>
                     </Link>
                 </li>
 
                 <!-- Role  -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/roles' }"
-                >
+                <li v-if="hasPermission('roles_management.view')"
+                    :class="['mt-0.5 w-full', isActiveRoute('roles') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('roles.index')"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-orange-500"
-                        >
-                            <i class="ni ni-badge text-sm leading-normal"></i>
-                        </div>
-                        <span>Role</span>
+                        :href="route('roles.index')">
+                    <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-orange-500">
+                        <i class="ni ni-badge text-sm leading-normal"></i>
+                    </div>
+                    <span>Roles</span>
                     </Link>
                 </li>
 
-                <!-- PLANT  -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/roles' }"
-                >
-                    <Link
-                        class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-orange-500"
-                        >
-                            <i class="ni ni-badge text-sm leading-normal"></i>
-                        </div>
-                        <span>Plant</span>
-                    </Link>
-                </li>
+               
 
                 <li class="w-full mt-4">
-                    <h6
-                        class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60"
-                    >
+                    <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">
                         Log & Audit Trail
                     </h6>
                 </li>
 
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/workaudit' }"
-                >
+                <li :class="['mt-0.5 w-full', isActiveRoute('workaudit') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('workaudit')"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-purple-500"
-                        >
-                            <i
-                                class="ni ni-bullet-list-67 text-sm leading-normal"
-                            ></i>
+                        :href="route('workaudit')">
+                        <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-purple-500">
+                            <i class="ni ni-bullet-list-67 text-sm leading-normal"></i>
                         </div>
                         <span>Work Audit Trail</span>
                     </Link>
                 </li>
 
                 <!-- login audit trail  -->
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{
-                        'bg-blue-500/13': currentRoute === '/loginaudit',
-                    }"
-                >
+                <li :class="['mt-0.5 w-full', isActiveRoute('loginaudit') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('loginaudit')"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-pink-500"
-                        >
+                        :href="route('loginaudit')">
+                        <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-pink-500">
                             <i class="ni ni-key-25 text-sm leading-normal"></i>
                         </div>
                         <span>Login Audit Trail</span>
@@ -286,45 +187,29 @@ const currentRoute = computed(() => usePage().url);
                 </li>
 
                 <li class="w-full mt-4">
-                    <h6
-                        class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60"
-                    >
+                    <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">
                         Account pages
                     </h6>
                 </li>
 
-                <li
-                    class="mt-0.5 w-full"
-                    :class="{ 'bg-blue-500/13': currentRoute === '/profile' }"
-                >
+                <li :class="['mt-0.5 w-full', isActiveRoute('profile') ? 'bg-blue-500/13 rounded-lg' : '']" class="hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
-                        :href="route('profile.edit')"
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-slate-700"
-                        >
-                            <i
-                                class="ni ni-single-02 text-sm leading-normal"
-                            ></i>
+                        :href="route('profile.edit')">
+                        <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-slate-700">
+                            <i class="ni ni-single-02 text-sm leading-normal"></i>
                         </div>
                         <span>Profile</span>
                     </Link>
                 </li>
 
                 <!-- logout -->
-                <li class="mt-0.5 w-full">
+                <li class="mt-0.5 w-full hover:bg-gray-100 dark:hover:bg-gray-700">
                     <Link
                         class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('logout')"
-                        method="post"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-red-500"
-                        >
-                            <i
-                                class="ni ni-button-power text-sm leading-normal"
-                            ></i>
+                        :href="route('logout')" method="post">
+                        <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-red-500">
+                            <i class="ni ni-button-power text-sm leading-normal"></i>
                         </div>
                         <span>Logout</span>
                     </Link>
