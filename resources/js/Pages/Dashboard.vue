@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 
 // Import Komponen
 import Card from "@/Components/Card.vue";
@@ -20,10 +20,32 @@ defineProps({
     header: String,
 });
 
-// Tanggal dan waktu
-const currentDate = new Date();
-const formattedDate = `${currentDate.getDate()} ${getMonthName(currentDate.getMonth())} ${currentDate.getFullYear()}`;
-const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')} WIB`;
+// Real-time tanggal dan waktu
+const currentDateTime = ref(new Date());
+const timerInterval = ref(null);
+
+// Update waktu setiap detik
+onMounted(() => {
+    timerInterval.value = setInterval(() => {
+        currentDateTime.value = new Date();
+    }, 1000);
+});
+
+// Cleanup interval saat komponen dihapus
+onUnmounted(() => {
+    if (timerInterval.value) {
+        clearInterval(timerInterval.value);
+    }
+});
+
+// Format tanggal dan waktu
+const formattedDate = computed(() => {
+    return `${currentDateTime.value.getDate()} ${getMonthName(currentDateTime.value.getMonth())} ${currentDateTime.value.getFullYear()}`;
+});
+
+const formattedTime = computed(() => {
+    return `${currentDateTime.value.getHours().toString().padStart(2, '0')}:${currentDateTime.value.getMinutes().toString().padStart(2, '0')} WIB`;
+});
 
 function getMonthName(month) {
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -159,32 +181,86 @@ const PIE_COLORS = ["#6A39F7", "#44BFD6", "#93CAED", "#CABFEB"];
                     </div>
                 </div>
 
-                <!-- Bagian Kartu Statistik -->
+                <!-- Bagian Kartu Statistik dengan icon -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <Card title="Total Work" :value="129">
-                        <div class="flex items-center text-green-600 text-sm mt-2">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                    <!-- Total Work Card -->
+                    <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Total Work</p>
+                                <h2 class="text-3xl font-bold text-gray-800">129</h2>
+                            </div>
+                            <div class="bg-yellow-100 p-4 rounded-lg">
+                                <!-- Package Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
+                                    <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
+                                    <path d="M12 3v6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-green-600 text-sm">
+                            <!-- Trending Up Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m23 6-9.5 9.5-5-5L1 18"></path>
+                                <path d="M17 6h6v6"></path>
                             </svg>
                             <span>5.5% up from past week</span>
                         </div>
-                    </Card>
-                    <Card title="In Progress / Ongoing Work" :value="45">
-                        <div class="flex items-center text-blue-600 text-sm mt-2">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                    </div>
+
+                    <!-- In-Progress Work Card -->
+                    <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <p class="text-sm text-gray-500">In-Progress / Ongoing Work</p>
+                                <h2 class="text-3xl font-bold text-gray-800">45</h2>
+                            </div>
+                            <div class="bg-blue-100 p-4 rounded-lg">
+                                <!-- FileText Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <line x1="10" y1="9" x2="8" y2="9"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-blue-600 text-sm">
+                            <!-- Trending Up Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m23 6-9.5 9.5-5-5L1 18"></path>
+                                <path d="M17 6h6v6"></path>
                             </svg>
                             <span>1% up from yesterday</span>
                         </div>
-                    </Card>
-                    <Card title="Work Overdue" :value="11">
-                        <div class="flex items-center text-green-600 text-sm mt-2">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                    </div>
+
+                    <!-- Work Overdue Card -->
+                    <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Work Overdue</p>
+                                <h2 class="text-3xl font-bold text-gray-800">11</h2>
+                            </div>
+                            <div class="bg-red-100 p-4 rounded-lg">
+                                <!-- Clock Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-green-600 text-sm">
+                            <!-- Trending Up Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m23 6-9.5 9.5-5-5L1 18"></path>
+                                <path d="M17 6h6v6"></path>
                             </svg>
                             <span>0.5% up from yesterday</span>
                         </div>
-                    </Card>
+                    </div>
                 </div>
 
                 <!-- Bagian Chart Utama dengan ukuran yang tepat -->
@@ -284,7 +360,6 @@ const PIE_COLORS = ["#6A39F7", "#44BFD6", "#93CAED", "#CABFEB"];
                             </div>
                         </div>
                         <div class="flex-grow" style="height: 350px;">
-                            <!-- MultiBarChart komponennya -->
                             <MultiBarChart :data="multiBarData" :height="350" />
                         </div>
                     </Card>

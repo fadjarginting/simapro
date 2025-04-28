@@ -17,4 +17,15 @@ export default defineConfig({
             },
         }),
     ],
+    // server: {
+    //     host: '0.0.0.0',
+    //     port: 5173,
+    //     cors: true,
+    //     strictPort: true,
+    //     hmr: {
+    //         protocol: 'ws',
+    //         host: '192.168.237.158', // <-- ganti sesuai IP lokal kamu
+    //         port: 5173,
+    //     },
+    // },
 });

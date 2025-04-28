@@ -16,8 +16,11 @@ const { props } = usePage();
 
 // Form data
 const form = useForm({
-    name: props.role.name || '',
-    permissions: props.role.permissions || [],
+    name: props.role.name,
+    permissions: props.role.permissions,
+    flash: props.flash,
+    console: props.errors
+    
 });
 
 // permission list grouped by menu
@@ -34,9 +37,75 @@ const extractAction = (permission) => {
     return action.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
 };
 
+
+
+// handle form submission with sweetalert2
+import Swal from 'sweetalert2';
 const submit = () => {
-    form.patch(route('roles.update', props.role.id));
+    Swal.fire({
+        title: 'Edit Role',
+        text: "Are you sure you want to update this role?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            confirmButton: 'bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 mr-2',
+            cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.patch(route('roles.update', props.role.id), {
+                onSuccess: () => {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer);
+                            toast.addEventListener('mouseleave', Swal.resumeTimer);
+                        }
+                    });
+
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Role has been updated successfully'
+                    });
+                },
+                onError: () => {
+                    if (props.flash.error) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: props.flash.error,
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to update the role. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                }
+            });
+        }
+    });
 };
+
+
 
 const handleCheckboxChange = (event, permissionName) => {
     if (event.target.checked) {
@@ -50,10 +119,25 @@ const handleCheckboxChange = (event, permissionName) => {
     }
 };
 
-// cancel button
+// cancel button with sweetalert2
 const cancel = () => {
-    // Redirect ke halaman sebelumnya
-    history.back();
+    Swal.fire({
+        title: 'Cancel',
+        text: "Are you sure you want to cancel?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep editing',
+        customClass: {
+            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mr-2',
+            cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            history.back();
+        }
+    });
 };
 
 </script>
@@ -102,8 +186,7 @@ const cancel = () => {
                             <div class="pl-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                                 <div v-for="permission in perms" :key="permission.id" class="flex items-center">
                                     <!-- Checkbox komponen dengan binding update array -->
-                                    <Checkbox name="permissions" :value="permission.name" v-model="form.permissions"
-                                        @change="(e) => handleCheckboxChange(e, permission.name)" />
+                                    <Checkbox :value="permission.name" v-model="form.permissions" />
                                     <!-- Teks permission (hanya bagian action) -->
                                     <span class="ml-2 text-sm text-gray-600 whitespace-normal break-words">
                                         {{ extractAction(permission.name) }}

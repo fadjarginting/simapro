@@ -65,15 +65,25 @@ defineOptions({
 
                         <div class="grid grid-cols-3 gap-4">
                             <div class="mb-4 relative">
-                                <InputLabel for="plant" value="PLANT" />
+                                <InputLabel for="plant" value="Plant" />
                                 <div class="relative">
                                     <select
                                         id="plant"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option>Select PLANT</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
+                                        <option>Select Plant</option>
+                                        <option>APLP</option>
+                                        <option>BINS</option>
+                                        <option>GENERAL</option>
+                                        <option>GP DUMAI</option>
+                                        <option>INDARUNG II/III</option>
+                                        <option>INDARUNG IV</option>
+                                        <option>INDARUNG V</option>
+                                        <option>INDARUNG VI</option>
+                                        <option>PP BENGKULU</option>
+                                        <option>PPI</option>
+                                        <option>PPTB</option>
+                                        <option>TAMBANG</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -92,8 +102,9 @@ defineOptions({
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
                                         <option>Select Job Type</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
+                                        <option>FEED/DED</option>
+                                        <option>Kajian Engineering</option>
+                                        <option>Technical Assist</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -115,8 +126,8 @@ defineOptions({
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
                                         <option>Select Work Piority</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
+                                        <option>-</option>
+                                        <option>P1</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -140,8 +151,8 @@ defineOptions({
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
                                         <option>Select Request Category</option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
+                                        <option>OPEX</option>
+                                        <option>CAPEX</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -230,8 +241,12 @@ defineOptions({
                                         <option>
                                             Select Assigned Lead Engineering
                                         </option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
+                                        <option>ANDRA NOVENDRI</option>
+                                        <option>AULIA EKADANA FAUTHRISNO</option>
+                                        <option>MARJUKI</option>
+                                        <option>MOCH CHOIRIL ANAM</option>
+                                        <option>NOVRIADI M</option>
+                                        <option>TBD</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -255,8 +270,9 @@ defineOptions({
                                         <option>
                                             Select Status Verifikasi ERF
                                         </option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
+                                        <option>Belum Verifikasi</option>
+                                        <option>Finish Verifikasi</option>
+                                        <option>In Progress Verifikasi</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -282,8 +298,20 @@ defineOptions({
                                         <option>
                                             Select Keterangan Progress
                                         </option>
-                                        <option>Type 1</option>
-                                        <option>Type 2</option>
+                                        <option>Approval dokumen di e-DEMS</option>
+                                        <option>Approval dokumen di e-DEMS oleh Ka. Dept.</option>
+                                        <option>Approval dokumen di e-DEMS oleh Ka. Unit</option>
+                                        <option>Approval EAT di e-DEMS oleh Ka. Unit</option>
+                                        <option>Approval pengesahan ERF oleh User di e-DEMS</option>
+                                        <option>Belum ada ERF</option>
+                                        <option>Dokumen terkirim ke User melalui e-DEMS</option>
+                                        <option>ERF belum disetujui oleh User di e-DEMS</option>
+                                        <option>Hold</option>
+                                        <option>Penyusunan dokumen DED</option>
+                                        <option>Penyusunan dokumen Kajian</option>
+                                        <option>Proses EAT</option>
+                                        <option>Proses verifikasi ERF</option>
+                                        <option>Reject</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div

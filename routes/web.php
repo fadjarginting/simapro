@@ -6,7 +6,6 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Foundation\Application;
 use Spatie\Permission\Contracts\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

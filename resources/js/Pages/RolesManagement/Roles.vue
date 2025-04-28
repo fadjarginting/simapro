@@ -1,118 +1,265 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, usePage } from "@inertiajs/vue3";
-import { defineProps, ref, onMounted, computed, onBeforeUnmount } from "vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import TextInput from "@/Components/TextInput.vue";
+import { Head, Link, router, usePage } from "@inertiajs/vue3";
+import Swal from 'sweetalert2';
+import { ref, watch, onMounted } from "vue";
 
 defineOptions({
     layout: AuthenticatedLayout,
 });
 
-const { props } = usePage();
-const roles = computed(() => props.roles);
+const props = defineProps({
+    roles: Object,
+    filters: Object,
+    errors: Object,
+    flash: Object,
+    success: String,
+});
 
+const page = usePage();
 
+// Form state that syncs with URL parameters
+const form = ref({
+    search: props.filters.search || '',
+    perPage: props.filters.perPage || 10,
+    page: props.roles.current_page || 1,
+});
 
+// Debounce search to prevent too many requests
+let timeout;
+const performSearch = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        router.get(route('roles.index'), {
+            search: form.value.search,
+            perPage: form.value.perPage,
+            page: 1, // Always reset to first page on new search
+        }, {
+            preserveState: true,
+            replace: true,
+        });
+    }, 300);
+};
 
+// Watch for changes in search and perPage to trigger search
+watch(() => form.value.search, performSearch);
+watch(() => form.value.perPage, () => {
+    router.get(route('roles.index'), {
+        search: form.value.search,
+        perPage: form.value.perPage,
+        page: 1, // Reset to first page when changing items per page
+    }, {
+        preserveState: true,
+        replace: true,
+    });
+});
+
+// Handle page change
+const changePage = (url) => {
+    if (!url) return;
+
+    router.visit(url, {
+        preserveState: true,
+        replace: true,
+    });
+};
+
+// Handle delete role with sweetalert2 confirmation
+const deleteRole = (roleId, roleName) => {
+    Swal.fire({
+        title: 'Confirm Deletion',
+        text: `Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#9CA3AF',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'rounded-lg shadow-lg',
+            title: 'text-lg font-semibold text-gray-800',
+            htmlContainer: 'text-sm text-gray-600',
+            confirmButton: 'px-4 py-2 rounded-md text-white bg-red-500 hover:bg-red-600',
+            cancelButton: 'px-4 py-2 rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('roles.destroy', roleId), {
+                onSuccess: () => {
+                    if (page.props.flash.error) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: page.props.flash.error,
+                            showConfirmButton: false,
+                            timer: 4000,
+                            timerProgressBar: true,
+                            customClass: {
+                                popup: 'rounded-lg shadow-lg',
+                                title: 'text-sm font-semibold text-gray-800',
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'The role has been successfully deleted.',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            customClass: {
+                                popup: 'rounded-lg shadow-lg',
+                                title: 'text-sm font-semibold text-gray-800',
+                            }
+                        });
+                    }
+                },
+                onError: () => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Failed to delete the role.',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'rounded-lg shadow-lg',
+                            title: 'text-sm font-semibold text-gray-800',
+                        }
+                    });
+                }
+            });
+        }
+    });
+};
 </script>
 
 <template>
 
-    <Head>
-        <title>Roles</title>
-    </Head>
+    <Head title="Roles Management" />
 
-    <template name="header"> </template>
-
-    <!-- Flash Message: Jika ada pesan sukses -->
-    <div v-if="$page.props.flash.status" class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded">
-        {{ $page.props.flash.status }}
-    </div>
-
-    <!-- Flash Message: Jika ada pesan error -->
-    <div v-if="$page.props.flash.error" class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded">
-        {{ $page.props.flash.error }}
-    </div>
+    <template name="header">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            Roles Management
+        </h2>
+    </template>
 
     <div class="container mx-auto px-4 py-12">
         <div class="mx-auto max-w-full sm:px-6 lg:px-8">
-            <!-- table docs -->
             <div class="flex flex-wrap -mx-3">
                 <div class="flex-none w-full max-w-full px-3">
                     <div
                         class="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl sm:rounded-lg bg-clip-border">
                         <div
                             class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
-                            <!-- Judul Tabel -->
-                            <h6 class="text-2xl font-bold text-gray-900">
+                            <h6 class="dark:text-white text-base font-bold">
                                 Roles Management
                             </h6>
-                            <!-- Button Add Role -->
                             <div class="flex items-center justify-end">
                                 <Link :href="route('roles.create')"
-                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-black-500 transition duration-300 hover:bg-gradient-to-tl hover:from-emerald-500 hover:to-teal-400 hover:text-white">
+                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-green-500 transition duration-300 hover:bg-gradient-to-tl hover:from-green-500 hover:to-teal-400 hover:text-white">
                                 <i class="fas fa-plus mr-2 text-xs leading-none"></i>
                                 <span>Add Role</span>
-                                <i class="ni ni-folder-17 ml-2 leading-none"></i>
                                 </Link>
+                            </div>
+                        </div>
+
+                        <!-- Filters and search -->
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <InputLabel for="search" value="Search Role" />
+                                <div class="relative">
+                                    <TextInput v-model="form.search" type="text" placeholder="Search by Role Name"
+                                        class="w-full" />
+                                    <span v-if="form.search" @click="form.search = ''"
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-red-300 hover:text-gray-700 focus:outline-none mr-2">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="flex-auto px-0 pt-0 pb-2">
                             <div class="p-0 overflow-x-auto">
                                 <table class="w-full table-auto">
-                                    <thead class="bg-gray-50">
+                                    <thead class="bg-gray-100">
                                         <tr class="text-sm font-normal text-gray-600 border-t border-b text-left">
                                             <th class="px-4 py-3">Role Name</th>
                                             <th class="px-4 py-3">Users</th>
-                                            <th class="px-4 py-3">
-                                                Permissions
-                                            </th>
-                                            <th class="px-4 py-3">Actions</th>
+                                            <th class="px-4 py-3">Permissions</th>
+                                            <th class="px-4 py-3 text-center">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-sm font-normal text-gray-700">
-                                        <tr v-for="role in roles" :key="role.id"
+                                        <tr v-for="role in roles.data" :key="role.id"
                                             class="border-b border-gray-200 hover:bg-gray-100">
-                                            <td class="px-6 py-4">
-                                                <div class="flex items-center">
-                                                    <span class="font-medium">{{ role.name }}</span>
-                                                </div>
+                                            <td class="px-4 py-3">{{ role.name }}</td>
+                                            <td class="px-4 py-3">
+                                                <span
+                                                    class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                                    {{ role.users.length }} Users
+                                                </span>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <div class="flex flex-wrap gap-2">
-                                                    <span
-                                                        class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                                                        {{ role.users.length }} Users
-                                                    </span>
-                                                </div>
+                                            <td class="px-4 py-3">
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                                    {{ role.permissions.length }} Permissions
+                                                </span>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <div class="flex flex-wrap gap-2">
-                                                    <span
-                                                        class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                                        {{ role.permissions.length }} Permissions
-                                                    </span>
-                                                </div>
+                                            <td class="px-4 py-3 text-center">
+                                                <Link :href="route('roles.edit', role.id)"
+                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white">
+                                                <i class="fas fa-edit mr-2 text-xs leading-none"></i>
+                                                <span>Edit</span>
+                                                </Link>
+                                                <button @click="deleteRole(role.id, role.name)"
+                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-red-500 transition duration-300 hover:bg-gradient-to-tl hover:from-red-500 hover:to-red-400 hover:text-white">
+                                                    <i class="fas fa-trash mr-2 text-xs leading-none"></i>
+                                                    <span>Delete</span>
+                                                </button>
                                             </td>
-                                            <td class="px-6 py-4 space-x-2">
-                                                <!-- Edit Button -->
-                                                <div class="flex-col space-x-2">
-                                                    <Link :href="route('roles.edit', role.id)"
-                                                        class="bg-transparent px-1.4 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-600 hover:text-white hover:shadow-md">
-                                                    <i class="fas fa-edit"></i>
-                                                    Edit
-                                                    </Link>
-                                                    <!-- Delete Button -->
-                                                    <button
-                                                        class="bg-transparent px-1.4 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-red-500 transition duration-300 hover:bg-gradient-to-tl hover:from-red-500 hover:to-red-600 hover:text-white hover:shadow-md">
-                                                        <i class="fas fa-trash"></i>
-                                                        Delete
-                                                    </button>
-                                                </div>
+                                        </tr>
+                                        <tr v-if="roles.data.length === 0">
+                                            <td colspan="4" class="px-4 py-3 text-center text-gray-500">
+                                                No roles found
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="flex justify-between items-center p-4 bg-gray-50">
+                                <div class="flex items-center">
+                                    <span class="mr-2 text-sm text-gray-700">Show</span>
+                                    <select v-model="form.perPage"
+                                        class="px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <span class="ml-2 text-sm text-gray-700">rows</span>
+                                </div>
+                                <div class="overflow-x-auto bg-gray-50 flex justify-between items-center p-4">
+                                    <div class="min-w-max flex items-center space-x-1">
+                                        <template v-for="(link, i) in roles.links" :key="i">
+                                            <button @click="changePage(link.url)" :disabled="!link.url"
+                                                class="px-2 py-1 text-xs rounded-md min-w-[28px] text-center" :class="{
+                                                    'bg-blue-500 text-white': link.active,
+                                                    'bg-gray-50 text-gray-700 hover:bg-blue-500 hover:text-white': !link.active && link.url,
+                                                    'bg-gray-50 text-gray-400': !link.url && link.label === '...',
+                                                }">
+                                                <span v-html="link.label"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

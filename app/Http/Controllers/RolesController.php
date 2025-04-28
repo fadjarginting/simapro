@@ -3,88 +3,141 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateRoleRequest;
-use GuzzleHttp\Promise\Create;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use PhpParser\Node\Stmt\Return_;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class RolesController extends Controller
 {
-    // Get all roles
-    public function index()
+    // Get roles with server-side pagination and search
+    public function index(Request $request)
     {
-        $roles = Role::with('permissions', 'users')->get();
+        // Get request parameters
+        $search = $request->input('search', '');
+        $maxPerPage = 50; // Set a maximum limit for perPage
+        $perPage = min((int) $request->input('perPage', 10), $maxPerPage);
+        $sortField = $request->input('sortField', 'name');
+        $sortDirection = $request->input('sortDirection', 'asc');
+        
+        // Start with a base query
+        $query = Role::query();
+        
+        // Add search condition if provided - with proper parameter binding
+        if (!empty($search)) {
+            $query->where('name', 'LIKE', '%' . $search . '%');
+        }
+        
+        // Add sorting
+        $query->orderBy($sortField, $sortDirection);
+        
+        // Get paginated results with relationships
+        $roles = $query->with(['permissions', 'users'])
+                       ->paginate($perPage)->appends($request->query());  // Append query parameters manually
+        
+        // breadcrumb
+        $breadcrumbs = [
+            ['name' => 'Roles', 'url' => route('roles.index')],
+        ];
+
         return Inertia::render('RolesManagement/Roles', [
-            'roles' => $roles
+            'roles' => $roles,
+            'breadcrumbs' => $breadcrumbs,
+            'filters' => [
+                'search' => $search,
+                'perPage' => $perPage,
+                'sortField' => $sortField,
+                'sortDirection' => $sortDirection
+            ]
         ]);
     }
 
     public function create()
     {   
+        // breadcrumb
+        $breadcrumbs = [
+            ['name' => 'Roles', 'url' => route('roles.index')],
+            ['name' => 'Create Role', 'url' => route('roles.create')],
+        ];
         // get all permissions
         $permissions = Permission::all();
 
         $groupedPermissions = $permissions->groupBy(function($perm) {
-            return explode('.', $perm->name)[0]; // Bagian sebelum dot
+            return explode('.', $perm->name)[0]; // Group by the part before the dot
         });
 
         return Inertia::render('RolesManagement/CreateRole', [
             'permissions' => $permissions,
-            'groupedPermissions' => $groupedPermissions
+            'groupedPermissions' => $groupedPermissions,
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
 
-    public function store (CreateRoleRequest $request)
+    public function store(CreateRoleRequest $request)
     {
-        $role = Role::create($request->validated());
-
-        $role->syncPermissions($request->permissions);
-        
-        if ($role) {
+        try {
+            $role = Role::create($request->validated());
+            $role->syncPermissions($request->permissions);
+            
             return redirect()->route('roles.index')->with('status', 'Role created successfully!');
-        } else {
-            return redirect()->route('roles.index')->with('error', 'Failed to create role.');
+        } catch (\Exception $e) {
+            return redirect()->route('roles.index')->with('error', 'Failed to create role: ' . $e->getMessage());
         }
     }
 
     public function edit(Role $role)
     {
-        $permissions = Permission::all();
+        // Eager-load permissions relation
+        $role->load('permissions');
 
-        $groupedPermissions = $permissions->groupBy(function($perm) {
-            return explode('.', $perm->name)[0]; // Bagian sebelum dot
-        });
+        $breadcrumbs = [
+            ['name' => 'Roles',      'url' => route('roles.index')],
+            ['name' => 'Edit Role',  'url' => route('roles.edit', $role)],
+        ];
+
+        $permissions = Permission::all();
+        $groupedPermissions = $permissions->groupBy(fn($perm) => explode('.', $perm->name)[0]);
 
         return Inertia::render('RolesManagement/EditRole', [
-            'role' => $role,
-            'permissions' => $permissions,
-            'groupedPermissions' => $groupedPermissions
+            // Send role as array with only the permissions names
+            'role' => [
+                'id'          => $role->id,
+                'name'        => $role->name,
+                'permissions' => $role->permissions->pluck('name'), 
+            ],
+            'groupedPermissions' => $groupedPermissions,
+            'breadcrumbs'        => $breadcrumbs,
         ]);
     }
 
     public function update(CreateRoleRequest $request, Role $role)
     {
-        $role->update($request->validated());
-
-        $role->syncPermissions($request->permissions);
-
-        return Redirect::route('roles.index')->with('status', 'Role updated successfully!');
+        try {
+            $role->update($request->validated());
+            $role->syncPermissions($request->permissions);
+            
+            return redirect()->route('roles.index')->with('status', 'Role updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->route('roles.index')->with('error', 'Failed to update role: ' . $e->getMessage());
+        }
+        
     }
 
     public function destroy(Role $role)
     {   
-        // cek jika ada user yang memiliki role ini
+        // Check if any users have this role
         if ($role->users()->exists()) {
             return Redirect::route('roles.index')->with('error', 'Role cannot be deleted because it is still being used by users.');
         }
         
-        $role->delete();
-
-        return Redirect::route('roles.index')->with('status', 'Role deleted successfully!');
+        try {
+            $roleName = $role->name;
+            $role->delete();
+            return Redirect::route('roles.index')->with('status', 'Role "' . $roleName . '" deleted successfully!');
+        } catch (\Exception $e) {
+            return Redirect::route('roles.index')->with('error', 'Role cannot be deleted because it is still being used by users.');    
+        }
     }
-
 }

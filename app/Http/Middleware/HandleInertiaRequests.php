@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use Inertia\Middleware;
+use App\Models\Categories;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\UserSharedResource;
 
 class HandleInertiaRequests extends Middleware
@@ -36,9 +38,18 @@ class HandleInertiaRequests extends Middleware
             'auth.user' => fn () => $request->user()
                 ? new UserSharedResource($request->user())
                 : null,
+            // 'documentCategories' => function () {
+            //     if (Auth::check() && method_exists(Auth::user(), 'can') && Auth::user()) {
+            //         return Categories::with('children')->get()->toTree();
+            //     }
+            //     return [];
+            // },
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
                 'error' => fn () => $request->session()->get('error'),
+                'success' => fn () => $request->session()->get('success'),
+                'message'=> fn () => $request->session()->get('message'),
+                'warning' => fn () => $request->session()->get('warning'),
             ],
         ];
     }

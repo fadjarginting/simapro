@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Controller;
@@ -10,26 +9,64 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rules;
 use Illuminate\Http\RedirectResponse;
 
 class UserManagementController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->get();
-        $roles = Role::all();
-        return Inertia::render('UsersManagement/UserPage', [
+        // breadcrumb
+        $breadcrumbs = [
+            ['name' => 'Users', 'url' => route('users.index')],
+        ];
+        
+        $roles = Cache::remember('roles_list', 3600, function () {
+            return Role::select('id', 'name')->get();
+        });
+        
+        $maxPerPage = 50; // Set a maximum limit for perPage
+        // Get per page value with default fallback
+        $perPage = min((int) request('perPage', 10), $maxPerPage);
+        
+        // Get sort parameters with defaults
+        $sortField = $request->input('sort', 'name');
+        $sortDirection = $request->input('direction', 'asc');
+        
+        // Build the query with filters, sorting and pagination
+        $users = User::with('roles')
+            ->filter($request->only(['search', 'role']))
+            ->when($sortField && $sortDirection, function($query) use ($sortField, $sortDirection) {
+                return $query->orderBy($sortField, $sortDirection);
+            }, function($query) {
+                return $query->orderBy('created_at', 'desc');
+            })
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return Inertia::render('UsersManagement/UserIndex', [
             'users' => $users,
+            'breadcrumbs' => $breadcrumbs,
             'roles' => $roles,
+            'filters' => $request->only(['search', 'role', 'perPage', 'sort', 'direction']),
         ]);
     }
 
     public function create()
     {
-        $roles = Role::all();
+        // breadcrumb
+        $breadcrumbs = [
+            ['name' => 'Users', 'url' => route('users.index')],
+            ['name' => 'Create User', 'url' => route('users.create')],
+        ];
+        $roles = Cache::remember('roles_list', 3600, function () {
+            return Role::select('name')->get();
+        });
+ // Only fetch necessary fields to optimize performance
         return Inertia::render('UsersManagement/CreateUser', [
             'roles' => $roles,
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
 
@@ -49,18 +86,24 @@ class UserManagementController extends Controller
 
         $user->assignRole($request->role);
 
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
 
     public function edit(User $user)
     {
+        // breadcrumb
+        $breadcrumbs = [
+            ['name' => 'Users', 'url' => route('users.index')],
+            ['name' => 'Edit User', 'url' => route('users.edit', $user->id)],
+        ];
+
         $roles = Role::all();
         return Inertia::render('UsersManagement/EditUser', [
             'user' => $user,
             'roles' => $roles,
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
-
     public function update(Request $request, User $user): RedirectResponse
     {
         $request->validate([
@@ -83,5 +126,4 @@ class UserManagementController extends Controller
         $user->delete();
         return redirect()->route('users.index');
     }
-
 }

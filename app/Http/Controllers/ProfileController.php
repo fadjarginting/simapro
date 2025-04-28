@@ -18,9 +18,14 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        // breadcrumb
+        $breadcrumbs = [
+            ['name' => 'Profile', 'url' => route('profile.edit')],
+        ];
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'breadcrumbs' => $breadcrumbs,
         ]);
     }
 

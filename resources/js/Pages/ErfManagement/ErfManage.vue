@@ -212,10 +212,10 @@ function toggleDescription(id) {
                                                     <i class="fas fa-info-circle mr-2"></i>
                                                     Detail
                                                 </button>
-                                                <button @click="deleteUsers(doc.id)"
-                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-red-500 transition duration-300 hover:bg-gradient-to-tl hover:from-red-500 hover:to-red-400 hover:text-white">
-                                                    <i class="fas fa-trash mr-2 text-xs leading-none"></i>
-                                                    <span>Delete</span>
+                                                <button @click="updateErf(doc.doc_code)"
+                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-yellow-500 transition duration-300 hover:bg-gradient-to-tl hover:from-yellow-500 hover:to-yellow-400 hover:text-white">
+                                                    <i class="fas fa-edit mr-2 text-xs leading-none"></i>
+                                                    <span>Edit</span>
                                                 </button>
                                             </td>
                                         </tr>

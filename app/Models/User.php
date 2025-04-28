@@ -13,8 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
-    use HasRoles;
+    use HasFactory, Notifiable, HasRoles;
     
 
     /**
@@ -51,10 +50,22 @@ class User extends Authenticatable
         ];
     }
 
-    // relasi ke document
-    public function documents()
+    // scope untuk filtering dan searching
+    public function scopeFilter($query, array $filters)
     {
-        return $this->hasMany(Document::class, 'created_by');
-    }
+        // Search by name or email
+        $query->when($filters['search'] ?? null, function($q, $search) {
+            return $q->where(function($subquery) use ($search) {
+                $subquery->where('name', 'like', "%$search%")
+                         ->orWhere('email', 'like', "%$search%");
+            });
+        });
 
+        // Filter by role
+        $query->when($filters['role'] ?? null, function($q, $role) {
+            return $q->whereHas('roles', function($subquery) use ($role) {
+                $subquery->where('name', $role);
+            });
+        });
+    }
 }

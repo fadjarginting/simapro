@@ -3,18 +3,23 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, usePage, useForm } from "@inertiajs/vue3";
 import { defineProps } from "vue";
+import Swal from "sweetalert2";
 
 defineOptions({
     layout: AuthenticatedLayout,
 });
+
+const page = usePage();
 
 // Deklarasi props
 const props = defineProps({
     errors: Object,
     roles: Array
 });
+
+
 
 // Form data menggunakan inertia
 const form = useForm({
@@ -25,14 +30,80 @@ const form = useForm({
     role: ''
 });
 
+// submit with sweetalert2 confirmation, succes, and error handling
 const submit = () => {
-    form.post(route('users.store'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+    Swal.fire({
+        title: 'Create User',
+        text: "Are you sure you want to create this user?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Create',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            confirmButton: 'bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2',
+            cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.post(route('users.store'), {
+                onFinish: () => form.reset('password', 'password_confirmation'),
+                preserveScroll: true,
+                onSuccess: () => {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer);
+                            toast.addEventListener('mouseleave', Swal.resumeTimer);
+                        }
+                    });
+
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'User has been created successfully'
+                    });
+                },
+                onError: () => {
+                    Swal.fire({
+                        title: 'Error',
+                        text: page.props.errors.email || 'Failed to create the user. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            });
+        }
     });
 };
 
+// Cancel button to go back to the previous page
+// with sweetalert2 confirmation
 const cancel = () => {
-    history.back();
+    Swal.fire({
+        title: 'Cancel',
+        text: "Are you sure you want to cancel?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, go back',
+        customClass: {
+            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mr-2',
+            cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.history.back();
+        }
+    });
 };
 </script>
 
@@ -66,8 +137,8 @@ const cancel = () => {
                             <div class="mb-4">
                                 <InputLabel for="email" value="Email" />
                                 <TextInput id="email" v-model="form.email" type="email" placeholder="Enter Email"
-                                    class="mt-1 block w-full" :class="{ 'border-red-500': errors.email }" required
-                                    autocomplete="email" />
+                                    class="mt-1 block w-full" :class="{ 'border-red-500': errors.email }" required aria-autocomplete="false"
+                                    />
                                 <InputError :message="errors.email" />
                             </div>
 

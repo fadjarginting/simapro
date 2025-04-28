@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
 
         
         $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
         ]);
 
         // Assign role as admin
@@ -30,7 +30,13 @@ class DatabaseSeeder extends Seeder
 
 
         // spatie add role
-        
+        // // Create 50 users with the random role
+        User::factory(40)->create()->each(function ($user) {
+            // Assign a random role to each user
+            $roles = ['admin', 'user', 'engineer', 'manager'];
+            $randomRole = $roles[array_rand($roles)];
+            $user->assignRole($randomRole);
+        });
 
         
     }

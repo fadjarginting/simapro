@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Artisan;
 
 class PermissionsSeeder extends Seeder
 {
@@ -14,17 +14,31 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Daftar permission sesuai dengan menu dan aksi
+        // Reset cache dulu
+        Artisan::call('permission:cache-reset');
+
+        // Daftar permission
         $permissions = [
             // Dashboard
             'dashboard.view',
+
+            // ERF Management
+            'erf_management.view',
+
+            // Progress Report
+            'progress_report.view',
+
+            // Morning Report
+            'morning_report.view',
+            
+            // Key Performance Indicator
+            'kpi_management.view',
             
             // User Management
             'user_management.view',
             'user_management.create',
             'user_management.edit',
             'user_management.delete',
-            'user_management.reset_password',
             
             // Roles Management
             'roles_management.view',
@@ -32,21 +46,51 @@ class PermissionsSeeder extends Seeder
             'roles_management.edit',
             'roles_management.delete',
 
-            // Documents Activity Log
-            'documents_activity_log.view',
+            // Work Audit Log
+            'work_audit.view',
 
             // Login Audit Trail
             'login_audit_trail.view',
         ];
 
+        // Insert permissions
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // Assign permission to role
-        $role = Role::create(['name' => 'admin']);
-        $role->givePermissionTo($permissions);
+        // Assign permission to roles
+        // Cari role yang sudah ada, bukan buat baru!
+        $admin = Role::where('name', 'admin')->first();
+        if (!$admin) {
+            $admin = Role::create(['name' => 'admin']);
+        }
+        $admin->givePermissionTo($permissions);
 
-        
+        $user = Role::where('name', 'user')->first();
+        $user?->givePermissionTo([
+            'erf_management.view',
+            'progress_report.view',
+            'morning_report.view',
+            'kpi_management.view',
+        ]);
+
+        $engineer = Role::where('name', 'engineer')->first();
+        $engineer?->givePermissionTo([
+            'erf_management.view',
+            'progress_report.view',
+            'morning_report.view',
+            'kpi_management.view',
+        ]);
+
+        $manager = Role::where('name', 'manager')->first();
+        if (!$manager) {
+            $manager = Role::create(['name' => 'manager']);
+        }
+        $manager->givePermissionTo([
+            'erf_management.view',
+            'progress_report.view',
+            'morning_report.view',
+            'kpi_management.view',
+        ]);
     }
 }
