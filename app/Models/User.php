@@ -68,4 +68,10 @@ class User extends Authenticatable
             });
         });
     }
+
+    // Di model User.php
+    public function eatSchedules()
+    {
+        return $this->hasMany(EatSchedule::class);
+    }
 }

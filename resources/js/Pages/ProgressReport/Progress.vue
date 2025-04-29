@@ -2,52 +2,34 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { ref, computed } from "vue";
+import { usePage } from "@inertiajs/vue3";
 
 defineOptions({
     layout: AuthenticatedLayout,
 });
-// Data contoh (ganti dengan data props dari backend)
-const documents = ref([
-    {
-        id: 1,
-        doc_code: '6001.51.4001-1',
-        title: 'Flow Sheet With Capacity Indarung VI',
-        version: 'P1',
-        status: 'Finish',
-        publish_date: '10-03-2025'
-    },
-    {
-        id: 1,
-        doc_code: '5001.51.4001-1',
-        title: 'Flow Sheet With Capacity Indarung V',
-        version: 'P1',
-        status: 'Finish',
-        publish_date: '10-04-2025'
-    },
-    // Tambahkan data lain sesuai kebutuhan
-]);
+
+// Ambil data dari props yang dikirim oleh backend
+const { props } = usePage();
+const documents = ref(props.progresses || []);
 
 // Filter values
-const filterValues = ref({
-    docCode: '',
-    title: '',
-    version: '',
-    status: '',
-    publishDate: ''
-});
+// const filterValues = ref({
+//     requestCategory: '',
+//     statusVerifikasi: '',
+// });
 
-// Computed property untuk filtered data
-const filteredDocuments = computed(() => {
-    return documents.value.filter(doc => {
-        return (
-            doc.doc_code.toLowerCase().includes(filterValues.value.docCode.toLowerCase()) &&
-            doc.title.toLowerCase().includes(filterValues.value.title.toLowerCase()) &&
-            doc.version.toString().includes(filterValues.value.version) &&
-            doc.status.toLowerCase().includes(filterValues.value.status.toLowerCase()) &&
-            doc.publish_date.includes(filterValues.value.publishDate)
-        );
-    });
-});
+// // Computed property untuk filtered data
+// const filteredDocuments = computed(() => {
+//     return documents.value.filter(doc => {
+//         return (
+//             doc.doc_code.toLowerCase().includes(filterValues.value.docCode.toLowerCase()) &&
+//             doc.title.toLowerCase().includes(filterValues.value.title.toLowerCase()) &&
+//             doc.version.toString().includes(filterValues.value.version) &&
+//             doc.status.toLowerCase().includes(filterValues.value.status.toLowerCase()) &&
+//             doc.publish_date.includes(filterValues.value.publishDate)
+//         );
+//     });
+// });
 
 // Pagination
 const currentPage = ref(1);
@@ -59,9 +41,9 @@ const paginatedDocuments = computed(() => {
     return filteredDocuments.value.slice(start, end);
 });
 
-const totalPages = computed(() => {
-    return Math.ceil(filteredDocuments.value.length / itemsPerPage);
-});
+// const totalPages = computed(() => {
+//     return Math.ceil(filteredDocuments.value.length / itemsPerPage);
+// });
 
 function prevPage() {
     if (currentPage.value > 1) {
@@ -74,6 +56,7 @@ function nextPage() {
         currentPage.value++;
     }
 }
+
 // Membuat object reaktif untuk menyimpan status expand tiap baris,
 // misalnya dengan key 'user1', 'user2', dll.
 const expandedRows = ref({});
@@ -120,7 +103,7 @@ function toggleDescription(id) {
                         </div>
 
                         <!-- Filter -->
-                        <div
+                        <!-- <div
                             class="flex flex-wrap items-center p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent bg-gray-50">
                             
                             <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
@@ -129,27 +112,19 @@ function toggleDescription(id) {
                                     <option value="">Select Status</option>
                                     <option value="New">New</option>
                                     <option value="In Progress">In Progress</option>
-                                    <option value="Completed">Completed</option>
+                                    <option value="Completed">Completed</option> -->
                                     <!-- Tambahkan opsi lain sesuai kebutuhan -->
-                                </select>
+                                <!-- </select>
                             </div>
                             <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <input v-model="filterValues.publishDate" type="date" placeholder="Filter Publish Date"
+                                <input v-model="filterValues.requestCategory" type="date" placeholder="Filter Publish Date"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
                             <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <input v-model="filterValues.docCode" type="text" placeholder="Document Code"
+                                <input v-model="filterValues.statusVerifikasi" type="text" placeholder="Document Code"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
-                            <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <input v-model="filterValues.title" type="text" placeholder="Filter Title"
-                                    class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                            <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <input v-model="filterValues.version" type="text" placeholder="Filter Version"
-                                    class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                        </div>
+                        </div> -->
 
 
                         <div class="flex-auto px-0 pt-0 pb-2">
@@ -177,35 +152,35 @@ function toggleDescription(id) {
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.doc_code }}
+                                                        {{ doc.request_category }}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.publish_date }}
+                                                        {{ doc.status_verifikasi }}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.title }}
+                                                        {{ doc.pic_mekanikal }}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.status }}
+                                                        {{ doc.progress_mekanikal }}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-4">
                                                 <div class="flex-1">
                                                     <div class="font-medium dark:text-white">
-                                                        {{ doc.version }}
+                                                        {{ doc.note }}
                                                     </div>
                                                 </div>
                                             </td>

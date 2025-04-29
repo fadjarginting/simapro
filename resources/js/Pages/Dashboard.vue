@@ -126,39 +126,41 @@ const departmentData = [
 
 // Data untuk masing-masing Plant Engineering
 const plantEngineeringData = [
-    { name: "Working", value: 55 },
-    { name: "Planning", value: 25 },
+    { name: "Initiating", value: 55 },
+    { name: "Executing", value: 25 },
     { name: "Closing", value: 12 },
     { name: "Hold", value: 5 },
-    { name: "Cancel", value: 3 },
+    { name: "Reject", value: 3 },
 ];
 
 // Data untuk Digital Data HR
 const digitalHRData = [
-    { name: "Working", value: 50 },
-    { name: "Planning", value: 30 },
+    { name: "Initiating", value: 50 },
+    { name: "Executing", value: 30 },
     { name: "Closing", value: 15 },
     { name: "Hold", value: 3 },
-    { name: "Cancel", value: 2 },
+    { name: "Reject", value: 2 },
 ];
 
 // Data untuk Technical Audit
 const technicalAuditData = [
-    { name: "Working", value: 45 },
-    { name: "Planning", value: 35 },
+    { name: "Initiating", value: 45 },
+    { name: "Executing", value: 35 },
     { name: "Closing", value: 10 },
     { name: "Hold", value: 6 },
-    { name: "Cancel", value: 4 },
+    { name: "Reject", value: 4 },
 ];
 
 // Data untuk multi-bar chart
 const multiBarData = {
     categories: ["Tambang", "Indarung II/III", "Indarung IV", "Indarung V", "Indarung VI", "PPI", "PP MALAHAYATI", "GP DUMAI"],
     series: [
-        { name: "Working", data: [35, 28, 15, 22, 30, 25, 18, 40], color: "#6A39F7" },
-        { name: "Planning", data: [20, 15, 10, 12, 18, 15, 10, 22], color: "#44BFD6" },
+        { name: "Initiating", data: [35, 28, 15, 22, 30, 25, 18, 40], color: "#6A39F7" },
+        { name: "Executing", data: [20, 15, 10, 12, 18, 15, 10, 22], color: "#44BFD6" },
         { name: "Hold", data: [8, 5, 3, 6, 10, 8, 5, 12], color: "#93CAED" },
-        { name: "Cancel", data: [2, 3, 2, 1, 4, 3, 2, 5], color: "#FF0800" }
+        { name: "Closing", data: [2, 3, 2, 1, 4, 3, 2, 5], color: "#FF0800" },
+        { name: "Reject", data: [1, 2, 1, 1, 2, 1, 1, 1], color: "#FF0800" },
+        { name: "Total", data: [3, 4, 2, 5, 6, 4, 3, 5], color: "#FF8042" }
     ]
 };
 

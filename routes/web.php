@@ -1,13 +1,15 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RolesController;
-use App\Http\Controllers\UserManagementController;
-use Illuminate\Foundation\Application;
-use Spatie\Permission\Contracts\Role;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Contracts\Role;
+use Illuminate\Foundation\Application;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EatScheduleController;
+use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\UserManagementController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Auth/Login', [
@@ -25,7 +27,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 // route user management
@@ -61,6 +63,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/erfs/{erf}/edit', function () {
         return Inertia::render('ErfManagement/EditErf');
     })->name('erfs.edit');
+    // detail document
+    Route::get('/erfs/{erf}/detail', function () {
+        return Inertia::render('ErfManagement/DetailErf');
+    })->name('erfs.detail');
+    // Route::get('/arsip-documents/{document:slug}/detail', [DocumentController::class, 'detail'])
+    //     ->name('documents.detail');
+    // Route::get('/arsip-documents/{document:slug}', [DocumentController::class, 'view'])
+    //     ->middleware('permission:released_documents.view')
+    //     ->name('documents.preview');
 });
 
 // Route Morning Report
@@ -68,7 +79,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/morning', function () {
         return Inertia::render('MorningReport/Morning');
     })->name('morning');
-    
 });
 
 // Route Key Performance Indicator
@@ -79,16 +89,48 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Route Progress Report
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/progress', function () {
-        return Inertia::render('ProgressReport/Progress');
-    })->name('progress');
-    Route::get('/progress/create', function () {
-        return Inertia::render('ProgressReport/CreateProgress');
-    })->name('progress.create');
-    Route::get('/progress/{progres}/edit', function () {
-        return Inertia::render('Progress/EditProgress');
-    })->name('progress.edit');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/progress', [ProgressController::class, 'index'])
+        ->middleware('permission:progress_report.view')
+        ->name('progress.index');
+    Route::get('/progress/create', [ProgressController::class, 'create'])
+        ->middleware('permission:progress_report.create')
+        ->name('progress.create');
+    Route::post('/progress', [ProgressController::class, 'store'])
+        ->middleware('permission:progress_report.create')
+        ->name('progress.store');
+    Route::get('/progress/{progress}/edit', [ProgressController::class, 'edit'])
+        ->middleware('permission:progress_report.edit')
+        ->name('progress.edit');
+    Route::put('/progress/{progress}', [ProgressController::class, 'update'])
+        ->middleware('permission:progress_report.edit')
+        ->name('progress.update');
+    Route::delete('/progress/{progress}', [ProgressController::class, 'destroy'])
+        ->middleware('permission:progress_report.delete')
+        ->name('progress.destroy');
+});
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('/progress', function () {
+//         return Inertia::render('ProgressReport/Progress');
+//     })->name('progress');
+//     Route::get('/progress/create', function () {
+//         return Inertia::render('ProgressReport/CreateProgress');
+//     })->name('progress.create');
+//     Route::get('/progress/{progres}/edit', function () {
+//         return Inertia::render('Progress/EditProgress');
+//     })->name('progress.edit');
+// detail document
+// Route::get('/arsip-documents/{document:slug}/detail', [DocumentController::class, 'detail'])
+//     ->name('documents.detail');
+// Route::get('/arsip-documents/{document:slug}', [DocumentController::class, 'view'])
+//     ->middleware('permission:released_documents.view')
+//     ->name('documents.preview');
+// });
+
+// Resource routes for CRUD operations
+Route::middleware(['auth'])->group(function () {
+    Route::resource('eat-schedules', EatScheduleController::class);
+    Route::post('eat-schedules/{eatSchedule}/complete', [EatScheduleController::class, 'markAsCompleted'])->name('eat-schedules.complete');
 });
 
 // Profile Route
@@ -100,7 +142,7 @@ Route::middleware('auth')->group(function () {
 
 // Route for role management
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/roles',[RolesController::class, 'index'])
+    Route::get('/roles', [RolesController::class, 'index'])
         ->middleware('permission:roles_management.view')
         ->name('roles.index');
     Route::get('/roles/create', [RolesController::class, 'create'])
@@ -134,4 +176,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('loginaudit');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

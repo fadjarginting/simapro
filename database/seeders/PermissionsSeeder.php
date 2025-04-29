@@ -24,15 +24,27 @@ class PermissionsSeeder extends Seeder
 
             // ERF Management
             'erf_management.view',
+            'erf_management.create',
+            'erf_management.edit',
+            'erf_management.delete',
 
             // Progress Report
             'progress_report.view',
+            'progress_report.create',
+            'progress_report.edit',
+            'progress_report.delete',
 
             // Morning Report
             'morning_report.view',
             
             // Key Performance Indicator
             'kpi_management.view',
+
+            // EAT Schedule
+            'eat_schedule.view',
+            'eat_schedule.create',
+            'eat_schedule.edit',
+            'eat_schedule.delete',
             
             // User Management
             'user_management.view',

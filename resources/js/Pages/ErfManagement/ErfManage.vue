@@ -207,7 +207,7 @@ function toggleDescription(id) {
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-center">
-                                                <button @click="toggleDescription(`doc-${index}`)"
+                                                <button @click="toggleDescription()"
                                                     class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white">
                                                     <i class="fas fa-info-circle mr-2"></i>
                                                     Detail

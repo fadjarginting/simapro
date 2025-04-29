@@ -1,12 +1,55 @@
 <script setup>
+import { useForm, Head } from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
+import Swal from 'sweetalert2';
+
 defineOptions({
     layout: AuthenticatedLayout,
 });
+
+// Setup form inertia
+const form = useForm({
+    request_category: '',
+    status_verifikasi: '',
+    pic_mekanikal: '',
+    progress_mekanikal: '',
+    pic_sipil: '',
+    progress_sipil: '',
+    pic_elinst: '',
+    progress_elinst: '',
+    pic_proses: '',
+    progress_proses: '',
+    detail_progress: '',
+    note: ''
+});
+
+// Submit function
+function submit() {
+    form.post(route('progress.store'), {
+        onSuccess: () => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Progress berhasil ditambahkan!',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+        window.location.href = route('progress.index');      
+     });
+
+        },
+        onError: () => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Terdapat kesalahan input, periksa kembali form kamu!',
+            });
+        }
+    });
+}
 </script>
 
 <template>
@@ -23,18 +66,19 @@ defineOptions({
                 </div>
                 <!-- FORM -->
                 <div class="max-w-full mt-0 p-6 bg-white rounded-lg shadow-md">
-                    <form>
+                    <form @submit.prevent="submit">
                         <div class="grid grid-cols-2 gap-4">
                             <div class="mb-4 relative">
                                 <InputLabel for="request-category" value="Request Category" />
                                 <div class="relative">
                                     <select
                                         id="request-category"
+                                        v-model="form.request_category"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option>Request Category (CAPEX/OPEX)</option>
-                                        <option>CAPEX</option>
-                                        <option>OPEX</option>
+                                        <option value="">Request Category (CAPEX/OPEX)</option>
+                                        <option value="CAPEX">CAPEX</option>
+                                        <option value="OPEX">OPEX</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -52,11 +96,12 @@ defineOptions({
                                 />
                                 <TextInput
                                     id="status-verifikasi"
+                                    v-model="form.status_verifikasi"
                                     placeholder="Enter Status Verifikasi ERF"
                                     class="mt-1 block w-full"
                                     required
                                 />
-                                <InputError />
+                                <InputError :message="form.errors.status_verifikasi" />
                             </div>
                         </div>
 
@@ -66,11 +111,12 @@ defineOptions({
                                 <div class="relative">
                                     <select
                                         id="pic-mekanikal"
+                                        v-model="form.pic_mekanikal"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option>PIC Mekanikal</option>
-                                        <option>NOV</option>
-                                        <option>Type 2</option>
+                                        <option value="">PIC Mekanikal</option>
+                                        <option value="NOV">NOV</option>
+                                        <option value="Type 2">Type 2</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -88,14 +134,16 @@ defineOptions({
                                 />
                                 <TextInput
                                     id="progress-mekanikal"
+                                    v-model="form.progress_mekanikal"
                                     placeholder="Enter Progress %"
                                     class="mt-1 block w-full"
+                                    type="number"
+                                    min="0"
+                                    max="100"
                                     required
                                 />
-                                <InputError />
+                                <InputError :message="form.errors.progress_mekanikal" />
                             </div>
-
-                            
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -107,11 +155,12 @@ defineOptions({
                                 <div class="relative">
                                     <select
                                         id="pic-sipil"
+                                        v-model="form.pic_sipil"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option>PIC Sipil</option>
-                                        <option>AEF</option>
-                                        <option>Type 2</option>
+                                        <option value="">PIC Sipil</option>
+                                        <option value="AEF">AEF</option>
+                                        <option value="Type 2">Type 2</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -129,11 +178,15 @@ defineOptions({
                                 />
                                 <TextInput
                                     id="progress-sipil"
+                                    v-model="form.progress_sipil"
                                     placeholder="Enter Progress %"
                                     class="mt-1 block w-full"
+                                    type="number"
+                                    min="0"
+                                    max="100"
                                     required
                                 />
-                                <InputError />
+                                <InputError :message="form.errors.progress_sipil" />
                             </div>
                         </div>
 
@@ -146,11 +199,12 @@ defineOptions({
                                 <div class="relative">
                                     <select
                                         id="pic-elinst"
+                                        v-model="form.pic_elinst"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option>PIC Elinst</option>
-                                        <option>MCA</option>
-                                        <option>Type 2</option>
+                                        <option value="">PIC Elinst</option>
+                                        <option value="MCA">MCA</option>
+                                        <option value="Type 2">Type 2</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -168,11 +222,15 @@ defineOptions({
                                 />
                                 <TextInput
                                     id="progress-elinst"
+                                    v-model="form.progress_elinst"
                                     placeholder="Enter Progress %"
                                     class="mt-1 block w-full"
+                                    type="number"
+                                    min="0"
+                                    max="100"
                                     required
                                 />
-                                <InputError />
+                                <InputError :message="form.errors.progress_elinst" />
                             </div>
                         </div>
 
@@ -185,13 +243,12 @@ defineOptions({
                                 <div class="relative">
                                     <select
                                         id="pic-proses"
+                                        v-model="form.pic_proses"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option>
-                                            PIC Proses
-                                        </option>
-                                        <option>MRJ</option>
-                                        <option>Type 2</option>
+                                        <option value="">PIC Proses</option>
+                                        <option value="MRJ">MRJ</option>
+                                        <option value="Type 2">Type 2</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -209,11 +266,15 @@ defineOptions({
                                 />
                                 <TextInput
                                     id="progress-proses"
+                                    v-model="form.progress_proses"
                                     placeholder="Enter Progress %"
                                     class="mt-1 block w-full"
+                                    type="number"
+                                    min="0"
+                                    max="100"
                                     required
                                 />
-                                <InputError />
+                                <InputError :message="form.errors.progress_proses" />
                             </div>
                         </div>
                         
@@ -222,23 +283,25 @@ defineOptions({
                                 <InputLabel for="detail-progress" value="Detail Progress" />
                                 <TextInput
                                     id="detail-progress"
+                                    v-model="form.detail_progress"
                                     placeholder="Enter Detail Progress"
                                     class="mt-1 block w-full"
                                     required
                                     autofocus
                                 />
-                                <InputError />
+                                <InputError :message="form.errors.detail_progress" />
                             </div>
                             
                             <div class="mb-4">
                                 <InputLabel for="note" value="Note" />
                                 <TextInput
                                     id="note"
+                                    v-model="form.note"
                                     placeholder="Enter Note"
                                     class="mt-1 block w-full"
                                     required
                                 />
-                                <InputError />
+                                <InputError :message="form.errors.note" />
                             </div>
                         </div>
 
@@ -246,6 +309,7 @@ defineOptions({
                             <button
                                 type="button"
                                 class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                @click="form.reset"
                             >
                                 Cancel
                             </button>

@@ -131,7 +131,7 @@ onMounted(() => {
                     class="hover:bg-gray-100 dark:hover:bg-gray-700" @click="scrollToMenuItem">
                     <Link
                         class="flex items-center text-sm font-semibold dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('progress')"> <!-- Updated href to route('progress') -->
+                        :href="route('progress.index' )"> <!-- Updated href to route('progress') -->
                     <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-yellow-500">
                         <i class="ni ni-folder-17 text-sm leading-normal"></i>
                     </div>
@@ -164,6 +164,20 @@ onMounted(() => {
                         <i class="ni ni-single-copy-04 text-sm leading-normal"></i>
                     </div>
                     <span class="ml-1">Key Performance Indicator</span> <!-- Updated span text to 'Key Performance Indicator' -->
+                    </Link>
+                </li>
+
+                <!-- EatSchedule -->
+                <li v-if="hasPermission('eat_schedule.view')"
+                    :class="['mt-0.5 w-full', isActiveRoute('eat-schedules') ? 'bg-blue-500/13 rounded-lg' : '']"
+                    class="hover:bg-gray-100 dark:hover:bg-gray-700" @click="scrollToMenuItem">
+                    <Link
+                        class="flex items-center text-sm font-semibold dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
+                        :href="route('eat-schedules.index')">
+                    <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-green-500">
+                        <i class="ni ni-calendar-grid-58 text-sm leading-normal"></i>
+                    </div>
+                    <span class="ml-1">Eat Schedule</span>
                     </Link>
                 </li>
 

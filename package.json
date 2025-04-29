@@ -19,6 +19,8 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
+        "@inertiajs/inertia": "^0.11.1",
+        "@inertiajs/inertia-vue3": "^0.6.0",
         "chart.js": "^4.4.8",
         "d3": "^7.9.0",
         "perfect-scrollbar": "^1.5.6",
