@@ -14,7 +14,7 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
-    
+
 
     /**
      * The attributes that are mass assignable.
@@ -50,28 +50,28 @@ class User extends Authenticatable
         ];
     }
 
+    // relasi ke document
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'created_by');
+    }
+
     // scope untuk filtering dan searching
     public function scopeFilter($query, array $filters)
     {
         // Search by name or email
-        $query->when($filters['search'] ?? null, function($q, $search) {
-            return $q->where(function($subquery) use ($search) {
+        $query->when($filters['search'] ?? null, function ($q, $search) {
+            return $q->where(function ($subquery) use ($search) {
                 $subquery->where('name', 'like', "%$search%")
-                         ->orWhere('email', 'like', "%$search%");
+                    ->orWhere('email', 'like', "%$search%");
             });
         });
 
         // Filter by role
-        $query->when($filters['role'] ?? null, function($q, $role) {
-            return $q->whereHas('roles', function($subquery) use ($role) {
+        $query->when($filters['role'] ?? null, function ($q, $role) {
+            return $q->whereHas('roles', function ($subquery) use ($role) {
                 $subquery->where('name', $role);
             });
         });
-    }
-
-    // Di model User.php
-    public function eatSchedules()
-    {
-        return $this->hasMany(EatSchedule::class);
     }
 }

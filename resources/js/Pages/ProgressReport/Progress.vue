@@ -13,23 +13,23 @@ const { props } = usePage();
 const documents = ref(props.progresses || []);
 
 // Filter values
-// const filterValues = ref({
-//     requestCategory: '',
-//     statusVerifikasi: '',
-// });
+const filterValues = ref({
+    requestCategory: '',
+    statusVerifikasi: '',
+    jobTitle: '',
+});
 
-// // Computed property untuk filtered data
-// const filteredDocuments = computed(() => {
-//     return documents.value.filter(doc => {
-//         return (
-//             doc.doc_code.toLowerCase().includes(filterValues.value.docCode.toLowerCase()) &&
-//             doc.title.toLowerCase().includes(filterValues.value.title.toLowerCase()) &&
-//             doc.version.toString().includes(filterValues.value.version) &&
-//             doc.status.toLowerCase().includes(filterValues.value.status.toLowerCase()) &&
-//             doc.publish_date.includes(filterValues.value.publishDate)
-//         );
-//     });
-// });
+// Computed property untuk filtered data
+const filteredDocuments = computed(() => {
+    return documents.value.filter(doc => {
+        return (
+            (filterValues.value.requestCategory === '' || (doc.request_category && doc.request_category.toLowerCase().includes(filterValues.value.requestCategory.toLowerCase()))) &&
+            (filterValues.value.statusVerifikasi === '' || (doc.status_verifikasi && doc.status_verifikasi.toLowerCase().includes(filterValues.value.statusVerifikasi.toLowerCase()))) &&
+            (filterValues.value.jobTitle === '' || 
+                (doc.pic_mekanikal && doc.pic_mekanikal.toLowerCase().includes(filterValues.value.jobTitle.toLowerCase())))
+        );
+    });
+});
 
 // Pagination
 const currentPage = ref(1);
@@ -41,9 +41,9 @@ const paginatedDocuments = computed(() => {
     return filteredDocuments.value.slice(start, end);
 });
 
-// const totalPages = computed(() => {
-//     return Math.ceil(filteredDocuments.value.length / itemsPerPage);
-// });
+const totalPages = computed(() => {
+    return Math.ceil(filteredDocuments.value.length / itemsPerPage) || 1;
+});
 
 function prevPage() {
     if (currentPage.value > 1) {
@@ -57,8 +57,7 @@ function nextPage() {
     }
 }
 
-// Membuat object reaktif untuk menyimpan status expand tiap baris,
-// misalnya dengan key 'user1', 'user2', dll.
+// Membuat object reaktif untuk menyimpan status expand tiap baris
 const expandedRows = ref({});
 
 // Fungsi untuk toggle tampilan baris deskripsi berdasarkan id
@@ -66,10 +65,15 @@ function toggleDescription(id) {
     // Jika id sudah ada, invert nilainya, jika belum, set ke true
     expandedRows.value[id] = !expandedRows.value[id];
 }
+
+// Function to update progress
+function updateProgress(code) {
+    // You should implement navigation to your update page
+    window.location.href = route('progress.edit', code);
+}
 </script>
 
 <template>
-
     <Head title="Progress Report" />
 
     <template name="header">
@@ -103,124 +107,150 @@ function toggleDescription(id) {
                         </div>
 
                         <!-- Filter -->
-                        <!-- <div
+                        <div
                             class="flex flex-wrap items-center p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent bg-gray-50">
                             
-                            <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <select v-model="filterValues.status"
+                            <div class="w-full md:w-1/2 lg:w-1/4 px-2 mb-2">
+                                <select v-model="filterValues.statusVerifikasi"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Select Status</option>
                                     <option value="New">New</option>
                                     <option value="In Progress">In Progress</option>
-                                    <option value="Completed">Completed</option> -->
+                                    <option value="Completed">Completed</option>
                                     <!-- Tambahkan opsi lain sesuai kebutuhan -->
-                                <!-- </select>
+                                </select>
                             </div>
-                            <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <input v-model="filterValues.requestCategory" type="date" placeholder="Filter Publish Date"
+                            <div class="w-full md:w-1/2 lg:w-1/4 px-2 mb-2">
+                                <input v-model="filterValues.requestCategory" type="text" placeholder="Request Category"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
-                            <div class="w-full md:w-1/2 lg:w-1/6 px-2 mb-2">
-                                <input v-model="filterValues.statusVerifikasi" type="text" placeholder="Document Code"
+                            <div class="w-full md:w-1/2 lg:w-1/4 px-2 mb-2">
+                                <input v-model="filterValues.jobTitle" type="text" placeholder="Job Title"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
-                        </div> -->
-
+                        </div>
 
                         <div class="flex-auto px-0 pt-0 pb-2">
-
                             <div class="p-0 overflow-x-auto">
                                 <table class="w-full table-auto">
                                     <thead class="bg-gray-50">
                                         <tr class="text-sm font-normal text-gray-600 border-t border-b text-left">
                                             <th class="px-4 py-3">
-                                                No.ERF
+                                                No.ERF/Request Category
                                             </th>
-                                            <th class="px-4 py-3">Entry Date</th>
-                                            <th class="px-4 py-3">Job Title</th>
-                                            <th class="px-4 py-3">Status</th>
-                                            <th class="px-4 py-3">Plant</th>
+                                            <th class="px-4 py-3">Status Verifikasi</th>
+                                            <th class="px-4 py-3">Job Title/PIC</th>
+                                            <th class="px-4 py-3">Progress</th>
+                                            <th class="px-4 py-3">Note</th>
                                             <th class="px-4 py-3">
                                                 Action
                                             </th>
-                                            <th class="px-4 py-3"></th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-sm font-normal text-gray-700">
-                                        <tr v-for="(doc, index) in filteredDocuments" :key="doc.id"
-                                            class="border-b border-gray-200 hover:bg-gray-100">
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ doc.request_category }}
+                                        <template v-if="paginatedDocuments.length">
+                                            <tr v-for="(doc, index) in paginatedDocuments" :key="doc.id"
+                                                class="border-b border-gray-200 hover:bg-gray-100">
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium dark:text-white">
+                                                            {{ doc.request_category }}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ doc.status_verifikasi }}
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium dark:text-white">
+                                                            {{ doc.status_verifikasi }}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ doc.pic_mekanikal }}
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium dark:text-white">
+                                                            {{ doc.pic_mekanikal }}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ doc.progress_mekanikal }}
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium dark:text-white">
+                                                            {{ doc.progress_mekanikal }}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ doc.note }}
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium dark:text-white">
+                                                            {{ doc.note }}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4 py-3">
-                                                <button @click="toggleDescription(`doc-${index}`)"
-                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white">
-                                                    <i class="fas fa-info-circle mr-2"></i>
-                                                    Detail
-                                                </button>
-                                                <button @click="updateProgress(doc.code)"
-                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-yellow-500 transition duration-300 hover:bg-gradient-to-tl hover:from-yellow-500 hover:to-yellow-400 hover:text-white">
-                                                    <i class="fas fa-edit mr-2 text-xs leading-none"></i>
-                                                    <span>Update</span>
-                                                </button>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <button @click="toggleDescription(`doc-${index}`)"
+                                                        class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white">
+                                                        <i class="fas fa-info-circle mr-2"></i>
+                                                        Detail
+                                                    </button>
+                                                    <button @click="updateProgress(doc.id)"
+                                                        class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-yellow-500 transition duration-300 hover:bg-gradient-to-tl hover:from-yellow-500 hover:to-yellow-400 hover:text-white ml-2">
+                                                        <i class="fas fa-edit mr-2 text-xs leading-none"></i>
+                                                        <span>Update</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <!-- Expanded row for details -->
+                                            <tr v-for="(doc, index) in paginatedDocuments" :key="`detail-${doc.id}`" 
+                                                v-show="expandedRows[`doc-${index}`]" 
+                                                class="bg-gray-50">
+                                                <td colspan="6" class="px-4 py-4">
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <h4 class="font-bold">Detail Progress:</h4>
+                                                            <p>{{ doc.detail_progress || 'No detail provided' }}</p>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold">Other PIC:</h4>
+                                                            <p><strong>Sipil:</strong> {{ doc.pic_sipil || 'N/A' }}</p>
+                                                            <p><strong>Elinst:</strong> {{ doc.pic_elinst || 'N/A' }}</p>
+                                                            <p><strong>Proses:</strong> {{ doc.pic_proses || 'N/A' }}</p>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold">Progress by Department:</h4>
+                                                            <p><strong>Sipil:</strong> {{ doc.progress_sipil || 'N/A' }}</p>
+                                                            <p><strong>Elinst:</strong> {{ doc.progress_elinst || 'N/A' }}</p>
+                                                            <p><strong>Proses:</strong> {{ doc.progress_proses || 'N/A' }}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        <tr v-else class="border-b border-gray-200">
+                                            <td colspan="6" class="px-4 py-6 text-center text-gray-500">
+                                                No progress records found
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <!-- pagination -->
-                            <div class="flex justify-between items-center p-4 bg-gray-50"></div>
-                            <button @click="prevPage" :disabled="currentPage === 1"
-                                class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50">
-                                Previous
-                            </button>
-                            <span class="text-sm text-gray-700">
-                                Page {{ currentPage }} of {{ totalPages }}
-                            </span>
-                            <button @click="nextPage" :disabled="currentPage === totalPages"
-                                class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50">
-                                Next
-                            </button>
+                            <div class="flex justify-between items-center p-4 bg-gray-50">
+                                <button @click="prevPage" :disabled="currentPage === 1"
+                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50">
+                                    Previous
+                                </button>
+                                <span class="text-sm text-gray-700">
+                                    Page {{ currentPage }} of {{ totalPages }}
+                                </span>
+                                <button @click="nextPage" :disabled="currentPage === totalPages"
+                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50">
+                                    Next
+                                </button>
+                            </div>
                         </div>
-
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-
 </template>
