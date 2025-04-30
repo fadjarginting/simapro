@@ -5,6 +5,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Swal from "sweetalert2";
+import { router } from "@inertiajs/vue3";
 
 defineOptions({
     layout: AuthenticatedLayout,
@@ -387,10 +388,13 @@ function submit() {
                             <button
                                 type="button"
                                 class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                                @click="form.reset"
+                                @click="
+                                    () => router.visit(route('progress.index'))
+                                "
                             >
                                 Cancel
                             </button>
+
                             <button
                                 type="submit"
                                 class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"

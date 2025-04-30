@@ -66,7 +66,7 @@ class ProgressController extends Controller
     public function show(Progress $progress)
     {
         // Show the details of a specific progress record
-        return Inertia::render('ProgressShow', [
+        return Inertia::render('ProgressReport/ShowProgress', [
             'progress' => $progress
         ]);
     }
@@ -76,7 +76,8 @@ class ProgressController extends Controller
      */
     public function edit(Progress $progress)
     {
-        return Inertia::render('ProgressEdit', [
+        // Render the form for editing a specific progress record
+        return Inertia::render('ProgressReport/EditProgress', [
             'progress' => $progress
         ]);
     }

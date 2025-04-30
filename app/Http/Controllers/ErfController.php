@@ -20,7 +20,8 @@ class ErfController extends Controller
      */
     public function create()
     {
-        //
+        // Render the form for creating a new ERF
+        return inertia('ErfManagement/CreateErf');
     }
 
     /**

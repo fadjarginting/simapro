@@ -11,7 +11,7 @@ defineOptions({
 
 // Get data from props sent by backend
 const { props } = usePage();
-const documents = ref(props.progresses || []);
+const progress = ref(props.progresses || []);
 
 // Filter values
 const filterValues = ref({
@@ -22,25 +22,25 @@ const filterValues = ref({
 
 // Computed property for filtered data
 const filteredDocuments = computed(() => {
-    return documents.value.filter((doc) => {
+    return progress.value.filter((progres) => {
         return (
             (filterValues.value.requestCategory === "" ||
-                (doc.request_category &&
-                    doc.request_category
+                (progres.request_category &&
+                    progres.request_category
                         .toLowerCase()
                         .includes(
                             filterValues.value.requestCategory.toLowerCase()
                         ))) &&
             (filterValues.value.statusVerifikasi === "" ||
-                (doc.status_verifikasi &&
-                    doc.status_verifikasi
+                (progres.status_verifikasi &&
+                    progres.status_verifikasi
                         .toLowerCase()
                         .includes(
                             filterValues.value.statusVerifikasi.toLowerCase()
                         ))) &&
             (filterValues.value.picMekanikal === "" ||
-                (doc.pic_mekanikal &&
-                    doc.pic_mekanikal
+                (progres.pic_mekanikal &&
+                    progres.pic_mekanikal
                         .toLowerCase()
                         .includes(
                             filterValues.value.picMekanikal.toLowerCase()
@@ -103,8 +103,8 @@ function deleteProgress(id) {
             router.delete(route("progress.destroy", id), {
                 onSuccess: () => {
                     // Remove the deleted document from the local array
-                    documents.value = documents.value.filter(
-                        (doc) => doc.id !== id
+                    progress.value = progress.value.filter(
+                        (progres) => progres.id !== id
                     );
 
                     // Show success message
@@ -211,6 +211,7 @@ function formatPercentage(value) {
                             </div>
                         </div>
 
+                        <!-- tampilan -->
                         <div class="flex-auto px-0 pt-0 pb-2">
                             <div class="p-0 overflow-x-auto">
                                 <table class="w-full table-auto">
@@ -240,9 +241,9 @@ function formatPercentage(value) {
                                         >
                                             <tr
                                                 v-for="(
-                                                    doc, index
+                                                    progres, index
                                                 ) in paginatedDocuments"
-                                                :key="doc.id"
+                                                :key="progres.id"
                                                 class="border-b border-gray-200 hover:bg-gray-100"
                                             >
                                                 <td class="px-4 py-3">
@@ -251,7 +252,7 @@ function formatPercentage(value) {
                                                             class="font-medium dark:text-white"
                                                         >
                                                             {{
-                                                                doc.request_category
+                                                                progres.request_category
                                                             }}
                                                         </div>
                                                     </div>
@@ -262,7 +263,7 @@ function formatPercentage(value) {
                                                             class="font-medium dark:text-white"
                                                         >
                                                             {{
-                                                                doc.status_verifikasi
+                                                                progres.status_verifikasi
                                                             }}
                                                         </div>
                                                     </div>
@@ -273,7 +274,7 @@ function formatPercentage(value) {
                                                             class="font-medium dark:text-white"
                                                         >
                                                             {{
-                                                                doc.pic_mekanikal
+                                                                progres.pic_mekanikal
                                                             }}
                                                         </div>
                                                     </div>
@@ -285,7 +286,7 @@ function formatPercentage(value) {
                                                         >
                                                             {{
                                                                 formatPercentage(
-                                                                    doc.progress_mekanikal
+                                                                    progres.progress_mekanikal
                                                                 )
                                                             }}
                                                         </div>
@@ -296,16 +297,17 @@ function formatPercentage(value) {
                                                         <div
                                                             class="font-medium dark:text-white"
                                                         >
-                                                            {{ doc.note }}
+                                                            {{ progres.note }}
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3">
                                                     <div class="flex space-x-2">
-                                                        <button
-                                                            @click="
-                                                                toggleDescription(
-                                                                    `doc-${index}`
+                                                        <Link
+                                                            :href="
+                                                                route(
+                                                                    'progress.show',
+                                                                    progres.id
                                                                 )
                                                             "
                                                             class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white"
@@ -313,12 +315,14 @@ function formatPercentage(value) {
                                                             <i
                                                                 class="fas fa-info-circle mr-2"
                                                             ></i>
-                                                            Detail
-                                                        </button>
-                                                        <button
-                                                            @click="
-                                                                updateProgress(
-                                                                    doc.id
+                                                            <span>Detail</span>
+                                                            <!-- Bisa menambahkan ikon atau elemen lain di sini jika diperlukan -->
+                                                        </Link>
+                                                        <Link
+                                                            :href="
+                                                                route(
+                                                                    'progress.edit',
+                                                                    progres.id
                                                                 )
                                                             "
                                                             class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-yellow-500 transition duration-300 hover:bg-gradient-to-tl hover:from-yellow-500 hover:to-yellow-400 hover:text-white"
@@ -327,11 +331,11 @@ function formatPercentage(value) {
                                                                 class="fas fa-edit mr-2 text-xs leading-none"
                                                             ></i>
                                                             <span>Update</span>
-                                                        </button>
+                                                        </Link>
                                                         <button
                                                             @click="
                                                                 deleteProgress(
-                                                                    doc.id
+                                                                    progres.id
                                                                 )
                                                             "
                                                             class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-red-500 transition duration-300 hover:bg-gradient-to-tl hover:from-red-500 hover:to-red-400 hover:text-white"
@@ -341,112 +345,6 @@ function formatPercentage(value) {
                                                             ></i>
                                                             <span>Delete</span>
                                                         </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <!-- Expanded row for details -->
-                                            <tr
-                                                v-for="(
-                                                    doc, index
-                                                ) in paginatedDocuments"
-                                                :key="`detail-${doc.id}`"
-                                                v-show="
-                                                    expandedRows[`doc-${index}`]
-                                                "
-                                                class="bg-gray-50"
-                                            >
-                                                <td
-                                                    colspan="6"
-                                                    class="px-4 py-4"
-                                                >
-                                                    <div
-                                                        class="grid grid-cols-1 md:grid-cols-2 gap-4"
-                                                    >
-                                                        <div>
-                                                            <h4
-                                                                class="font-bold"
-                                                            >
-                                                                Detail Progress:
-                                                            </h4>
-                                                            <p>
-                                                                {{
-                                                                    doc.detail_progress ||
-                                                                    "No detail provided"
-                                                                }}
-                                                            </p>
-                                                        </div>
-                                                        <div>
-                                                            <h4
-                                                                class="font-bold"
-                                                            >
-                                                                Other PIC:
-                                                            </h4>
-                                                            <p>
-                                                                <strong
-                                                                    >Sipil:</strong
-                                                                >
-                                                                {{
-                                                                    doc.pic_sipil ||
-                                                                    "N/A"
-                                                                }}
-                                                            </p>
-                                                            <p>
-                                                                <strong
-                                                                    >Elinst:</strong
-                                                                >
-                                                                {{
-                                                                    doc.pic_elinst ||
-                                                                    "N/A"
-                                                                }}
-                                                            </p>
-                                                            <p>
-                                                                <strong
-                                                                    >Proses:</strong
-                                                                >
-                                                                {{
-                                                                    doc.pic_proses ||
-                                                                    "N/A"
-                                                                }}
-                                                            </p>
-                                                        </div>
-                                                        <div>
-                                                            <h4
-                                                                class="font-bold"
-                                                            >
-                                                                Progress by
-                                                                Department:
-                                                            </h4>
-                                                            <p>
-                                                                <strong
-                                                                    >Sipil:</strong
-                                                                >
-                                                                {{
-                                                                    formatPercentage(
-                                                                        doc.progress_sipil
-                                                                    )
-                                                                }}
-                                                            </p>
-                                                            <p>
-                                                                <strong
-                                                                    >Elinst:</strong
-                                                                >
-                                                                {{
-                                                                    formatPercentage(
-                                                                        doc.progress_elinst
-                                                                    )
-                                                                }}
-                                                            </p>
-                                                            <p>
-                                                                <strong
-                                                                    >Proses:</strong
-                                                                >
-                                                                {{
-                                                                    formatPercentage(
-                                                                        doc.progress_proses
-                                                                    )
-                                                                }}
-                                                            </p>
-                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>

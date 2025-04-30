@@ -116,6 +116,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/progress', [ProgressController::class, 'store'])
         ->middleware('permission:progress_report.create')
         ->name('progress.store');
+    Route::get('/progress/{progress}/show', [ProgressController::class, 'show'])
+        ->middleware('permission:progress_report.show')
+        ->name('progress.show');
     Route::get('/progress/{progress}/edit', [ProgressController::class, 'edit'])
         ->middleware('permission:progress_report.edit')
         ->name('progress.edit');

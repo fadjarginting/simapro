@@ -31,6 +31,7 @@ class PermissionsSeeder extends Seeder
             // Progress Report
             'progress_report.view',
             'progress_report.create',
+            'progress_report.show',
             'progress_report.edit',
             'progress_report.delete',
 
