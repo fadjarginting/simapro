@@ -8,6 +8,8 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EatScheduleController;
+use App\Http\Controllers\ErfController;
+use App\Http\Controllers\MorningController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\UserManagementController;
 
@@ -53,32 +55,47 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Route ERF Management
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/erfs', function () {
-        return Inertia::render('ErfManagement/ErfManage');
-    })->name('erfs');
-    Route::get('/erfs/create', function () {
-        return Inertia::render('ErfManagement/CreateErf');
-    })->name('erfs.create');
-    Route::get('/erfs/{erf}/edit', function () {
-        return Inertia::render('ErfManagement/EditErf');
-    })->name('erfs.edit');
-    // detail document
-    Route::get('/erfs/{erf}/detail', function () {
-        return Inertia::render('ErfManagement/DetailErf');
-    })->name('erfs.detail');
-    // Route::get('/arsip-documents/{document:slug}/detail', [DocumentController::class, 'detail'])
-    //     ->name('documents.detail');
-    // Route::get('/arsip-documents/{document:slug}', [DocumentController::class, 'view'])
-    //     ->middleware('permission:released_documents.view')
-    //     ->name('documents.preview');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/erfs', [ErfController::class, 'index'])
+        ->middleware('permission:erf_management.view')
+        ->name('erfs.index');
+    Route::get('/erfs/create', [ErfController::class, 'create'])
+        ->middleware('permission:erf_management.create')
+        ->name('erfs.create');
+    Route::post('/erfs', [ErfController::class, 'store'])
+        ->middleware('permission:erf_management.create')
+        ->name('erfs.store');
+    Route::get('/erfs/{erf}/edit', [ErfController::class, 'edit'])
+        ->middleware('permission:erf_management.edit')
+        ->name('erfs.edit');
+    Route::put('/erfs/{erf}', [ErfController::class, 'update'])
+        ->middleware('permission:erf_management.edit')
+        ->name('erfs.update');
+    Route::delete('/erfs/{erf}', [ErfController::class, 'destroy'])
+        ->middleware('permission:erf_management.delete')
+        ->name('erfs.destroy');
 });
 
 // Route Morning Report
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/morning', function () {
-        return Inertia::render('MorningReport/Morning');
-    })->name('morning');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/morning', [MorningController::class, 'index'])
+        ->middleware('permission:morning_report.view')
+        ->name('morning.index');
+    Route::get('/morning/create', [MorningController::class, 'create'])
+        ->middleware('permission:morning_report.create')
+        ->name('morning.create');
+    Route::post('/morning', [MorningController::class, 'store'])
+        ->middleware('permission:morning_report.create')
+        ->name('morning.store');
+    Route::get('/morning/{morning}/edit', [MorningController::class, 'edit'])
+        ->middleware('permission:morning_report.edit')
+        ->name('morning.edit');
+    Route::put('/morning/{morning}', [MorningController::class, 'update'])
+        ->middleware('permission:morning_report.edit')
+        ->name('morning.update');
+    Route::delete('/morning/{morning}', [MorningController::class, 'destroy'])
+        ->middleware('permission:morning_report.delete')
+        ->name('morning.destroy');
 });
 
 // Route Key Performance Indicator
@@ -109,23 +126,6 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('permission:progress_report.delete')
         ->name('progress.destroy');
 });
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('/progress', function () {
-//         return Inertia::render('ProgressReport/Progress');
-//     })->name('progress');
-//     Route::get('/progress/create', function () {
-//         return Inertia::render('ProgressReport/CreateProgress');
-//     })->name('progress.create');
-//     Route::get('/progress/{progres}/edit', function () {
-//         return Inertia::render('Progress/EditProgress');
-//     })->name('progress.edit');
-// detail document
-// Route::get('/arsip-documents/{document:slug}/detail', [DocumentController::class, 'detail'])
-//     ->name('documents.detail');
-// Route::get('/arsip-documents/{document:slug}', [DocumentController::class, 'view'])
-//     ->middleware('permission:released_documents.view')
-//     ->name('documents.preview');
-// });
 
 // Resource routes for CRUD operations
 Route::middleware(['auth'])->group(function () {

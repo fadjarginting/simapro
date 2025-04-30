@@ -36,7 +36,7 @@ class PermissionsSeeder extends Seeder
 
             // Morning Report
             'morning_report.view',
-            
+
             // Key Performance Indicator
             'kpi_management.view',
 
@@ -45,13 +45,13 @@ class PermissionsSeeder extends Seeder
             'eat_schedule.create',
             'eat_schedule.edit',
             'eat_schedule.delete',
-            
+
             // User Management
             'user_management.view',
             'user_management.create',
             'user_management.edit',
             'user_management.delete',
-            
+
             // Roles Management
             'roles_management.view',
             'roles_management.create',
