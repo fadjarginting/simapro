@@ -26,11 +26,11 @@ return new class extends Migration
             $table->string('pic_elinst');
             $table->string('pic_proses');
 
-            // Progress masing-masing bagian (dalam persen)
-            $table->unsignedTinyInteger('progress_mekanikal')->default(0);
-            $table->unsignedTinyInteger('progress_sipil')->default(0);
-            $table->unsignedTinyInteger('progress_elinst')->default(0);
-            $table->unsignedTinyInteger('progress_proses')->default(0);
+            // Progress masing-masing bagian (dalam persen, bisa berkoma)
+            $table->decimal('progress_mekanikal', 5, 2)->default(0.00);
+            $table->decimal('progress_sipil', 5, 2)->default(0.00);
+            $table->decimal('progress_elinst', 5, 2)->default(0.00);
+            $table->decimal('progress_proses', 5, 2)->default(0.00);
 
             // Detail progress dan catatan tambahan
             $table->text('detail_progress')->nullable();
