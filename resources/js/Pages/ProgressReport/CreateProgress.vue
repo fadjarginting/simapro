@@ -4,7 +4,7 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 defineOptions({
     layout: AuthenticatedLayout,
@@ -12,42 +12,41 @@ defineOptions({
 
 // Setup form inertia
 const form = useForm({
-    request_category: '',
-    status_verifikasi: '',
-    pic_mekanikal: '',
-    progress_mekanikal: '',
-    pic_sipil: '',
-    progress_sipil: '',
-    pic_elinst: '',
-    progress_elinst: '',
-    pic_proses: '',
-    progress_proses: '',
-    detail_progress: '',
-    note: ''
+    request_category: "",
+    status_verifikasi: "",
+    pic_mekanikal: "",
+    progress_mekanikal: "",
+    pic_sipil: "",
+    progress_sipil: "",
+    pic_elinst: "",
+    progress_elinst: "",
+    pic_proses: "",
+    progress_proses: "",
+    detail_progress: "",
+    note: "",
 });
 
 // Submit function
 function submit() {
-    form.post(route('progress.store'), {
+    form.post(route("progress.store"), {
         onSuccess: () => {
             Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: 'Progress berhasil ditambahkan!',
+                icon: "success",
+                title: "Success",
+                text: "Progress berhasil ditambahkan!",
                 timer: 2000,
-                showConfirmButton: false
+                showConfirmButton: false,
             }).then(() => {
-        window.location.href = route('progress.index');      
-     });
-
+                window.location.href = route("progress.index");
+            });
         },
         onError: () => {
             Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Terdapat kesalahan input, periksa kembali form kamu!',
+                icon: "error",
+                title: "Oops...",
+                text: "Terdapat kesalahan input, periksa kembali form kamu!",
             });
-        }
+        },
     });
 }
 </script>
@@ -61,7 +60,9 @@ function submit() {
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="p-2 text-gray-900">
-                        <h2 class="text-2xl font-semibold mb-2">Add New Progress</h2>
+                        <h2 class="text-2xl font-semibold mb-2">
+                            Add New Progress
+                        </h2>
                     </div>
                 </div>
                 <!-- FORM -->
@@ -69,14 +70,19 @@ function submit() {
                     <form @submit.prevent="submit">
                         <div class="grid grid-cols-2 gap-4">
                             <div class="mb-4 relative">
-                                <InputLabel for="request-category" value="Request Category" />
+                                <InputLabel
+                                    for="request-category"
+                                    value="Request Category"
+                                />
                                 <div class="relative">
                                     <select
                                         id="request-category"
                                         v-model="form.request_category"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option value="">Request Category (CAPEX/OPEX)</option>
+                                        <option value="">
+                                            Request Category (CAPEX/OPEX)
+                                        </option>
                                         <option value="CAPEX">CAPEX</option>
                                         <option value="OPEX">OPEX</option>
                                     </select>
@@ -88,7 +94,7 @@ function submit() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="mb-4">
                                 <InputLabel
                                     for="status-verifikasi"
@@ -101,13 +107,18 @@ function submit() {
                                     class="mt-1 block w-full"
                                     required
                                 />
-                                <InputError :message="form.errors.status_verifikasi" />
+                                <InputError
+                                    :message="form.errors.status_verifikasi"
+                                />
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="mb-4 relative">
-                                <InputLabel for="pic-mekanikal" value="PIC Mekanikal" />
+                                <InputLabel
+                                    for="pic-mekanikal"
+                                    value="PIC Mekanikal"
+                                />
                                 <div class="relative">
                                     <select
                                         id="pic-mekanikal"
@@ -132,26 +143,40 @@ function submit() {
                                     for="progress-mekanikal"
                                     value="Progress Mekanikal"
                                 />
-                                <TextInput
-                                    id="progress-mekanikal"
-                                    v-model="form.progress_mekanikal"
-                                    placeholder="Enter Progress %"
-                                    class="mt-1 block w-full"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    required
+                                <div class="relative">
+                                    <TextInput
+                                        id="progress-mekanikal"
+                                        v-model="form.progress_mekanikal"
+                                        placeholder="Contoh: 75 atau 75,5"
+                                        type="text"
+                                        class="mt-1 block w-full pr-10"
+                                        @input="
+                                            (e) => {
+                                                // Ganti koma ke titik dan validasi agar hanya angka & titik
+                                                const cleaned = e.target.value
+                                                    .replace(',', '.')
+                                                    .replace(/[^0-9.]/g, '');
+                                                form.progress_mekanikal =
+                                                    cleaned;
+                                            }
+                                        "
+                                        required
+                                    />
+                                    <span
+                                        class="absolute inset-y-0 right-3 flex items-center text-gray-500 text-sm pointer-events-none"
+                                    >
+                                        %
+                                    </span>
+                                </div>
+                                <InputError
+                                    :message="form.errors.progress_mekanikal"
                                 />
-                                <InputError :message="form.errors.progress_mekanikal" />
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="mb-4 relative">
-                                <InputLabel
-                                    for="pic-sipil"
-                                    value="PIC Sipil"
-                                />
+                                <InputLabel for="pic-sipil" value="PIC Sipil" />
                                 <div class="relative">
                                     <select
                                         id="pic-sipil"
@@ -176,17 +201,33 @@ function submit() {
                                     for="progress-sipil"
                                     value="Progress Sipil"
                                 />
-                                <TextInput
-                                    id="progress-sipil"
-                                    v-model="form.progress_sipil"
-                                    placeholder="Enter Progress %"
-                                    class="mt-1 block w-full"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    required
+                                <div class="relative">
+                                    <TextInput
+                                        id="progress-sipil"
+                                        v-model="form.progress_sipil"
+                                        placeholder="Contoh: 75 atau 75,5"
+                                        type="text"
+                                        class="mt-1 block w-full pr-10"
+                                        @input="
+                                            (e) => {
+                                                // Ganti koma ke titik dan validasi agar hanya angka & titik
+                                                const cleaned = e.target.value
+                                                    .replace(',', '.')
+                                                    .replace(/[^0-9.]/g, '');
+                                                form.progress_sipil = cleaned;
+                                            }
+                                        "
+                                        required
+                                    />
+                                    <span
+                                        class="absolute inset-y-0 right-3 flex items-center text-gray-500 text-sm pointer-events-none"
+                                    >
+                                        %
+                                    </span>
+                                </div>
+                                <InputError
+                                    :message="form.errors.progress_sipil"
                                 />
-                                <InputError :message="form.errors.progress_sipil" />
                             </div>
                         </div>
 
@@ -220,17 +261,33 @@ function submit() {
                                     for="progress-elinst"
                                     value="Progress Elinst"
                                 />
-                                <TextInput
-                                    id="progress-elinst"
-                                    v-model="form.progress_elinst"
-                                    placeholder="Enter Progress %"
-                                    class="mt-1 block w-full"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    required
+                                <div class="relative">
+                                    <TextInput
+                                        id="progress-elinst"
+                                        v-model="form.progress_elinst"
+                                        placeholder="Contoh: 75 atau 75,5"
+                                        type="text"
+                                        class="mt-1 block w-full pr-10"
+                                        @input="
+                                            (e) => {
+                                                // Ganti koma ke titik dan validasi agar hanya angka & titik
+                                                const cleaned = e.target.value
+                                                    .replace(',', '.')
+                                                    .replace(/[^0-9.]/g, '');
+                                                form.progress_elinst = cleaned;
+                                            }
+                                        "
+                                        required
+                                    />
+                                    <span
+                                        class="absolute inset-y-0 right-3 flex items-center text-gray-500 text-sm pointer-events-none"
+                                    >
+                                        %
+                                    </span>
+                                </div>
+                                <InputError
+                                    :message="form.errors.progress_elinst"
                                 />
-                                <InputError :message="form.errors.progress_elinst" />
                             </div>
                         </div>
 
@@ -264,23 +321,42 @@ function submit() {
                                     for="progress-proses"
                                     value="Progress Proses"
                                 />
-                                <TextInput
-                                    id="progress-proses"
-                                    v-model="form.progress_proses"
-                                    placeholder="Enter Progress %"
-                                    class="mt-1 block w-full"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    required
+                                <div class="relative">
+                                    <TextInput
+                                        id="progress-proses"
+                                        v-model="form.progress_proses"
+                                        placeholder="Contoh: 75 atau 75,5"
+                                        type="text"
+                                        class="mt-1 block w-full pr-10"
+                                        @input="
+                                            (e) => {
+                                                // Ganti koma ke titik dan validasi agar hanya angka & titik
+                                                const cleaned = e.target.value
+                                                    .replace(',', '.')
+                                                    .replace(/[^0-9.]/g, '');
+                                                form.progress_proses = cleaned;
+                                            }
+                                        "
+                                        required
+                                    />
+                                    <span
+                                        class="absolute inset-y-0 right-3 flex items-center text-gray-500 text-sm pointer-events-none"
+                                    >
+                                        %
+                                    </span>
+                                </div>
+                                <InputError
+                                    :message="form.errors.progress_proses"
                                 />
-                                <InputError :message="form.errors.progress_proses" />
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-4">
                             <div class="mb-4">
-                                <InputLabel for="detail-progress" value="Detail Progress" />
+                                <InputLabel
+                                    for="detail-progress"
+                                    value="Detail Progress"
+                                />
                                 <TextInput
                                     id="detail-progress"
                                     v-model="form.detail_progress"
@@ -289,9 +365,11 @@ function submit() {
                                     required
                                     autofocus
                                 />
-                                <InputError :message="form.errors.detail_progress" />
+                                <InputError
+                                    :message="form.errors.detail_progress"
+                                />
                             </div>
-                            
+
                             <div class="mb-4">
                                 <InputLabel for="note" value="Note" />
                                 <TextInput
