@@ -47,6 +47,18 @@ class PermissionsSeeder extends Seeder
             'eat_schedule.edit',
             'eat_schedule.delete',
 
+            // Plant Settings
+            'plant_settings.view',
+            'plant_settings.create',
+            'plant_settings.edit',
+            'plant_settings.delete',
+
+            // Noted Management
+            'noted_management.view',
+            'noted_management.create',
+            'noted_management.edit',
+            'noted_management.delete',
+
             // User Management
             'user_management.view',
             'user_management.create',

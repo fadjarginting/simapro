@@ -85,7 +85,7 @@ function toggleDescription(id) {
 
 // Function to update progress
 function updateProgress(id) {
-    window.location.href = route("progress.edit", id);
+    router.visit(route("progress.edit", id));
 }
 
 // Function to delete progress with SweetAlert2 confirmation
@@ -132,6 +132,17 @@ function deleteProgress(id) {
 function formatPercentage(value) {
     if (!value && value !== 0) return "N/A";
     return `${value}%`;
+}
+
+//tanggal
+function formatDate(dateStr) {
+    if (!dateStr) return "N/A";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    });
 }
 </script>
 
@@ -215,21 +226,21 @@ function formatPercentage(value) {
                         <div class="flex-auto px-0 pt-0 pb-2">
                             <div class="p-0 overflow-x-auto">
                                 <table class="w-full table-auto">
-                                    <thead class="bg-gray-50">
+                                    <thead class="bg-gray-200">
                                         <tr
                                             class="text-sm font-normal text-gray-600 border-t border-b text-left"
                                         >
+                                            <th class="px-4 py-3">No ERF</th>
+                                            <th class="px-4 py-3">Job Title</th>
+                                            <th class="px-4 py-3">Plant</th>
                                             <th class="px-4 py-3">
-                                                Request Category
+                                                ERF Approved Date
                                             </th>
+                                            <th class="px-4 py-3">Job Type</th>
                                             <th class="px-4 py-3">
-                                                Status Verifikasi
+                                                Lead Engineering
                                             </th>
-                                            <th class="px-4 py-3">
-                                                PIC Mekanikal
-                                            </th>
-                                            <th class="px-4 py-3">Progress</th>
-                                            <th class="px-4 py-3">Note</th>
+                                            <th>Deadline Executing Phase</th>
                                             <th class="px-4 py-3">Action</th>
                                         </tr>
                                     </thead>
@@ -251,9 +262,25 @@ function formatPercentage(value) {
                                                         <div
                                                             class="font-medium dark:text-white"
                                                         >
-                                                            {{
-                                                                progres.request_category
-                                                            }}
+                                                            {{ progres.no_erf }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div
+                                                            class="font-medium dark:text-white"
+                                                        >
+                                                            {{ progres.title }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div
+                                                            class="font-medium dark:text-white"
+                                                        >
+                                                            {{ progres.plant }}
                                                         </div>
                                                     </div>
                                                 </td>
@@ -263,30 +290,8 @@ function formatPercentage(value) {
                                                             class="font-medium dark:text-white"
                                                         >
                                                             {{
-                                                                progres.status_verifikasi
-                                                            }}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="flex-1">
-                                                        <div
-                                                            class="font-medium dark:text-white"
-                                                        >
-                                                            {{
-                                                                progres.pic_mekanikal
-                                                            }}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="flex-1">
-                                                        <div
-                                                            class="font-medium dark:text-white"
-                                                        >
-                                                            {{
-                                                                formatPercentage(
-                                                                    progres.progress_mekanikal
+                                                                formatDate(
+                                                                    progres.erf_approved_date
                                                                 )
                                                             }}
                                                         </div>
@@ -297,7 +302,33 @@ function formatPercentage(value) {
                                                         <div
                                                             class="font-medium dark:text-white"
                                                         >
-                                                            {{ progres.note }}
+                                                            {{
+                                                                progres.job_type
+                                                            }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div
+                                                            class="font-medium dark:text-white"
+                                                        >
+                                                            {{
+                                                                progres.lead_engineering
+                                                            }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
+                                                        <div
+                                                            class="font-medium dark:text-white"
+                                                        >
+                                                            {{
+                                                                formatDate(
+                                                                    progres.deadline_executing
+                                                                )
+                                                            }}
                                                         </div>
                                                     </div>
                                                 </td>
@@ -316,7 +347,6 @@ function formatPercentage(value) {
                                                                 class="fas fa-info-circle mr-2"
                                                             ></i>
                                                             <span>Detail</span>
-                                                            <!-- Bisa menambahkan ikon atau elemen lain di sini jika diperlukan -->
                                                         </Link>
                                                         <Link
                                                             :href="
@@ -354,7 +384,7 @@ function formatPercentage(value) {
                                             class="border-b border-gray-200"
                                         >
                                             <td
-                                                colspan="6"
+                                                colspan="8"
                                                 class="px-4 py-6 text-center text-gray-500"
                                             >
                                                 No progress records found
@@ -383,6 +413,18 @@ function formatPercentage(value) {
                                     class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50"
                                 >
                                     Next
+                                </button>
+                                <button
+                                    @click="
+                                        filterValues = {
+                                            requestCategory: '',
+                                            statusVerifikasi: '',
+                                            picMekanikal: '',
+                                        }
+                                    "
+                                    class="ml-2 bg-gray-200 px-4 py-2 rounded text-sm text-gray-700 hover:bg-gray-300"
+                                >
+                                    Reset Filter
                                 </button>
                             </div>
                         </div>

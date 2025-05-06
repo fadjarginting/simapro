@@ -4,13 +4,15 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Contracts\Role;
 use Illuminate\Foundation\Application;
+use App\Http\Controllers\ErfController;
+use App\Http\Controllers\PlantController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\MorningController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EatScheduleController;
-use App\Http\Controllers\ErfController;
-use App\Http\Controllers\MorningController;
-use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\NotedController;
 use App\Http\Controllers\UserManagementController;
 
 // Route::get('/', function () {
@@ -134,6 +136,31 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::resource('eat-schedules', EatScheduleController::class);
     Route::post('eat-schedules/{eatSchedule}/complete', [EatScheduleController::class, 'markAsCompleted'])->name('eat-schedules.complete');
+});
+
+
+// Plants Routes
+Route::middleware(['auth', 'verified'])->prefix('plants')->name('plants.')->group(function () {
+    Route::get('/', [PlantController::class, 'index'])
+        ->name('index');
+    Route::post('/', [PlantController::class, 'store'])
+        ->name('store');
+    Route::put('/{plant}', [PlantController::class, 'update'])
+        ->name('update');
+    Route::delete('/{plant}', [PlantController::class, 'destroy'])
+        ->name('destroy');
+});
+
+// Noteds Routes
+Route::middleware(['auth', 'verified'])->prefix('noteds')->name('noteds.')->group(function () {
+    Route::get('/', [NotedController::class, 'index'])
+        ->name('index');
+    Route::post('/', [NotedController::class, 'store'])
+        ->name('store');
+    Route::put('/{noted}', [NotedController::class, 'update'])
+        ->name('update');
+    Route::delete('/{noted}', [NotedController::class, 'destroy'])
+        ->name('destroy');
 });
 
 // Profile Route

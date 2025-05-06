@@ -1,90 +1,33 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
-import { ref, computed } from "vue";
+import { ref } from "vue";
 
 defineOptions({
     layout: AuthenticatedLayout,
 });
 
-// Data untuk ERP items
-const erpItems = ref([
+// Data for progress items
+const progressItems = ref([
     {
-        id: 1,
-        no: 1,
-        jobTitle: 'Stock Opname Material Local Support',
-        urPekerjaan: 'Unit Ins DP',
-        load: 'ALIAS PRADANA',
-        tglErpTerkirim: '22-Oct-16',
-        tglSelesaiTarget: '23-Jan-25',
-        faseExecutionTarget: '(blank)',
-        statusVerifikasi: 'Finish Verifikasi',
-        statusPull: 'In Progress'
+        title: "Proytebasian FEED - DED Design & Engineering",
+        period: "01 January 25 - 05 May 25",
+        percentage: 18.75,
+        target: 85.00
     },
     {
-        id: 2,
-        no: 2,
-        jobTitle: 'Stock Opname Material Local Support',
-        urPekerjaan: 'Unit Ins DP',
-        load: 'ALIAS PRADANA',
-        tglErpTerkirim: '22-Oct-24',
-        tglSelesaiTarget: '23-Jan-25',
-        faseExecutionTarget: '(blank)',
-        statusVerifikasi: 'Finish Verifikasi',
-        statusPull: 'In Progress'
+        title: "Proytebasian Kajian Tabula Design & Engineering",
+        period: "01 January 25 - 05 May 25",
+        percentage: 0,
+        target: 85.00
     },
     {
-        id: 3,
-        no: 3,
-        jobTitle: 'Stock Opname Material Local Boiler',
-        urPekerjaan: 'Unit Ins DP',
-        load: 'ALIAS PRADANA',
-        tglErpTerkirim: '22-Oct-24',
-        tglSelesaiTarget: '23-Jan-25',
-        faseExecutionTarget: '(blank)',
-        statusVerifikasi: 'Finish Verifikasi',
-        statusPull: 'In Progress'
-    },
-    {
-        id: 4,
-        no: 4,
-        jobTitle: 'Stock Opname Material Local Boiler',
-        urPekerjaan: 'Unit Ins DP',
-        load: 'ALIAS PRADANA',
-        tglErpTerkirim: '22-Oct-16',
-        tglSelesaiTarget: '23-Jan-25',
-        faseExecutionTarget: '(blank)',
-        statusVerifikasi: 'Finish Verifikasi',
-        statusPull: 'In Progress'
+        title: "Proytebasian Technical Assist",
+        period: "01 January 25 - 05 May 25",
+        percentage: 33.33,
+        target: 85.00
     }
 ]);
-
-// Pagination untuk ERP
-const erpCurrentPage = ref(1);
-const erpItemsPerPage = 10;
-
-const paginatedErpItems = computed(() => {
-    const start = (erpCurrentPage.value - 1) * erpItemsPerPage;
-    const end = start + erpItemsPerPage;
-    return erpItems.value.slice(start, end);
-});
-
-const erpTotalPages = computed(() => {
-    return Math.ceil(erpItems.value.length / erpItemsPerPage);
-});
-
-function prevErpPage() {
-    if (erpCurrentPage.value > 1) {
-        erpCurrentPage.value--;
-    }
-}
-
-function nextErpPage() {
-    if (erpCurrentPage.value < erpTotalPages.value) {
-        erpCurrentPage.value++;
-    }
-}
-
 </script>
 
 <template>
@@ -98,125 +41,76 @@ function nextErpPage() {
 
     <div class="container mx-auto px-4 py-12">
         <div class="mx-auto max-w-full sm:px-6 lg:px-8">
-            <!-- ERP Table -->
+            <!-- Progress Section -->
             <div class="flex flex-wrap -mx-3 mb-6">
                 <div class="flex-none w-full max-w-full px-3">
-                    <div
-                        class="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl sm:rounded-lg bg-clip-border">
-                        <div
-                            class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
-                            <!-- Judul Tabel -->
-                            <h1 class="text-2xl font-bold text-gray-900">
-                                KEY PERFORMANCE INDICATOR
+                    <div class="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl sm:rounded-lg bg-clip-border">
+                        <!-- Main Title -->
+                        <div class="p-6 pb-2 mb-0 border-b-0 border-b-solid border-b-transparent">
+                            <h1 class="text-2xl font-bold text-gray-900 uppercase">
+                                SUNWASHES PERMANENT WITH ELDERESTER
                             </h1>
                         </div>
-                        <div
-                            class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
-                            <!-- Judul Tabel -->
-                            <h6 class="dark:text-white text-base font-bold">
-                                KPI MONITORING S1 2025
-                            </h6>
+                        
+                        <!-- Subtitle -->
+                        <div class="p-6 pt-0 pb-2 mb-0 border-b-0 border-b-solid border-b-transparent">
+                            <h2 class="text-lg font-semibold text-gray-700 uppercase">
+                                Key Monitoring Unit Site Environmental Services | Tarun 2025
+                            </h2>
                         </div>
-
-                        <div class="flex-auto px-0 pt-0 pb-2">
-                            <div class="p-0 overflow-x-auto">
-                                <table class="w-full table-auto">
-                                    <thead class="bg-gray-50">
-                                        <tr class="text-sm font-normal text-gray-600 border-t border-b text-left">
-                                            <th class="px-4 py-3">No</th>
-                                            <th class="px-4 py-3">Job Title</th>
-                                            <th class="px-4 py-3">UK Peminta</th>
-                                            <th class="px-4 py-3">Lead</th>
-                                            <th class="px-4 py-3">Tgl. ERF Disetujui</th>
-                                            <th class="px-4 py-3">Fase Initiating Target Selesai</th>
-                                            <th class="px-4 py-3">Fase Executing & Closing Target Selesai</th>
-                                            <th class="px-4 py-3">Status Verifikasi ERF</th>
-                                            <th class="px-4 py-3">Status Pek. Engineering</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-sm font-normal text-gray-700">
-                                        <tr v-for="item in paginatedErpItems" :key="item.id"
-                                            class="border-b border-gray-200 hover:bg-gray-100">
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.no }}
-                                                    </div>
+                        
+                        <!-- Progress Items -->
+                        <div class="p-6">
+                            <div class="space-y-8">
+                                <div v-for="(item, index) in progressItems" :key="index" class="border-b border-gray-200 pb-6 last:border-b-0">
+                                    <div class="flex justify-between items-start">
+                                        <div class="w-2/3">
+                                            <p class="font-bold text-gray-800">% {{ item.title }}</p>
+                                            <p class="text-sm text-gray-600">Period {{ item.period }}</p>
+                                        </div>
+                                        <div class="w-1/3 flex flex-col items-end">
+                                            <p class="font-bold text-gray-800">Target {{ item.target.toFixed(2) }}%</p>
+                                            <div class="relative w-24 h-12 mt-2">
+                                                <!-- Background semi-circle -->
+                                                <svg class="w-full h-full" viewBox="0 0 100 50">
+                                                    <path 
+                                                        d="M 10,50 A 40,40 0 0 1 90,50" 
+                                                        fill="none" 
+                                                        stroke="#e5e7eb" 
+                                                        stroke-width="10"
+                                                    />
+                                                    <!-- Progress semi-circle -->
+                                                    <path 
+                                                        class="transition-all duration-500"
+                                                        :class="{
+                                                            'stroke-red-500': item.percentage === 0,
+                                                            'stroke-yellow-500': item.percentage > 0 && item.percentage < 30,
+                                                            'stroke-green-500': item.percentage >= 30
+                                                        }"
+                                                        :d="`M 10,50 A 40,40 0 0 1 ${10 + (80 * (Math.min(item.percentage, 100)/100))},${50 - (40 * Math.sin(Math.PI * Math.min(item.percentage, 100)/100))}`" 
+                                                        fill="none" 
+                                                        stroke="currentColor"
+                                                        stroke-width="10"
+                                                        stroke-linecap="round"
+                                                    />
+                                                </svg>
+                                                <!-- Percentage text -->
+                                                <div class="absolute inset-0 flex items-center justify-center">
+                                                    <span 
+                                                        class="text-lg font-bold"
+                                                        :class="{
+                                                            'text-red-500': item.percentage === 0,
+                                                            'text-yellow-500': item.percentage > 0 && item.percentage < 30,
+                                                            'text-green-500': item.percentage >= 30
+                                                        }"
+                                                    >
+                                                        {{ item.percentage.toFixed(2) }}%
+                                                    </span>
                                                 </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.jobTitle }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.urPekerjaan }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.load }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.tglErpTerkirim }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.tglSelesaiTarget }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.faseExecutionTarget }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.statusVerifikasi }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-4">
-                                                <div class="flex-1">
-                                                    <div class="font-medium dark:text-white">
-                                                        {{ item.statusPull }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- pagination -->
-                            <div class="flex justify-between items-center p-4 bg-gray-50">
-                                <button @click="prevErpPage" :disabled="erpCurrentPage === 1"
-                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50">
-                                    Previous
-                                </button>
-                                <span class="text-sm text-gray-700">
-                                    Page {{ erpCurrentPage }} of {{ erpTotalPages }}
-                                </span>
-                                <button @click="nextErpPage" :disabled="erpCurrentPage === erpTotalPages"
-                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50">
-                                    Next
-                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

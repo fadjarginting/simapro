@@ -386,3 +386,290 @@ defineOptions({
     </div>
     <!-- end form add document -->
 </template>
+
+
+
+<div class="p-6 text-gray-900">
+    <div class="p-2 text-gray-900">
+        <h2 class="text-lg font-semibold mb-2">
+            EAT SCHEADULE
+        </h2>
+    </div>
+</div>
+
+<div class="grid grid-cols-5 gap-4">
+    <div class="mb-4">
+        <InputLabel
+            for="aktifitas"
+            value="Scope Disiplin Proses"
+        />
+        <TextInput
+            id="aktifitas"
+            placeholder="Enter Scope Disiplin Proses"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+
+    <div class="mb-4">
+        <InputLabel for="pic" value="PIC" />
+        <TextInput
+            id="pic"
+            placeholder="Enter PIC"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="tgl-mulai"
+            value="Tanggal Mulai"
+        />
+        <div class="relative">
+            <input
+                type="date"
+                id="tgl-mulai"
+                v-model="tglMulai"
+                class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
+                required
+            />
+            <!-- Ikon Kalender -->
+            <div
+                class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+            >
+                📅
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="tgl-selesai"
+            value="Tanggal Selesai"
+        />
+        <div class="relative">
+            <input
+                type="date"
+                id="tgl-selesai"
+                v-model="tglSelesai"
+                class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
+                required
+            />
+            <!-- Ikon Kalender -->
+            <div
+                class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+            >
+                📅
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="durasi"
+            value="Durasi (Hari)"
+        />
+        <TextInput
+            id="durasi"
+            :modelValue="durasi"
+            readonly
+            placeholder="Diinput Otomatis dari tanggal"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+</div>
+
+<div class="grid grid-cols-5 gap-4">
+    <div class="mb-4">
+        <InputLabel
+            for="aktifitas"
+            value="Scope Disiplin Mekanikal"
+        />
+        <TextInput
+            id="aktifitas"
+            placeholder="Enter Scope Disiplin Mekanikal"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+
+    <div class="mb-4">
+        <InputLabel for="pic" value="PIC" />
+        <TextInput
+            id="pic"
+            placeholder="Enter PIC"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="tgl-mulai"
+            value="Tanggal Mulai"
+        />
+        <div class="relative">
+            <input
+                type="date"
+                id="tgl-mulai"
+                v-model="tglMulai"
+                class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
+                required
+            />
+            <!-- Ikon Kalender -->
+            <div
+                class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+            >
+                📅
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="tgl-selesai"
+            value="Tanggal Selesai"
+        />
+        <div class="relative">
+            <input
+                type="date"
+                id="tgl-selesai"
+                v-model="tglSelesai"
+                class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
+                required
+            />
+            <!-- Ikon Kalender -->
+            <div
+                class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+            >
+                📅
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="durasi"
+            value="Durasi (Hari)"
+        />
+        <TextInput
+            id="durasi"
+            :modelValue="durasi"
+            readonly
+            placeholder="Diinput Otomatis dari tanggal"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+</div>
+
+<div class="grid grid-cols-5 gap-4 mt-8">
+    <div class="mb-4">
+        <InputLabel
+            for="aktifitas"
+            value="Scope Disiplin Sipil"
+        />
+        <TextInput
+            id="aktifitas"
+            placeholder="Enter Scope Disiplin Sipil"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+    <div class="mb-4">
+        <InputLabel
+            for="aktifitas"
+            value="Scope Disiplin Elins"
+        />
+        <TextInput
+            id="aktifitas"
+            placeholder="Enter Scope Disiplin Elins"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="aktifitas"
+            value="Scope Multi Disiplin"
+        />
+        <TextInput
+            id="aktifitas"
+            placeholder="Enter Scope Multi Disiplin"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+    <div class="mb-4">
+        <InputLabel for="pic" value="PIC" />
+        <TextInput
+            id="pic"
+            placeholder="Enter PIC"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="tgl-mulai"
+            value="Tanggal Mulai"
+        />
+        <div class="relative">
+            <input
+                type="date"
+                id="tgl-mulai"
+                v-model="tglMulai"
+                class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
+                required
+            />
+            <!-- Ikon Kalender -->
+            <div
+                class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+            >
+                📅
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <InputLabel
+            for="tgl-selesai"
+            value="Tanggal Selesai"
+        />
+        <div class="relative">
+            <input
+                type="date"
+                id="tgl-selesai"
+                v-model="tglSelesai"
+                class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fuchsia-300 dark:bg-gray-950 dark:text-white/80 text-sm leading-5.6 transition-all"
+                required
+            />
+            <!-- Ikon Kalender -->
+            <div
+                class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+            >
+                📅
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid grid-cols-3 gap-4">
+    <div class="mb-4">
+        <InputLabel
+            for="durasi"
+            value="Durasi (Hari)"
+        />
+        <TextInput
+            id="durasi"
+            :modelValue="durasi"
+            readonly
+            placeholder="Diinput Otomatis dari tanggal"
+            class="mt-1 block w-full"
+        />
+        <InputError />
+    </div>
+</div>

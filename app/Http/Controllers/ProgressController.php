@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Progress;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
 
 class ProgressController extends Controller
 {
@@ -14,7 +15,7 @@ class ProgressController extends Controller
     public function index()
     {
         // Get all progress records from the database
-        $progresses = Progress::all();
+        $progresses = Progress::latest()->get();
 
         // Pass them to the Vue component
         return Inertia::render('ProgressReport/Progress', [
@@ -38,19 +39,42 @@ class ProgressController extends Controller
     {
         // Validate the incoming request
         $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'plant' => 'required|string|max:255',
+            'work_priority' => 'nullable|string|max:255',
+            'job_type' => 'required|string|max:255',
             'request_category' => 'required|string|max:255',
-            'status_verifikasi' => 'required|string|max:255',
+            'no_erf' => 'required|string|max:255',
+            'erf_approved_date' => 'required|date',
+            'erf_clarification_date' => 'required|date',
+            'erf_validated_date' => 'required|date',
+            'lead_engineering' => 'required|string|max:255',
             'pic_mekanikal' => 'nullable|string|max:255',
+            'progress_mekanikal' => 'nullable|numeric|between:0,100',
             'pic_sipil' => 'nullable|string|max:255',
+            'progress_sipil' => 'nullable|numeric|between:0,100',
             'pic_elinst' => 'nullable|string|max:255',
+            'progress_elinst' => 'nullable|numeric|between:0,100',
             'pic_proses' => 'nullable|string|max:255',
-            'progress_mekanikal' => 'nullable|numeric|min:0|max:100',
-            'progress_sipil' => 'nullable|numeric|min:0|max:100',
-            'progress_elinst' => 'nullable|numeric|min:0|max:100',
-            'progress_proses' => 'nullable|numeric|min:0|max:100',
-            'detail_progress' => 'nullable|string',
+            'progress_proses' => 'nullable|numeric|between:0,100',
+            'requesting_unit' => 'required|string|max:255',
+            'status_verifikasi' => 'required|string|max:255',
+            'deadline_initiating' => 'required|date',
+            'deadline_executing' => 'required|date',
+            'status' => 'required|string|max:255',
+            'fase' => 'required|string|max:255',
+            'progress_description' => 'nullable|string|max:255',
             'note' => 'nullable|string',
+            'entry_date' => 'required|date',
         ]);
+
+        // Clean percentage input values
+        $numericFields = ['progress_mekanikal', 'progress_sipil', 'progress_elinst', 'progress_proses'];
+        foreach ($numericFields as $field) {
+            if (isset($validated[$field])) {
+                $validated[$field] = str_replace(',', '.', $validated[$field]);
+            }
+        }
 
         // Create new progress record
         Progress::create($validated);
@@ -89,19 +113,42 @@ class ProgressController extends Controller
     {
         // Validate the incoming request
         $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'plant' => 'required|string|max:255',
+            'work_priority' => 'nullable|string|max:255',
+            'job_type' => 'required|string|max:255',
             'request_category' => 'required|string|max:255',
-            'status_verifikasi' => 'required|string|max:255',
+            'no_erf' => 'required|string|max:255',
+            'erf_approved_date' => 'required|date',
+            'erf_clarification_date' => 'required|date',
+            'erf_validated_date' => 'required|date',
+            'lead_engineering' => 'required|string|max:255',
             'pic_mekanikal' => 'nullable|string|max:255',
+            'progress_mekanikal' => 'nullable|numeric|between:0,100',
             'pic_sipil' => 'nullable|string|max:255',
+            'progress_sipil' => 'nullable|numeric|between:0,100',
             'pic_elinst' => 'nullable|string|max:255',
+            'progress_elinst' => 'nullable|numeric|between:0,100',
             'pic_proses' => 'nullable|string|max:255',
-            'progress_mekanikal' => 'nullable|string|max:255',
-            'progress_sipil' => 'nullable|string|max:255',
-            'progress_elinst' => 'nullable|string|max:255',
-            'progress_proses' => 'nullable|string|max:255',
-            'detail_progress' => 'nullable|string',
+            'progress_proses' => 'nullable|numeric|between:0,100',
+            'requesting_unit' => 'required|string|max:255',
+            'status_verifikasi' => 'required|string|max:255',
+            'deadline_initiating' => 'required|date',
+            'deadline_executing' => 'required|date',
+            'status' => 'required|string|max:255',
+            'fase' => 'required|string|max:255',
+            'progress_description' => 'nullable|string|max:255',
             'note' => 'nullable|string',
+            'entry_date' => 'required|date',
         ]);
+
+        // Clean percentage input values
+        $numericFields = ['progress_mekanikal', 'progress_sipil', 'progress_elinst', 'progress_proses'];
+        foreach ($numericFields as $field) {
+            if (isset($validated[$field])) {
+                $validated[$field] = str_replace(',', '.', $validated[$field]);
+            }
+        }
 
         // Update the progress record
         $progress->update($validated);

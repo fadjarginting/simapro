@@ -144,7 +144,7 @@ onMounted(() => {
                         <div
                             class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-blue-500"
                         >
-                            <i class="ni ni-tv-2 text-sm leading-normal"></i>
+                            <i class="ni ni-settings-gear-65 text-sm leading-normal"></i>
                         </div>
                         <span class="ml-1">ERF Management</span>
                         <!-- Updated span text to 'ERF Management' -->
@@ -262,6 +262,41 @@ onMounted(() => {
                             ></i>
                         </div>
                         <span class="ml-1">Eat Schedule</span>
+                    </Link>
+                </li>
+
+                <!-- Rest of the sidebar content remains the same -->
+                <!-- plants & noted settings -->
+                <li v-if="hasPermission('plant_settings.view') || hasPermission('noted.view')"
+                    class="w-full mt-4 ">
+                    <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">
+                        Settings
+                    </h6>
+                </li>
+
+                <li v-if="hasPermission('plant_settings.view')"
+                    :class="['mt-0.5 w-full', isActiveRoute('plants') ? 'bg-blue-500/13 rounded-lg' : '']"
+                    class="hover:bg-gray-100 dark:hover:bg-gray-700" @click="scrollToMenuItem">
+                    <Link
+                        class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
+                        :href="route('plants.index')">
+                    <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-red-500">
+                        <i class="ni ni-single-copy-04 text-sm leading-normal"></i>
+                    </div>
+                    <span>Plant Settings</span>
+                    </Link>
+                </li>
+
+                <li v-if="hasPermission('noted_management.view')"
+                    :class="['mt-0.5 w-full', isActiveRoute('noteds') ? 'bg-blue-500/13 rounded-lg' : '']"
+                    class="hover:bg-gray-100 dark:hover:bg-gray-700" @click="scrollToMenuItem">
+                    <Link
+                        class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
+                        :href="route('noteds.index')">
+                    <div class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-teal-500">
+                        <i class="ni ni-settings text-sm leading-normal"></i>
+                    </div>
+                    <span>Noted Progress</span>
                     </Link>
                 </li>
 

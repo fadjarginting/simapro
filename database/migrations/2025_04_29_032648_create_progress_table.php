@@ -13,30 +13,34 @@ return new class extends Migration
     {
         Schema::create('progresses', function (Blueprint $table) {
             $table->id();
-
-            // Dropdown atau pilihan kategori request (CAPEX/OPEX)
+            $table->string('title');
+            $table->string('plant');
+            $table->string('work_priority')->nullable();
+            $table->string('job_type');
             $table->string('request_category');
-
-            // Status verifikasi ERF
+            $table->string('no_erf');
+            $table->date('erf_approved_date');
+            $table->date('erf_clarification_date');
+            $table->date('erf_validated_date');
+            $table->string('lead_engineering');
+            $table->string('pic_mekanikal')->nullable();
+            $table->decimal('progress_mekanikal', 5, 2)->nullable();
+            $table->string('pic_sipil')->nullable();
+            $table->decimal('progress_sipil', 5, 2)->nullable();
+            $table->string('pic_elinst')->nullable();
+            $table->decimal('progress_elinst', 5, 2)->nullable();
+            $table->string('pic_proses')->nullable();
+            $table->decimal('progress_proses', 5, 2)->nullable();
+            $table->string('requesting_unit');
             $table->string('status_verifikasi');
-
-            // PIC (Person In Charge) masing-masing bagian
-            $table->string('pic_mekanikal');
-            $table->string('pic_sipil');
-            $table->string('pic_elinst');
-            $table->string('pic_proses');
-
-            // Progress masing-masing bagian (dalam persen, bisa berkoma)
-            $table->decimal('progress_mekanikal', 5, 2)->default(0.00);
-            $table->decimal('progress_sipil', 5, 2)->default(0.00);
-            $table->decimal('progress_elinst', 5, 2)->default(0.00);
-            $table->decimal('progress_proses', 5, 2)->default(0.00);
-
-            // Detail progress dan catatan tambahan
-            $table->text('detail_progress')->nullable();
+            $table->date('deadline_initiating');
+            $table->date('deadline_executing');
+            $table->string('status');
+            $table->string('fase');
+            $table->string('progress_description')->nullable();
             $table->text('note')->nullable();
-
-            $table->timestamps(); // created_at & updated_at
+            $table->date('entry_date');
+            $table->timestamps();
         });
     }
 
