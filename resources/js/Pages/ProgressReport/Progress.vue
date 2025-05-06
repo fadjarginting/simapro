@@ -220,6 +220,18 @@ function formatDate(dateStr) {
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
+                            <button
+                                @click="
+                                    filterValues = {
+                                        requestCategory: '',
+                                        statusVerifikasi: '',
+                                        picMekanikal: '',
+                                    }
+                                "
+                                class="ml-2 bg-gray-200 px-4 py-2 rounded text-sm text-gray-700 hover:bg-gray-300"
+                            >
+                                Reset Filter
+                            </button>
                         </div>
 
                         <!-- tampilan -->
@@ -413,18 +425,6 @@ function formatDate(dateStr) {
                                     class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white disabled:opacity-50"
                                 >
                                     Next
-                                </button>
-                                <button
-                                    @click="
-                                        filterValues = {
-                                            requestCategory: '',
-                                            statusVerifikasi: '',
-                                            picMekanikal: '',
-                                        }
-                                    "
-                                    class="ml-2 bg-gray-200 px-4 py-2 rounded text-sm text-gray-700 hover:bg-gray-300"
-                                >
-                                    Reset Filter
                                 </button>
                             </div>
                         </div>

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Noted extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'slug', 'document'];
+    protected $fillable = ['name', 'slug', 'noted_code'];
     /**
      * Search scope for the model.
      *

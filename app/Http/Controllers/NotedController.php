@@ -109,13 +109,8 @@ class NotedController extends Controller
      * @param  \App\Models\Noted  $noted
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Noted $noted)
+    public function destroy(Request $request, Noted $noted)
     {
-        // Check if the noted has any related documents
-        if ($noted->documents()->exists()) {
-            return redirect()->route('noteds.index')
-                ->with('error', 'Cannot delete noted with related documents');
-        }
         $noted->delete();
 
         return redirect()->route('noteds.index')
