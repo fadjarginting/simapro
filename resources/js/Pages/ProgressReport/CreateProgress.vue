@@ -11,7 +11,7 @@ defineOptions({
     layout: AuthenticatedLayout,
 });
 
-// Setup form inertia
+// Setup form inertia - modified to use arrays for PICs and Lead Engineering
 const form = useForm({
     title: "",
     plant: "",
@@ -22,14 +22,14 @@ const form = useForm({
     erf_approved_date: "",
     erf_clarification_date: "",
     erf_validated_date: "",
-    lead_engineering: "",
-    pic_mekanikal: "",
+    lead_engineering: [], // Changed to array
+    pic_mekanikal: [], // Changed to array
     progress_mekanikal: "",
-    pic_sipil: "",
+    pic_sipil: [], // Changed to array
     progress_sipil: "",
-    pic_elinst: "",
+    pic_elinst: [], // Changed to array
     progress_elinst: "",
-    pic_proses: "",
+    pic_proses: [], // Changed to array
     progress_proses: "",
     requesting_unit: "",
     status_verifikasi: "",
@@ -41,6 +41,40 @@ const form = useForm({
     note: "",
     entry_date: "",
 });
+
+// Options for multi-select dropdowns
+const leadEngineeringOptions = [
+    { value: "AULIA EKADANA FAUTHRISNO", label: "AULIA EKADANA FAUTHRISNO" },
+    { value: "MARJUKI", label: "MARJUKI" },
+    { value: "MOCH CHOIRIL ANAM", label: "MOCH CHOIRIL ANAM" },
+    { value: "NOVRIADI M", label: "NOVRIADI M" },
+    { value: "YOKE GISKARD", label: "YOKE GISKARD" },
+];
+
+const picMekanikalOptions = [
+    { value: "NOV", label: "NOV" },
+    { value: "Type 2", label: "Type 2" },
+    { value: "Type 3", label: "Type 3" },
+    { value: "Type 4", label: "Type 4" },
+];
+
+const picSipilOptions = [
+    { value: "AEF", label: "AEF" },
+    { value: "Type 2", label: "Type 2" },
+    { value: "Type 3", label: "Type 3" },
+];
+
+const picElinstOptions = [
+    { value: "MCA", label: "MCA" },
+    { value: "Type 2", label: "Type 2" },
+    { value: "Type 3", label: "Type 3" },
+];
+
+const picProsesOptions = [
+    { value: "MRJ", label: "MRJ" },
+    { value: "Type 2", label: "Type 2" },
+    { value: "Type 3", label: "Type 3" },
+];
 
 // Date tracking for potential duration calculation
 const tglMulai = ref("");
@@ -95,6 +129,21 @@ const formatPercentage = (e, field) => {
     }
 
     form[field] = value;
+};
+
+// Toggle selection for multi-select dropdowns
+const toggleSelection = (option, fieldName) => {
+    const index = form[fieldName].indexOf(option.value);
+    if (index === -1) {
+        form[fieldName].push(option.value);
+    } else {
+        form[fieldName].splice(index, 1);
+    }
+};
+
+// Check if option is selected
+const isSelected = (value, fieldName) => {
+    return form[fieldName].includes(value);
 };
 
 // Calculate duration when dates change
@@ -418,70 +467,55 @@ function submit() {
                                 />
                             </div>
 
-                            <div class="mb-4 relative">
+                            <!-- Multi-select Lead Engineering -->
+                            <div class="mb-4">
                                 <InputLabel
                                     for="lead"
-                                    value="Lead Engineering"
+                                    value="Lead Engineering (Select multiple if needed)"
                                 />
-                                <div class="relative">
-                                    <select
-                                        id="lead"
-                                        v-model="form.lead_engineering"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option value="">
-                                            Select Lead Engineering
-                                        </option>
-                                        <option
-                                            value="AULIA EKADANA FAUTHRISNO"
+                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                    <div class="p-2 flex flex-wrap gap-2">
+                                        <div
+                                            v-for="option in leadEngineeringOptions"
+                                            :key="option.value"
+                                            @click="toggleSelection(option, 'lead_engineering')"
+                                            class="px-3 py-1 rounded-full cursor-pointer text-sm"
+                                            :class="isSelected(option.value, 'lead_engineering') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
                                         >
-                                            AULIA EKADANA FAUTHRISNO
-                                        </option>
-                                        <option value="MARJUKI">MARJUKI</option>
-                                        <option value="MOCH CHOIRIL ANAM">
-                                            MOCH CHOIRIL ANAM
-                                        </option>
-                                        <option value="NOVRIADI M">
-                                            NOVRIADI M
-                                        </option>
-                                        <option value="YOKE GISKARD">
-                                            YOKE GISKARD
-                                        </option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
+                                            {{ option.label }}
+                                        </div>
                                     </div>
                                 </div>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Selected: {{ form.lead_engineering.join(', ') || 'None' }}
+                                </p>
                                 <InputError
                                     :message="form.errors.lead_engineering"
                                 />
                             </div>
 
-                            <div class="mb-4 relative">
+                            <!-- Multi-select PIC Mekanikal -->
+                            <div class="mb-4">
                                 <InputLabel
                                     for="pic-mekanikal"
-                                    value="PIC Mekanikal"
+                                    value="PIC Mekanikal (Select multiple if needed)"
                                 />
-                                <div class="relative">
-                                    <select
-                                        id="pic-mekanikal"
-                                        v-model="form.pic_mekanikal"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option value="">PIC Mekanikal</option>
-                                        <option value="NOV">NOV</option>
-                                        <option value="Type 2">Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
+                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                    <div class="p-2 flex flex-wrap gap-2">
+                                        <div
+                                            v-for="option in picMekanikalOptions"
+                                            :key="option.value"
+                                            @click="toggleSelection(option, 'pic_mekanikal')"
+                                            class="px-3 py-1 rounded-full cursor-pointer text-sm"
+                                            :class="isSelected(option.value, 'pic_mekanikal') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                        >
+                                            {{ option.label }}
+                                        </div>
                                     </div>
                                 </div>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Selected: {{ form.pic_mekanikal.join(', ') || 'None' }}
+                                </p>
                                 <InputError
                                     :message="form.errors.pic_mekanikal"
                                 />
@@ -489,76 +523,85 @@ function submit() {
                         </div>
 
                         <div class="grid grid-cols-3 gap-4">
-                            <div class="mb-4 relative">
-                                <InputLabel for="pic-sipil" value="PIC Sipil" />
-                                <div class="relative">
-                                    <select
-                                        id="pic-sipil"
-                                        v-model="form.pic_sipil"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option value="">PIC Sipil</option>
-                                        <option value="AEF">AEF</option>
-                                        <option value="Type 2">Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
+                            <!-- Multi-select PIC Sipil -->
+                            <div class="mb-4">
+                                <InputLabel
+                                    for="pic-sipil"
+                                    value="PIC Sipil (Select multiple if needed)"
+                                />
+                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                    <div class="p-2 flex flex-wrap gap-2">
+                                        <div
+                                            v-for="option in picSipilOptions"
+                                            :key="option.value"
+                                            @click="toggleSelection(option, 'pic_sipil')"
+                                            class="px-3 py-1 rounded-full cursor-pointer text-sm"
+                                            :class="isSelected(option.value, 'pic_sipil') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                        >
+                                            {{ option.label }}
+                                        </div>
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.pic_sipil" />
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Selected: {{ form.pic_sipil.join(', ') || 'None' }}
+                                </p>
+                                <InputError
+                                    :message="form.errors.pic_sipil"
+                                />
                             </div>
 
-                            <div class="mb-4 relative">
+                            <!-- Multi-select PIC Elinst -->
+                            <div class="mb-4">
                                 <InputLabel
                                     for="pic-elinst"
-                                    value="PIC Elinst"
+                                    value="PIC Elinst (Select multiple if needed)"
                                 />
-                                <div class="relative">
-                                    <select
-                                        id="pic-elinst"
-                                        v-model="form.pic_elinst"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option value="">PIC Elinst</option>
-                                        <option value="MCA">MCA</option>
-                                        <option value="Type 2">Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
+                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                    <div class="p-2 flex flex-wrap gap-2">
+                                        <div
+                                            v-for="option in picElinstOptions"
+                                            :key="option.value"
+                                            @click="toggleSelection(option, 'pic_elinst')"
+                                            class="px-3 py-1 rounded-full cursor-pointer text-sm"
+                                            :class="isSelected(option.value, 'pic_elinst') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                        >
+                                            {{ option.label }}
+                                        </div>
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.pic_elinst" />
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Selected: {{ form.pic_elinst.join(', ') || 'None' }}
+                                </p>
+                                <InputError
+                                    :message="form.errors.pic_elinst"
+                                />
                             </div>
 
-                            <div class="mb-4 relative">
+                            <!-- Multi-select PIC Proses -->
+                            <div class="mb-4">
                                 <InputLabel
                                     for="pic-proses"
-                                    value="PIC Proses"
+                                    value="PIC Proses (Select multiple if needed)"
                                 />
-                                <div class="relative">
-                                    <select
-                                        id="pic-proses"
-                                        v-model="form.pic_proses"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
-                                    >
-                                        <option value="">PIC Proses</option>
-                                        <option value="MRJ">MRJ</option>
-                                        <option value="Type 2">Type 2</option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
-                                    <div
-                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
-                                    >
-                                        🔽
+                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                    <div class="p-2 flex flex-wrap gap-2">
+                                        <div
+                                            v-for="option in picProsesOptions"
+                                            :key="option.value"
+                                            @click="toggleSelection(option, 'pic_proses')"
+                                            class="px-3 py-1 rounded-full cursor-pointer text-sm"
+                                            :class="isSelected(option.value, 'pic_proses') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                        >
+                                            {{ option.label }}
+                                        </div>
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.pic_proses" />
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Selected: {{ form.pic_proses.join(', ') || 'None' }}
+                                </p>
+                                <InputError
+                                    :message="form.errors.pic_proses"
+                                />
                             </div>
                         </div>
 
