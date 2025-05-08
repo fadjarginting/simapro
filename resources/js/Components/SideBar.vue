@@ -175,7 +175,7 @@ onMounted(() => {
                                 class="ni ni-folder-17 text-sm leading-normal"
                             ></i>
                         </div>
-                        <span class="ml-1">Progress Report</span>
+                        <span class="ml-1">ERF Management</span>
                         <!-- Updated span text to 'Progress Report' -->
                     </Link>
                 </li>

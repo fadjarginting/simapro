@@ -11,10 +11,15 @@ defineOptions({
     layout: AuthenticatedLayout,
 });
 
+const props = defineProps({
+    plants: Array,
+    noteds: Array,
+});
+
 // Setup form inertia - modified to use arrays for PICs and Lead Engineering
 const form = useForm({
     title: "",
-    plant: "",
+    plant_id: null,
     work_priority: "",
     job_type: "",
     request_category: "",
@@ -31,13 +36,13 @@ const form = useForm({
     progress_elinst: "",
     pic_proses: [], // Changed to array
     progress_proses: "",
-    requesting_unit: "",
+    uk_peminta: "",
     status_verifikasi: "",
     deadline_initiating: "",
     deadline_executing: "",
     status: "",
     fase: "",
-    progress_description: "",
+    noted_id: null,
     note: "",
     entry_date: "",
 });
@@ -240,38 +245,21 @@ function submit() {
                             </div>
 
                             <div class="mb-4 relative">
-                                <InputLabel for="plant" value="Plant" />
+                                <InputLabel for="plant_id" value="Plant" />
                                 <div class="relative">
                                     <select
-                                        id="plant"
-                                        v-model="form.plant"
+                                        id="plant_id"
+                                        v-model="form.plant_id"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
                                         <option value="">Select Plant</option>
-                                        <option value="APLP">APLP</option>
-                                        <option value="BINS">BINS</option>
-                                        <option value="GENERAL">GENERAL</option>
-                                        <option value="GP DUMAI">
-                                            GP DUMAI
+                                        <option
+                                            v-for="plant in plants"
+                                            :key="plant.id"
+                                            :value="plant.id"
+                                        >
+                                            {{ plant.name }}
                                         </option>
-                                        <option value="INDARUNG II/III">
-                                            INDARUNG II/III
-                                        </option>
-                                        <option value="INDARUNG IV">
-                                            INDARUNG IV
-                                        </option>
-                                        <option value="INDARUNG V">
-                                            INDARUNG V
-                                        </option>
-                                        <option value="INDARUNG VI">
-                                            INDARUNG VI
-                                        </option>
-                                        <option value="PP BENGKULU">
-                                            PP BENGKULU
-                                        </option>
-                                        <option value="PPI">PPI</option>
-                                        <option value="PPTB">PPTB</option>
-                                        <option value="TAMBANG">TAMBANG</option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -280,7 +268,7 @@ function submit() {
                                         🔽
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.plant" />
+                                <InputError :message="form.errors.plant_id" />
                             </div>
                         </div>
 
@@ -473,21 +461,39 @@ function submit() {
                                     for="lead"
                                     value="Lead Engineering (Select multiple if needed)"
                                 />
-                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                <div
+                                    class="mt-1 w-full border border-gray-300 rounded-md"
+                                >
                                     <div class="p-2 flex flex-wrap gap-2">
                                         <div
                                             v-for="option in leadEngineeringOptions"
                                             :key="option.value"
-                                            @click="toggleSelection(option, 'lead_engineering')"
+                                            @click="
+                                                toggleSelection(
+                                                    option,
+                                                    'lead_engineering'
+                                                )
+                                            "
                                             class="px-3 py-1 rounded-full cursor-pointer text-sm"
-                                            :class="isSelected(option.value, 'lead_engineering') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                            :class="
+                                                isSelected(
+                                                    option.value,
+                                                    'lead_engineering'
+                                                )
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            "
                                         >
                                             {{ option.label }}
                                         </div>
                                     </div>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500">
-                                    Selected: {{ form.lead_engineering.join(', ') || 'None' }}
+                                    Selected:
+                                    {{
+                                        form.lead_engineering.join(", ") ||
+                                        "None"
+                                    }}
                                 </p>
                                 <InputError
                                     :message="form.errors.lead_engineering"
@@ -500,21 +506,38 @@ function submit() {
                                     for="pic-mekanikal"
                                     value="PIC Mekanikal (Select multiple if needed)"
                                 />
-                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                <div
+                                    class="mt-1 w-full border border-gray-300 rounded-md"
+                                >
                                     <div class="p-2 flex flex-wrap gap-2">
                                         <div
                                             v-for="option in picMekanikalOptions"
                                             :key="option.value"
-                                            @click="toggleSelection(option, 'pic_mekanikal')"
+                                            @click="
+                                                toggleSelection(
+                                                    option,
+                                                    'pic_mekanikal'
+                                                )
+                                            "
                                             class="px-3 py-1 rounded-full cursor-pointer text-sm"
-                                            :class="isSelected(option.value, 'pic_mekanikal') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                            :class="
+                                                isSelected(
+                                                    option.value,
+                                                    'pic_mekanikal'
+                                                )
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            "
                                         >
                                             {{ option.label }}
                                         </div>
                                     </div>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500">
-                                    Selected: {{ form.pic_mekanikal.join(', ') || 'None' }}
+                                    Selected:
+                                    {{
+                                        form.pic_mekanikal.join(", ") || "None"
+                                    }}
                                 </p>
                                 <InputError
                                     :message="form.errors.pic_mekanikal"
@@ -529,25 +552,38 @@ function submit() {
                                     for="pic-sipil"
                                     value="PIC Sipil (Select multiple if needed)"
                                 />
-                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                <div
+                                    class="mt-1 w-full border border-gray-300 rounded-md"
+                                >
                                     <div class="p-2 flex flex-wrap gap-2">
                                         <div
                                             v-for="option in picSipilOptions"
                                             :key="option.value"
-                                            @click="toggleSelection(option, 'pic_sipil')"
+                                            @click="
+                                                toggleSelection(
+                                                    option,
+                                                    'pic_sipil'
+                                                )
+                                            "
                                             class="px-3 py-1 rounded-full cursor-pointer text-sm"
-                                            :class="isSelected(option.value, 'pic_sipil') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                            :class="
+                                                isSelected(
+                                                    option.value,
+                                                    'pic_sipil'
+                                                )
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            "
                                         >
                                             {{ option.label }}
                                         </div>
                                     </div>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500">
-                                    Selected: {{ form.pic_sipil.join(', ') || 'None' }}
+                                    Selected:
+                                    {{ form.pic_sipil.join(", ") || "None" }}
                                 </p>
-                                <InputError
-                                    :message="form.errors.pic_sipil"
-                                />
+                                <InputError :message="form.errors.pic_sipil" />
                             </div>
 
                             <!-- Multi-select PIC Elinst -->
@@ -556,25 +592,38 @@ function submit() {
                                     for="pic-elinst"
                                     value="PIC Elinst (Select multiple if needed)"
                                 />
-                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                <div
+                                    class="mt-1 w-full border border-gray-300 rounded-md"
+                                >
                                     <div class="p-2 flex flex-wrap gap-2">
                                         <div
                                             v-for="option in picElinstOptions"
                                             :key="option.value"
-                                            @click="toggleSelection(option, 'pic_elinst')"
+                                            @click="
+                                                toggleSelection(
+                                                    option,
+                                                    'pic_elinst'
+                                                )
+                                            "
                                             class="px-3 py-1 rounded-full cursor-pointer text-sm"
-                                            :class="isSelected(option.value, 'pic_elinst') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                            :class="
+                                                isSelected(
+                                                    option.value,
+                                                    'pic_elinst'
+                                                )
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            "
                                         >
                                             {{ option.label }}
                                         </div>
                                     </div>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500">
-                                    Selected: {{ form.pic_elinst.join(', ') || 'None' }}
+                                    Selected:
+                                    {{ form.pic_elinst.join(", ") || "None" }}
                                 </p>
-                                <InputError
-                                    :message="form.errors.pic_elinst"
-                                />
+                                <InputError :message="form.errors.pic_elinst" />
                             </div>
 
                             <!-- Multi-select PIC Proses -->
@@ -583,44 +632,74 @@ function submit() {
                                     for="pic-proses"
                                     value="PIC Proses (Select multiple if needed)"
                                 />
-                                <div class="mt-1 w-full border border-gray-300 rounded-md">
+                                <div
+                                    class="mt-1 w-full border border-gray-300 rounded-md"
+                                >
                                     <div class="p-2 flex flex-wrap gap-2">
                                         <div
                                             v-for="option in picProsesOptions"
                                             :key="option.value"
-                                            @click="toggleSelection(option, 'pic_proses')"
+                                            @click="
+                                                toggleSelection(
+                                                    option,
+                                                    'pic_proses'
+                                                )
+                                            "
                                             class="px-3 py-1 rounded-full cursor-pointer text-sm"
-                                            :class="isSelected(option.value, 'pic_proses') ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                                            :class="
+                                                isSelected(
+                                                    option.value,
+                                                    'pic_proses'
+                                                )
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            "
                                         >
                                             {{ option.label }}
                                         </div>
                                     </div>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500">
-                                    Selected: {{ form.pic_proses.join(', ') || 'None' }}
+                                    Selected:
+                                    {{ form.pic_proses.join(", ") || "None" }}
                                 </p>
-                                <InputError
-                                    :message="form.errors.pic_proses"
-                                />
+                                <InputError :message="form.errors.pic_proses" />
                             </div>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4">
                             <div class="mb-4">
                                 <InputLabel
-                                    for="requesting-unit"
-                                    value="Requesting Unit"
+                                    for="uk-peminta"
+                                    value="UK Peminta"
                                 />
-                                <TextInput
-                                    id="requesting-unit"
-                                    v-model="form.requesting_unit"
-                                    placeholder="Enter Requesting Unit"
-                                    class="mt-1 block w-full"
-                                    required
-                                />
-                                <InputError
-                                    :message="form.errors.requesting_unit"
-                                />
+                                <div class="relative">
+                                    <select
+                                        id="uk-peminta"
+                                        v-model="form.uk_peminta"
+                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
+                                    >
+                                        <option value="">
+                                            Select UK Peminta
+                                        </option>
+                                        <option value="AREA GUDANG">
+                                            AREA GUDANG
+                                        </option>
+                                        <option value="AREA IV TAMBANG">
+                                            AREA IV TAMBANG
+                                        </option>
+                                        <option value="AREA KILN IND-V">
+                                            AREA KILN IND-V
+                                        </option>
+                                    </select>
+                                    <!-- Ikon panah bawah -->
+                                    <div
+                                        class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
+                                    >
+                                        🔽
+                                    </div>
+                                </div>
+                                <InputError :message="form.errors.uk_peminta" />
                             </div>
 
                             <div class="mb-4 relative">
@@ -919,72 +998,20 @@ function submit() {
                                 />
                                 <div class="relative">
                                     <select
-                                        id="progress-description"
-                                        v-model="form.progress_description"
+                                        id="noted_id"
+                                        v-model="form.noted_id"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
                                         <option value="">
                                             Select Keterangan Progress
                                         </option>
                                         <option
-                                            value="Approval dokumen di e-DEMS"
+                                            v-for="noted in noteds"
+                                            :key="noted.id"
+                                            :value="noted.id"
                                         >
-                                            Approval dokumen di e-DEMS
+                                            {{ noted.name }}
                                         </option>
-                                        <option
-                                            value="Approval dokumen di e-DEMS oleh Ka. Dept."
-                                        >
-                                            Approval dokumen di e-DEMS oleh Ka.
-                                            Dept.
-                                        </option>
-                                        <option
-                                            value="Approval dokumen di e-DEMS oleh Ka. Unit"
-                                        >
-                                            Approval dokumen di e-DEMS oleh Ka.
-                                            Unit
-                                        </option>
-                                        <option
-                                            value="Approval EAT di e-DEMS oleh Ka. Unit"
-                                        >
-                                            Approval EAT di e-DEMS oleh Ka. Unit
-                                        </option>
-                                        <option
-                                            value="Approval pengesahan ERF oleh User di e-DEMS"
-                                        >
-                                            Approval pengesahan ERF oleh User di
-                                            e-DEMS
-                                        </option>
-                                        <option value="Belum ada ERF">
-                                            Belum ada ERF
-                                        </option>
-                                        <option
-                                            value="Dokumen terkirim ke User melalui e-DEMS"
-                                        >
-                                            Dokumen terkirim ke User melalui
-                                            e-DEMS
-                                        </option>
-                                        <option
-                                            value="ERF belum disetujui oleh User di e-DEMS"
-                                        >
-                                            ERF belum disetujui oleh User di
-                                            e-DEMS
-                                        </option>
-                                        <option value="Hold">Hold</option>
-                                        <option value="Penyusunan dokumen DED">
-                                            Penyusunan dokumen DED
-                                        </option>
-                                        <option
-                                            value="Penyusunan dokumen Kajian"
-                                        >
-                                            Penyusunan dokumen Kajian
-                                        </option>
-                                        <option value="Proses EAT">
-                                            Proses EAT
-                                        </option>
-                                        <option value="Proses verifikasi ERF">
-                                            Proses verifikasi ERF
-                                        </option>
-                                        <option value="Reject">Reject</option>
                                     </select>
                                     <div
                                         class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
@@ -992,9 +1019,7 @@ function submit() {
                                         🔽
                                     </div>
                                 </div>
-                                <InputError
-                                    :message="form.errors.progress_description"
-                                />
+                                <InputError :message="form.errors.noted_id" />
                             </div>
 
                             <div class="mb-4">

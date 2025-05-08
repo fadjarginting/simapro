@@ -13,7 +13,7 @@ class Progress extends Model
 
     protected $fillable = [
         'title',
-        'plant',
+        'plant_id', // Ubah dari plant menjadi plant_id
         'work_priority',
         'job_type',
         'request_category',
@@ -30,7 +30,7 @@ class Progress extends Model
         'progress_elinst',
         'pic_proses',
         'progress_proses',
-        'requesting_unit',
+        'uk_peminta',
         'status_verifikasi',
         'deadline_initiating',
         'deadline_executing',
@@ -83,5 +83,9 @@ class Progress extends Model
         }
 
         return round(array_sum($validFields) / count($validFields), 2);
+    }
+    public function plant()
+    {
+        return $this->belongsTo(Plant::class);
     }
 }

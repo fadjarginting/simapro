@@ -11,6 +11,11 @@ class Plant extends Model
 
     protected $fillable = ['name', 'slug', 'plant_code'];
 
+    public function progresses()
+    {
+        return $this->hasMany(Progress::class);
+    }
+
     /**
      * Scope a query to search plants by name.
      *

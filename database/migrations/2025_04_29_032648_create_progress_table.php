@@ -31,7 +31,7 @@ return new class extends Migration
             $table->decimal('progress_elinst', 5, 2)->nullable();
             $table->string('pic_proses')->nullable();
             $table->decimal('progress_proses', 5, 2)->nullable();
-            $table->string('requesting_unit');
+            $table->string('uk_peminta');
             $table->string('status_verifikasi');
             $table->date('deadline_initiating');
             $table->date('deadline_executing');

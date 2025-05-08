@@ -252,7 +252,10 @@ function formatDate(dateStr) {
                                             <th class="px-4 py-3">
                                                 Lead Engineering
                                             </th>
-                                            <th>Deadline Executing Phase</th>
+                                            <th class="px-4 py-3">
+                                                Deadline Executing Phase
+                                            </th>
+                                            <th class="px-4 py-3">Status</th>
                                             <th class="px-4 py-3">Action</th>
                                         </tr>
                                     </thead>
@@ -345,7 +348,16 @@ function formatDate(dateStr) {
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3">
-                                                    <div class="flex space-x-2">
+                                                    <div class="flex-1">
+                                                        <div
+                                                            class="font-medium dark:text-white"
+                                                        >
+                                                            {{ progres.status }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex-1">
                                                         <Link
                                                             :href="
                                                                 route(

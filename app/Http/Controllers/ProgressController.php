@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Noted;
 use App\Models\Progress;
+use App\Models\Plant;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
@@ -15,8 +17,8 @@ class ProgressController extends Controller
     public function index()
     {
         // Get all progress records from the database
-        $progresses = Progress::latest()->get();
 
+        $progresses = Progress::with('plant')->latest()->get();
         // Pass them to the Vue component
         return Inertia::render('ProgressReport/Progress', [
             'progresses' => $progresses
@@ -28,8 +30,14 @@ class ProgressController extends Controller
      */
     public function create()
     {
+        $plants = Plant::select('id', 'name')->orderBy('name')->get();
+        $noteds = Noted::select('id', 'name')->orderBy('name')->get();
+
         // Render the form for creating a new progress record
-        return Inertia::render('ProgressReport/CreateProgress');
+        return Inertia::render('ProgressReport/CreateProgress', [
+            'plants' => $plants,
+            'noteds' => $noteds
+        ]);
     }
 
     /**
@@ -40,7 +48,7 @@ class ProgressController extends Controller
         // Validate the incoming request
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'plant' => 'required|string|max:255',
+            'plant_id' => 'required|exists:plants,id', // Ubah dari plant menjadi plant_id
             'work_priority' => 'nullable|string|max:255',
             'job_type' => 'required|string|max:255',
             'request_category' => 'required|string|max:255',
@@ -48,22 +56,23 @@ class ProgressController extends Controller
             'erf_approved_date' => 'required|date',
             'erf_clarification_date' => 'required|date',
             'erf_validated_date' => 'required|date',
-            'lead_engineering' => 'required|array',
-            'pic_mekanikal' => 'nullable|array',
+            'lead_engineering' => 'required|string|max:255',
+            'pic_mekanikal' => 'nullable|string|max:255',
             'progress_mekanikal' => 'nullable|numeric|between:0,100',
-            'pic_sipil' => 'nullable|array',
+            'pic_sipil' => 'nullable|string|max:255',
             'progress_sipil' => 'nullable|numeric|between:0,100',
-            'pic_elinst' => 'nullable|array',
+            'pic_elinst' => 'nullable|string|max:255',
             'progress_elinst' => 'nullable|numeric|between:0,100',
-            'pic_proses' => 'nullable|array',
-            'progress_proses' => 'nullable|numeric|between:0,100',
-            'requesting_unit' => 'required|string|max:255',
+            'pic_proses' => 'nullable|string|max:255',
+            'progress_proses' => 'nullable|between:0,100',
+            'uk_peminta' => 'required|string|max:255',
             'status_verifikasi' => 'required|string|max:255',
             'deadline_initiating' => 'required|date',
             'deadline_executing' => 'required|date',
             'status' => 'required|string|max:255',
             'fase' => 'required|string|max:255',
             'progress_description' => 'nullable|string|max:255',
+            'noted_id' => 'nullable|exists:noteds,id',
             'note' => 'nullable|string',
             'entry_date' => 'required|date',
         ]);
@@ -89,6 +98,7 @@ class ProgressController extends Controller
      */
     public function show(Progress $progress)
     {
+        $progress->load('plant');
         // Show the details of a specific progress record
         return Inertia::render('ProgressReport/ShowProgress', [
             'progress' => $progress
@@ -100,9 +110,12 @@ class ProgressController extends Controller
      */
     public function edit(Progress $progress)
     {
+        $plants = Plant::all();
+
         // Render the form for editing a specific progress record
         return Inertia::render('ProgressReport/EditProgress', [
-            'progress' => $progress
+            'progress' => $progress,
+            'plants' => $plants
         ]);
     }
 
@@ -114,7 +127,7 @@ class ProgressController extends Controller
         // Validate the incoming request
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'plant' => 'required|string|max:255',
+            'plant_id' => 'required|exists:plants,id', // Ubah dari plant menjadi plant_id
             'work_priority' => 'nullable|string|max:255',
             'job_type' => 'required|string|max:255',
             'request_category' => 'required|string|max:255',
@@ -122,16 +135,16 @@ class ProgressController extends Controller
             'erf_approved_date' => 'required|date',
             'erf_clarification_date' => 'required|date',
             'erf_validated_date' => 'required|date',
-            'lead_engineering' => 'required|array',
-            'pic_mekanikal' => 'nullable|array',
+            'lead_engineering' => 'required|string|max:255',
+            'pic_mekanikal' => 'nullable|string|max:255',
             'progress_mekanikal' => 'nullable|numeric|between:0,100',
-            'pic_sipil' => 'nullable|array',
+            'pic_sipil' => 'nullable|string|max:255',
             'progress_sipil' => 'nullable|numeric|between:0,100',
-            'pic_elinst' => 'nullable|array',
+            'pic_elinst' => 'nullable|string|max:255',
             'progress_elinst' => 'nullable|numeric|between:0,100',
-            'pic_proses' => 'nullable|array',
+            'pic_proses' => 'nullable|string|max:255',
             'progress_proses' => 'nullable|numeric|between:0,100',
-            'requesting_unit' => 'required|string|max:255',
+            'uk_peminta' => 'required|string|max:255',
             'status_verifikasi' => 'required|string|max:255',
             'deadline_initiating' => 'required|date',
             'deadline_executing' => 'required|date',

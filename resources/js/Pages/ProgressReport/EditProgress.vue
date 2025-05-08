@@ -38,7 +38,7 @@ const form = useForm({
     progress_elinst: props.progress.progress_elinst || "",
     pic_proses: props.progress.pic_proses || "",
     progress_proses: props.progress.progress_proses || "",
-    requesting_unit: props.progress.requesting_unit || "",
+    uk_peminta: props.progress.uk_peminta || "",
     status_verifikasi: props.progress.status_verifikasi || "",
     deadline_initiating: toInputDateFormat(props.progress.deadline_initiating),
     deadline_executing: toInputDateFormat(props.progress.deadline_executing),
@@ -593,19 +593,17 @@ function submit() {
                         <div class="grid grid-cols-3 gap-4">
                             <div class="mb-4">
                                 <InputLabel
-                                    for="requesting-unit"
-                                    value="Requesting Unit"
+                                    for="uk-peminta"
+                                    value="UK Peminta"
                                 />
                                 <TextInput
-                                    id="requesting-unit"
-                                    v-model="form.requesting_unit"
-                                    placeholder="Enter Requesting Unit"
+                                    id="uk-peminta"
+                                    v-model="form.uk_peminta"
+                                    placeholder="Select UK Peminta"
                                     class="mt-1 block w-full"
                                     required
                                 />
-                                <InputError
-                                    :message="form.errors.requesting_unit"
-                                />
+                                <InputError :message="form.errors.uk_peminta" />
                             </div>
 
                             <div class="mb-4 relative">
