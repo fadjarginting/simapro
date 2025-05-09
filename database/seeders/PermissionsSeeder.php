@@ -59,17 +59,30 @@ class PermissionsSeeder extends Seeder
             'noted_management.edit',
             'noted_management.delete',
 
+            // Work Priority Settings
+            'work_priority.view',
+            'work_priority.create',
+            'work_priority.edit',
+            'work_priority.delete',
+
+            // Request Category Settings
+            'category.view',
+            'category.create',
+            'category.edit',
+            'category.delete',
+
             // User Management
             'user_management.view',
             'user_management.create',
             'user_management.edit',
             'user_management.delete',
+            'user_management.reset_password',
 
             // Roles Management
-            'roles_management.view',
-            'roles_management.create',
-            'roles_management.edit',
-            'roles_management.delete',
+            'role_management.view',
+            'role_management.create',
+            'role_management.edit',
+            'role_management.delete',
 
             // Work Audit Log
             'work_audit.view',
@@ -80,38 +93,16 @@ class PermissionsSeeder extends Seeder
 
         // Insert permissions
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+            Permission::create(['name' => $permission]);
         }
 
         // Assign permission to roles
-        // Cari role yang sudah ada, bukan buat baru!
-        $admin = Role::where('name', 'admin')->first();
-        if (!$admin) {
-            $admin = Role::create(['name' => 'admin']);
-        }
-        $admin->givePermissionTo($permissions);
+        $role = Role::create(['name' => 'admin']);
+        $role->givePermissionTo($permissions);
 
-        $user = Role::where('name', 'user')->first();
-        $user?->givePermissionTo([
-            'erf_management.view',
-            'progress_report.view',
-            'morning_report.view',
-            'kpi_management.view',
-        ]);
+        $role = Role::create(['name' => 'user']);
+        $role->givePermissionTo([
 
-        $engineer = Role::where('name', 'engineer')->first();
-        $engineer?->givePermissionTo([
-            'erf_management.view',
-            'progress_report.view',
-            'morning_report.view',
-            'kpi_management.view',
-        ]);
-
-        $manager = Role::where('name', 'manager')->first();
-        if (!$manager) {
-            $manager = Role::create(['name' => 'manager']);
-        }
-        $manager->givePermissionTo([
             'erf_management.view',
             'progress_report.view',
             'morning_report.view',

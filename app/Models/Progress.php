@@ -14,9 +14,9 @@ class Progress extends Model
     protected $fillable = [
         'title',
         'plant_id', // Ubah dari plant menjadi plant_id
-        'work_priority',
+        'priority_id',
         'job_type',
-        'request_category',
+        'category_id',
         'no_erf',
         'erf_approved_date',
         'erf_clarification_date',
@@ -36,7 +36,7 @@ class Progress extends Model
         'deadline_executing',
         'status',
         'fase',
-        'progress_description',
+        'noted_id',
         'note',
         'entry_date',
     ];

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Contracts\Role;
@@ -13,7 +14,9 @@ use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EatScheduleController;
 use App\Http\Controllers\NotedController;
+use App\Http\Controllers\PriorityController;
 use App\Http\Controllers\UserManagementController;
+use Illuminate\Support\Facades\Auth;
 
 // Route::get('/', function () {
 //     return Inertia::render('Auth/Login', [
@@ -25,35 +28,39 @@ use App\Http\Controllers\UserManagementController;
 //     ]);
 // });
 
-//Redirect to Login Page
+// Redirect to login page
 Route::get('/', function () {
-    return redirect()->route('login');
+    return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
+
+// Dashboard Routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('permission:dashboard.view')
+        ->name('dashboard');
 });
 
-// route user management
-Route::middleware(['auth'])->group(function () {
-    Route::get('/users', [UserManagementController::class, 'index'])
+// User Management Routes
+Route::middleware(['auth'])->prefix('users')->name('users.')->group(function () {
+    Route::get('/', [UserManagementController::class, 'index'])
         ->middleware('permission:user_management.view')
-        ->name('users.index');
-    Route::get('/users/create', [UserManagementController::class, 'create'])
+        ->name('index');
+    Route::get('/create', [UserManagementController::class, 'create'])
         ->middleware('permission:user_management.create')
-        ->name('users.create');
-    Route::post('/users', [UserManagementController::class, 'store'])
+        ->name('create');
+    Route::post('/', [UserManagementController::class, 'store'])
         ->middleware('permission:user_management.create')
-        ->name('users.store');
-    Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])
+        ->name('store');
+    Route::get('/{user}/edit', [UserManagementController::class, 'edit'])
         ->middleware('permission:user_management.edit')
-        ->name('users.edit');
-    Route::put('/users/{user}', [UserManagementController::class, 'update'])
+        ->name('edit');
+    Route::put('/{user}', [UserManagementController::class, 'update'])
         ->middleware('permission:user_management.edit')
-        ->name('users.update');
-    Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])
+        ->name('update');
+    Route::delete('/{user}', [UserManagementController::class, 'destroy'])
         ->middleware('permission:user_management.delete')
-        ->name('users.destroy');
+        ->name('destroy');
 });
 
 // Route ERF Management
@@ -163,6 +170,30 @@ Route::middleware(['auth', 'verified'])->prefix('noteds')->name('noteds.')->grou
         ->name('destroy');
 });
 
+// Work Priority Routes
+Route::middleware(['auth', 'verified'])->prefix('priorities')->name('priorities.')->group(function () {
+    Route::get('/', [PriorityController::class, 'index'])
+        ->name('index');
+    Route::post('/', [PriorityController::class, 'store'])
+        ->name('store');
+    Route::put('/{priority}', [PriorityController::class, 'update'])
+        ->name('update');
+    Route::delete('/{priority}', [PriorityController::class, 'destroy'])
+        ->name('destroy');
+});
+
+// Work Category Routes
+Route::middleware(['auth', 'verified'])->prefix('categories')->name('categories.')->group(function () {
+    Route::get('/', [CategoryController::class, 'index'])
+        ->name('index');
+    Route::post('/', [CategoryController::class, 'store'])
+        ->name('store');
+    Route::put('/{category}', [CategoryController::class, 'update'])
+        ->name('update');
+    Route::delete('/{category}', [CategoryController::class, 'destroy'])
+        ->name('destroy');
+});
+
 // Profile Route
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -170,26 +201,26 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Route for role management
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/roles', [RolesController::class, 'index'])
-        ->middleware('permission:roles_management.view')
-        ->name('roles.index');
-    Route::get('/roles/create', [RolesController::class, 'create'])
-        ->middleware('permission:roles_management.create')
-        ->name('roles.create');
-    Route::post('/roles', [RolesController::class, 'store'])
-        ->middleware('permission:roles_management.create')
-        ->name('roles.store');
-    Route::get('/roles/{role}/edit', [RolesController::class, 'edit'])
-        ->middleware('permission:roles_management.edit')
-        ->name('roles.edit');
-    Route::patch('/roles/{role}', [RolesController::class, 'update'])
-        ->middleware('permission:roles_management.edit')
-        ->name('roles.update');
-    Route::delete('/roles/{role}', [RolesController::class, 'destroy'])
-        ->middleware('permission:roles_management.delete')
-        ->name('roles.destroy');
+// Roles Routes
+Route::middleware(['auth', 'verified'])->prefix('roles')->name('roles.')->group(function () {
+    Route::get('/', [RolesController::class, 'index'])
+        ->middleware('permission:role_management.view')
+        ->name('index');
+    Route::get('/create', [RolesController::class, 'create'])
+        ->middleware('permission:role_management.create')
+        ->name('create');
+    Route::post('/', [RolesController::class, 'store'])
+        ->middleware('permission:role_management.create')
+        ->name('store');
+    Route::get('/{role}/edit', [RolesController::class, 'edit'])
+        ->middleware('permission:role_management.edit')
+        ->name('edit');
+    Route::patch('/{role}', [RolesController::class, 'update'])
+        ->middleware('permission:role_management.edit')
+        ->name('update');
+    Route::delete('/{role}', [RolesController::class, 'destroy'])
+        ->middleware('permission:role_management.delete')
+        ->name('destroy');
 });
 
 // Route for Work Audit Trail

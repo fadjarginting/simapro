@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Noted;
 use App\Models\Progress;
 use App\Models\Plant;
+use App\Models\Priority;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
@@ -32,11 +34,15 @@ class ProgressController extends Controller
     {
         $plants = Plant::select('id', 'name')->orderBy('name')->get();
         $noteds = Noted::select('id', 'name')->orderBy('name')->get();
+        $priorities = Priority::select('id', 'name')->orderBy('name')->get();
+        $categories = Category::select('id', 'name')->orderBy('name')->get();
 
         // Render the form for creating a new progress record
         return Inertia::render('ProgressReport/CreateProgress', [
             'plants' => $plants,
-            'noteds' => $noteds
+            'noteds' => $noteds,
+            'priorities' => $priorities,
+            'categories' => $categories
         ]);
     }
 
@@ -49,9 +55,9 @@ class ProgressController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'plant_id' => 'required|exists:plants,id', // Ubah dari plant menjadi plant_id
-            'work_priority' => 'nullable|string|max:255',
+            'priority_id' => 'nullable|exists:priorities,id',
             'job_type' => 'required|string|max:255',
-            'request_category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'no_erf' => 'required|string|max:255',
             'erf_approved_date' => 'required|date',
             'erf_clarification_date' => 'required|date',
@@ -71,7 +77,6 @@ class ProgressController extends Controller
             'deadline_executing' => 'required|date',
             'status' => 'required|string|max:255',
             'fase' => 'required|string|max:255',
-            'progress_description' => 'nullable|string|max:255',
             'noted_id' => 'nullable|exists:noteds,id',
             'note' => 'nullable|string',
             'entry_date' => 'required|date',
@@ -128,9 +133,9 @@ class ProgressController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'plant_id' => 'required|exists:plants,id', // Ubah dari plant menjadi plant_id
-            'work_priority' => 'nullable|string|max:255',
+            'priority_id' => 'nullable|exists:priorities,id',
             'job_type' => 'required|string|max:255',
-            'request_category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'no_erf' => 'required|string|max:255',
             'erf_approved_date' => 'required|date',
             'erf_clarification_date' => 'required|date',

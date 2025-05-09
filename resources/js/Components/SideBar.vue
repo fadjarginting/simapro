@@ -238,33 +238,6 @@ onMounted(() => {
                     </Link>
                 </li>
 
-                <!-- EatSchedule -->
-                <li
-                    v-if="hasPermission('eat_schedule.view')"
-                    :class="[
-                        'mt-0.5 w-full',
-                        isActiveRoute('eat-schedules')
-                            ? 'bg-blue-500/13 rounded-lg'
-                            : '',
-                    ]"
-                    class="hover:bg-gray-100 dark:hover:bg-gray-700"
-                    @click="scrollToMenuItem"
-                >
-                    <Link
-                        class="flex items-center text-sm font-semibold dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
-                        :href="route('eat-schedules.index')"
-                    >
-                        <div
-                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-green-500"
-                        >
-                            <i
-                                class="ni ni-calendar-grid-58 text-sm leading-normal"
-                            ></i>
-                        </div>
-                        <span class="ml-1">Eat Schedule</span>
-                    </Link>
-                </li>
-
                 <!-- Rest of the sidebar content remains the same -->
                 <!-- plants & noted settings -->
                 <li
@@ -333,11 +306,63 @@ onMounted(() => {
                     </Link>
                 </li>
 
+                <li
+                    v-if="hasPermission('work_priority.view')"
+                    :class="[
+                        'mt-0.5 w-full',
+                        isActiveRoute('priorities')
+                            ? 'bg-blue-500/13 rounded-lg'
+                            : '',
+                    ]"
+                    class="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    @click="scrollToMenuItem"
+                >
+                    <Link
+                        class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
+                        :href="route('priorities.index')"
+                    >
+                        <div
+                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-teal-500"
+                        >
+                            <i
+                                class="ni ni-settings text-sm leading-normal"
+                            ></i>
+                        </div>
+                        <span>Work Priority</span>
+                    </Link>
+                </li>
+
+                <li
+                    v-if="hasPermission('category.view')"
+                    :class="[
+                        'mt-0.5 w-full',
+                        isActiveRoute('categories')
+                            ? 'bg-blue-500/13 rounded-lg'
+                            : '',
+                    ]"
+                    class="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    @click="scrollToMenuItem"
+                >
+                    <Link
+                        class="flex items-center text-sm dark:text-white dark:opacity-80 transition-colors px-6 py-2.5 whitespace-nowrap"
+                        :href="route('categories.index')"
+                    >
+                        <div
+                            class="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-teal-500"
+                        >
+                            <i
+                                class="ni ni-settings text-sm leading-normal"
+                            ></i>
+                        </div>
+                        <span>Request Category</span>
+                    </Link>
+                </li>
+
                 <!-- page of users -->
                 <li
                     v-if="
                         hasPermission('user_management.view') ||
-                        hasPermission('roles_management.view')
+                        hasPermission('role_management.view')
                     "
                     class="w-full mt-4"
                 >
@@ -377,7 +402,7 @@ onMounted(() => {
 
                 <!-- Role  -->
                 <li
-                    v-if="hasPermission('roles_management.view')"
+                    v-if="hasPermission('role_management.view')"
                     :class="[
                         'mt-0.5 w-full',
                         isActiveRoute('roles')

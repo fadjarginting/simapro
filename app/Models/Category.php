@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Plant extends Model
+class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'plant_code'];
-
+    protected $fillable = ['name', 'slug'];
 
     /**
      * Scope a query to search plants by name.

@@ -10,140 +10,119 @@ defineOptions({
     layout: AuthenticatedLayout,
 });
 
-// Ambil data dari controller
+// Get data from controller
 const { props } = usePage();
 
-
-// Form data
+// Form data - remove non-form fields (flash and errors)
 const form = useForm({
     name: props.role.name,
     permissions: props.role.permissions,
-    flash: props.flash,
-    console: props.errors
-    
 });
 
-// permission list grouped by menu
+// Permission list grouped by menu
 const groupedPermissions = computed(() => props.groupedPermissions || {});
+
 // Helper function to extract group
 const extractGroup = (permission) => {
-    return permission.replace(/_/g, ' ');
+    return permission.replace(/_/g, " ");
 };
 
 // Helper function to extract action from permission string
 const extractAction = (permission) => {
-    const parts = permission.split('.');
+    const parts = permission.split(".");
     const action = parts.length > 1 ? parts[1] : permission;
-    return action.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+    return action
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-
-
-// handle form submission with sweetalert2
-import Swal from 'sweetalert2';
+// Handle form submission with sweetalert2
+import Swal from "sweetalert2";
 const submit = () => {
     Swal.fire({
-        title: 'Edit Role',
+        title: "Edit Role",
         text: "Are you sure you want to update this role?",
-        icon: 'question',
+        icon: "question",
         showCancelButton: true,
-        confirmButtonText: 'Update',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: "Update",
+        cancelButtonText: "Cancel",
         customClass: {
-            confirmButton: 'bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 mr-2',
-            cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2'
+            confirmButton:
+                "bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 mr-2",
+            cancelButton:
+                "bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2",
         },
-        buttonsStyling: false
+        buttonsStyling: false,
     }).then((result) => {
         if (result.isConfirmed) {
-            form.patch(route('roles.update', props.role.id), {
+            form.patch(route("roles.update", props.role.id), {
                 onSuccess: () => {
                     const Toast = Swal.mixin({
                         toast: true,
-                        position: 'top-end',
+                        position: "top-end",
                         showConfirmButton: false,
                         timer: 3000,
                         timerProgressBar: true,
                         didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer);
-                            toast.addEventListener('mouseleave', Swal.resumeTimer);
-                        }
+                            toast.addEventListener(
+                                "mouseenter",
+                                Swal.stopTimer
+                            );
+                            toast.addEventListener(
+                                "mouseleave",
+                                Swal.resumeTimer
+                            );
+                        },
                     });
 
                     Toast.fire({
-                        icon: 'success',
-                        title: 'Role has been updated successfully'
+                        icon: "success",
+                        title: "Role has been updated successfully",
                     });
                 },
-                onError: () => {
-                    if (props.flash.error) {
-                        Swal.fire({
-                            title: 'Error',
-                            text: props.flash.error,
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'
-                            },
-                            buttonsStyling: false
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Failed to update the role. Please try again.',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'
-                            },
-                            buttonsStyling: false
-                        });
-                    }
-                }
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Failed to update the role. Please check the form for errors.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                        customClass: {
+                            confirmButton:
+                                "bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600",
+                        },
+                        buttonsStyling: false,
+                    });
+                },
             });
         }
     });
 };
 
-
-
-const handleCheckboxChange = (event, permissionName) => {
-    if (event.target.checked) {
-        // Tambahkan permission jika belum ada
-        if (!form.permissions.includes(permissionName)) {
-            form.permissions.push(permissionName);
-        }
-    } else {
-        // Hapus permission dari array
-        form.permissions = form.permissions.filter(p => p !== permissionName);
-    }
-};
-
-// cancel button with sweetalert2
+// Cancel button with sweetalert2
 const cancel = () => {
     Swal.fire({
-        title: 'Cancel',
+        title: "Cancel",
         text: "Are you sure you want to cancel?",
-        icon: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: 'Yes, cancel it!',
-        cancelButtonText: 'No, keep editing',
+        confirmButtonText: "Yes, cancel it!",
+        cancelButtonText: "No, keep editing",
         customClass: {
-            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mr-2',
-            cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2'
+            confirmButton:
+                "bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mr-2",
+            cancelButton:
+                "bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2",
         },
-        buttonsStyling: false
+        buttonsStyling: false,
     }).then((result) => {
         if (result.isConfirmed) {
             history.back();
         }
     });
 };
-
 </script>
 
 <template>
-
     <Head>
         <title>Edit Role</title>
     </Head>
@@ -161,13 +140,26 @@ const cancel = () => {
                 </div>
 
                 <!-- Form edit roles -->
-                <div class="max-w-full mt-0 pt-0 p-6 bg-white rounded-lg shadow-md">
+                <div
+                    class="max-w-full mt-0 pt-0 p-6 bg-white rounded-lg shadow-md"
+                >
                     <form @submit.prevent="submit" class="space-y-6">
                         <!-- Input role name -->
-                        <div class=" mb-4">
+                        <div class="mb-4">
                             <InputLabel for="role-name" value="Role Name" />
-                            <TextInput id="role-name" v-model="form.name" type="text" class="mt-1 block w-full"
-                                autofocus />
+                            <TextInput
+                                id="role-name"
+                                v-model="form.name"
+                                type="text"
+                                class="mt-1 block w-full"
+                                autofocus
+                            />
+                            <div
+                                v-if="form.errors.name"
+                                class="text-red-500 text-sm mt-1"
+                            >
+                                {{ form.errors.name }}
+                            </div>
                         </div>
 
                         <h6 class="text-lg font-semibold">
@@ -175,34 +167,59 @@ const cancel = () => {
                         </h6>
 
                         <!-- Input role permission -->
-                        <div v-for="(perms, groupName) in groupedPermissions" :key="groupName"
-                            class="mb-4 border-b pb-4">
-
-                            <!-- Nama group (menu) -->
+                        <div
+                            v-for="(perms, groupName) in groupedPermissions"
+                            :key="groupName"
+                            class="mb-4 border-b pb-4"
+                        >
+                            <!-- Group name (menu) -->
                             <h6 class="text-sm font-semibold mb-2 capitalize">
                                 {{ extractGroup(groupName) }}
                             </h6>
-                            <!-- Daftar permission di group ini -->
-                            <div class="pl-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                <div v-for="permission in perms" :key="permission.id" class="flex items-center">
-                                    <!-- Checkbox komponen dengan binding update array -->
-                                    <Checkbox :value="permission.name" v-model="form.permissions" />
-                                    <!-- Teks permission (hanya bagian action) -->
-                                    <span class="ml-2 text-sm text-gray-600 whitespace-normal break-words">
+                            <!-- Permission list in this group -->
+                            <div
+                                class="pl-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"
+                            >
+                                <div
+                                    v-for="permission in perms"
+                                    :key="permission.id"
+                                    class="flex items-center"
+                                >
+                                    <!-- Checkbox component with array binding -->
+                                    <Checkbox
+                                        :id="permission.name"
+                                        :value="permission.name"
+                                        v-model:checked="form.permissions"
+                                        :checked="
+                                            form.permissions.includes(
+                                                permission.name
+                                            )
+                                        "
+                                    />
+                                    <!-- Permission text (action part only) -->
+                                    <label
+                                        :for="permission.name"
+                                        class="ml-2 text-sm text-gray-600 whitespace-normal break-words"
+                                    >
                                         {{ extractAction(permission.name) }}
-                                    </span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Tombol action -->
+                        <!-- Action buttons -->
                         <div class="flex mt-6 space-x-4 justify-end">
-                            <button type="submit"
-                                class="bg-transparent px-4 rounded-lg text-green-500 whitespace-nowrap text-center transition duration-300 hover:bg-green-500 hover:text-white py-1">
+                            <button
+                                type="submit"
+                                class="bg-transparent px-4 rounded-lg text-green-500 whitespace-nowrap text-center transition duration-300 hover:bg-green-500 hover:text-white py-1"
+                            >
                                 <i class="fas fa-save"></i> Save
                             </button>
-                            <button type="button" @click="cancel"
-                                class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center transition duration-300 hover:bg-red-500 hover:text-white py-1">
+                            <button
+                                type="button"
+                                @click="cancel"
+                                class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center transition duration-300 hover:bg-red-500 hover:text-white py-1"
+                            >
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>

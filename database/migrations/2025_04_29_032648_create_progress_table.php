@@ -37,7 +37,7 @@ return new class extends Migration
             $table->date('deadline_executing');
             $table->string('status');
             $table->string('fase');
-            $table->string('progress_description')->nullable();
+            $table->string('noted')->nullable();
             $table->text('note')->nullable();
             $table->date('entry_date');
             $table->timestamps();

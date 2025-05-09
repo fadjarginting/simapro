@@ -15,22 +15,14 @@ const progress = ref(props.progresses || []);
 
 // Filter values
 const filterValues = ref({
-    requestCategory: "",
     statusVerifikasi: "",
-    picMekanikal: "",
+    title: "",
 });
 
 // Computed property for filtered data
 const filteredDocuments = computed(() => {
     return progress.value.filter((progres) => {
         return (
-            (filterValues.value.requestCategory === "" ||
-                (progres.request_category &&
-                    progres.request_category
-                        .toLowerCase()
-                        .includes(
-                            filterValues.value.requestCategory.toLowerCase()
-                        ))) &&
             (filterValues.value.statusVerifikasi === "" ||
                 (progres.status_verifikasi &&
                     progres.status_verifikasi
@@ -38,13 +30,11 @@ const filteredDocuments = computed(() => {
                         .includes(
                             filterValues.value.statusVerifikasi.toLowerCase()
                         ))) &&
-            (filterValues.value.picMekanikal === "" ||
-                (progres.pic_mekanikal &&
-                    progres.pic_mekanikal
+            (filterValues.value.title === "" ||
+                (progres.title &&
+                    progres.title
                         .toLowerCase()
-                        .includes(
-                            filterValues.value.picMekanikal.toLowerCase()
-                        )))
+                        .includes(filterValues.value.title.toLowerCase())))
         );
     });
 });
@@ -206,26 +196,17 @@ function formatDate(dateStr) {
                             </div>
                             <div class="w-full md:w-1/2 lg:w-1/4 px-2 mb-2">
                                 <input
-                                    v-model="filterValues.requestCategory"
+                                    v-model="filterValues.title"
                                     type="text"
-                                    placeholder="Request Category"
-                                    class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div class="w-full md:w-1/2 lg:w-1/4 px-2 mb-2">
-                                <input
-                                    v-model="filterValues.picMekanikal"
-                                    type="text"
-                                    placeholder="PIC Mekanikal"
+                                    placeholder="Job Title"
                                     class="w-full px-4 py-3 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
                             <button
                                 @click="
                                     filterValues = {
-                                        requestCategory: '',
                                         statusVerifikasi: '',
-                                        picMekanikal: '',
+                                        title: '',
                                     }
                                 "
                                 class="ml-2 bg-gray-200 px-4 py-2 rounded text-sm text-gray-700 hover:bg-gray-300"
@@ -255,7 +236,7 @@ function formatDate(dateStr) {
                                             <th class="px-4 py-3">
                                                 Deadline Executing Phase
                                             </th>
-                                            <th class="px-4 py-3">Status</th>
+                                            <th class="px-4 py-3">Fase</th>
                                             <th class="px-4 py-3">Action</th>
                                         </tr>
                                     </thead>
@@ -352,7 +333,7 @@ function formatDate(dateStr) {
                                                         <div
                                                             class="font-medium dark:text-white"
                                                         >
-                                                            {{ progres.status }}
+                                                            {{ progres.fase }}
                                                         </div>
                                                     </div>
                                                 </td>

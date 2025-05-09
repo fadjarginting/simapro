@@ -16,10 +16,11 @@ class DatabaseSeeder extends Seeder
     {
         // call RolesTableSeeder
         $this->call(PermissionsSeeder::class);
-        $this->call(RolesTableSeeder::class);
+        $this->call(UsersSeeder::class);
         $this->call(PlantSeeder::class);
+        $this->call(PrioritySeeder::class);
 
-        
+
         $user = User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
@@ -27,19 +28,14 @@ class DatabaseSeeder extends Seeder
 
         // Assign role as admin
         $user->assignRole('admin');
-        
-
-
 
         // spatie add role
         // // Create 50 users with the random role
         User::factory(40)->create()->each(function ($user) {
             // Assign a random role to each user
-            $roles = ['admin', 'user', 'engineer', 'manager'];
+            $roles = ['admin', 'user'];
             $randomRole = $roles[array_rand($roles)];
             $user->assignRole($randomRole);
         });
-
-        
     }
 }

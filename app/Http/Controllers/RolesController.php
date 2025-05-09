@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateRoleRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -21,22 +22,22 @@ class RolesController extends Controller
         $perPage = min((int) $request->input('perPage', 10), $maxPerPage);
         $sortField = $request->input('sortField', 'name');
         $sortDirection = $request->input('sortDirection', 'asc');
-        
+
         // Start with a base query
         $query = Role::query();
-        
+
         // Add search condition if provided - with proper parameter binding
         if (!empty($search)) {
             $query->where('name', 'LIKE', '%' . $search . '%');
         }
-        
+
         // Add sorting
         $query->orderBy($sortField, $sortDirection);
-        
+
         // Get paginated results with relationships
         $roles = $query->with(['permissions', 'users'])
-                       ->paginate($perPage)->appends($request->query());  // Append query parameters manually
-        
+            ->paginate($perPage)->appends($request->query());  // Append query parameters manually
+
         // breadcrumb
         $breadcrumbs = [
             ['name' => 'Roles', 'url' => route('roles.index')],
@@ -55,7 +56,7 @@ class RolesController extends Controller
     }
 
     public function create()
-    {   
+    {
         // breadcrumb
         $breadcrumbs = [
             ['name' => 'Roles', 'url' => route('roles.index')],
@@ -64,7 +65,7 @@ class RolesController extends Controller
         // get all permissions
         $permissions = Permission::all();
 
-        $groupedPermissions = $permissions->groupBy(function($perm) {
+        $groupedPermissions = $permissions->groupBy(function ($perm) {
             return explode('.', $perm->name)[0]; // Group by the part before the dot
         });
 
@@ -80,7 +81,7 @@ class RolesController extends Controller
         try {
             $role = Role::create($request->validated());
             $role->syncPermissions($request->permissions);
-            
+
             return redirect()->route('roles.index')->with('status', 'Role created successfully!');
         } catch (\Exception $e) {
             return redirect()->route('roles.index')->with('error', 'Failed to create role: ' . $e->getMessage());
@@ -105,39 +106,50 @@ class RolesController extends Controller
             'role' => [
                 'id'          => $role->id,
                 'name'        => $role->name,
-                'permissions' => $role->permissions->pluck('name'), 
+                'permissions' => $role->permissions->pluck('name'),
             ],
             'groupedPermissions' => $groupedPermissions,
             'breadcrumbs'        => $breadcrumbs,
         ]);
     }
 
-    public function update(CreateRoleRequest $request, Role $role)
+    public function update(Request $request, Role $role)
     {
         try {
-            $role->update($request->validated());
-            $role->syncPermissions($request->permissions);
-            
+            // Validate the request
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
+                'permissions' => 'array',
+            ]);
+
+            // Update the role name
+            $role->update(['name' => $validated['name']]);
+
+            // Ensure permissions is an array, even if empty
+            $permissions = $request->input('permissions', []);
+
+            // Sync permissions
+            $role->syncPermissions($permissions);
+
             return redirect()->route('roles.index')->with('status', 'Role updated successfully!');
         } catch (\Exception $e) {
-            return redirect()->route('roles.index')->with('error', 'Failed to update role: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to update role: ' . $e->getMessage()]);
         }
-        
     }
 
     public function destroy(Role $role)
-    {   
+    {
         // Check if any users have this role
         if ($role->users()->exists()) {
             return Redirect::route('roles.index')->with('error', 'Role cannot be deleted because it is still being used by users.');
         }
-        
+
         try {
             $roleName = $role->name;
             $role->delete();
             return Redirect::route('roles.index')->with('status', 'Role "' . $roleName . '" deleted successfully!');
         } catch (\Exception $e) {
-            return Redirect::route('roles.index')->with('error', 'Role cannot be deleted because it is still being used by users.');    
+            return Redirect::route('roles.index')->with('error', 'Role cannot be deleted because it is still being used by users.');
         }
     }
 }

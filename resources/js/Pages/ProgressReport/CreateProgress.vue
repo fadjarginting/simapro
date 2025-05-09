@@ -14,6 +14,8 @@ defineOptions({
 const props = defineProps({
     plants: Array,
     noteds: Array,
+    priorities: Array,
+    categories: Array,
 });
 
 // Setup form inertia - modified to use arrays for PICs and Lead Engineering
@@ -245,23 +247,24 @@ function submit() {
                             </div>
 
                             <div class="mb-4 relative">
-                                <InputLabel for="plant_id" value="Plant" />
+                                <InputLabel for="plant" value="Plant" />
                                 <div class="relative">
                                     <select
-                                        id="plant_id"
-                                        v-model="form.plant_id"
+                                        id="plant"
+                                        v-model="form.plant"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option value="">Select Plant</option>
+                                        <option disabled value="">
+                                            SELECT PLANT
+                                        </option>
                                         <option
                                             v-for="plant in plants"
                                             :key="plant.id"
-                                            :value="plant.id"
+                                            :value="plant.name"
                                         >
                                             {{ plant.name }}
                                         </option>
                                     </select>
-                                    <!-- Ikon panah bawah -->
                                     <div
                                         class="absolute inset-y-0 right-3 flex items-center pointer-events-none"
                                     >
@@ -284,11 +287,16 @@ function submit() {
                                         v-model="form.work_priority"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option value="">
-                                            Select Work Priority
+                                        <option disabled value="">
+                                            SELECT WORK PRIORITY
                                         </option>
-                                        <option value="-">-</option>
-                                        <option value="P1">P1</option>
+                                        <option
+                                            v-for="priority in priorities"
+                                            :key="priority.id"
+                                            :value="priority.name"
+                                        >
+                                            {{ priority.name }}
+                                        </option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -344,11 +352,16 @@ function submit() {
                                         v-model="form.request_category"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option value="">
-                                            Select Request Category
+                                        <option disabled value="">
+                                            SELECT REQUEST CATEGORY
                                         </option>
-                                        <option value="OPEX">OPEX</option>
-                                        <option value="CAPEX">CAPEX</option>
+                                        <option
+                                            v-for="category in categories"
+                                            :key="category.id"
+                                            :value="category.name"
+                                        >
+                                            {{ category.name }}
+                                        </option>
                                     </select>
                                     <!-- Ikon panah bawah -->
                                     <div
@@ -1002,8 +1015,8 @@ function submit() {
                                         v-model="form.noted_id"
                                         class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10"
                                     >
-                                        <option value="">
-                                            Select Keterangan Progress
+                                        <option disabled value="">
+                                            SELECT KETERANGAN PROGRESS
                                         </option>
                                         <option
                                             v-for="noted in noteds"

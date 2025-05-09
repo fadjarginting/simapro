@@ -16,23 +16,23 @@ class PlantController extends Controller
         $maxPerPage = 50; // Set a maximum limit for perPage
         $perPage = min((int) $request->input('perPage', 10), $maxPerPage);
         $search = $request->input('search', '');
-        
+
         // Breadcrumbs
         $breadcrumbs = [
             ['name' => 'Plant Settings', 'url' => route('plants.index')],
         ];
-        
+
         // Query to get plants
         $plantsQuery = Plant::query();
-        
+
         // Apply search if provided
         if (!empty($search)) {
             $plantsQuery->where('name', 'like', '%' . $search . '%');
         }
-        
+
         // Get paginated plants
-        $plants = $plantsQuery->paginate($perPage)->withQueryString();
-        
+        $plants = $plantsQuery->paginate($perPage)->appends(request()->query());
+
         return inertia('PlantSettings/IndexPlant', [
             'breadcrumbs' => $breadcrumbs,
             'plants' => $plants,
@@ -46,12 +46,12 @@ class PlantController extends Controller
     {
         // Validate the request
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:plants,name',   
+            'name' => 'required|string|max:255|unique:plants,name',
         ]);
 
         // Generate slug from name
         $validated['slug'] = Str::slug($validated['name'], '-');
-        
+
         // Check if slug already exists
         $existingSlug = Plant::where('slug', $validated['slug'])->first();
         if ($existingSlug) {
@@ -74,7 +74,7 @@ class PlantController extends Controller
     {
         // Find the plant
         $plant = Plant::findOrFail($plant);
-        
+
         // Validate the request
         $validated = $request->validate([
             'name' => 'required|string|max:255',
