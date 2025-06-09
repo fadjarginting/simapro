@@ -1,22 +1,25 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Contracts\Role;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ErfController;
+use App\Http\Controllers\WorkController;
+use App\Http\Controllers\NotedController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\MorningController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PriorityController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DisciplinesController;
 use App\Http\Controllers\EatScheduleController;
-use App\Http\Controllers\NotedController;
-use App\Http\Controllers\PriorityController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\UserManagementController;
-use Illuminate\Support\Facades\Auth;
 
 // Route::get('/', function () {
 //     return Inertia::render('Auth/Login', [
@@ -62,6 +65,47 @@ Route::middleware(['auth'])->prefix('users')->name('users.')->group(function () 
         ->middleware('permission:user_management.delete')
         ->name('destroy');
 });
+
+// works management
+Route::middleware(['auth'])->prefix('works')->name('works.')->group(function () {
+    Route::get('/', [WorkController::class, 'index'])
+        ->name('index');
+    Route::get('/create', [WorkController::class, 'create'])
+        ->name('create');
+    Route::post('/', [WorkController::class, 'store'])
+        ->name('store');
+    Route::get('/{work}/edit', [WorkController::class, 'edit'])
+        ->name('edit');
+    Route::put('/{work}', [WorkController::class, 'update'])
+        ->name('update');
+    Route::put('/{work}/update-basic-info', [WorkController::class, 'updateBasicInfo'])
+        ->name('update-basic-info');
+    Route::put('/{work}/update-status', [WorkController::class, 'updateStatus'])
+        ->name('update-status');
+    Route::delete('/{work}', [WorkController::class, 'destroy'])
+        ->name('destroy');
+    Route::get('/{work}/show', [WorkController::class, 'detail'])
+        ->name('show');
+    Route::put('/{work}/update-timeline', [WorkController::class, 'updateTimeline'])
+        ->name('update-timeline');
+});
+
+// Search users API
+Route::get('/api/users/search', [UserManagementController::class, 'search'])->name('users.search');
+
+// disciplines management
+Route::middleware(['auth'])->prefix('disciplines')->name('disciplines.')->group(function () {
+    Route::get('/', [DisciplinesController::class, 'index'])
+        ->name('index');
+    Route::post('/', [DisciplinesController::class, 'store'])
+        ->name('store');
+    Route::put('/{discipline}', [DisciplinesController::class, 'update'])
+        ->name('update');
+    Route::delete('/{discipline}', [DisciplinesController::class, 'destroy'])
+        ->name('destroy');
+});
+
+
 
 // Route ERF Management
 Route::middleware(['auth'])->group(function () {
@@ -114,30 +158,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('kpis');
 });
 
+
 // Route Progress Report
-Route::middleware(['auth'])->group(function () {
-    Route::get('/progress', [ProgressController::class, 'index'])
-        ->middleware('permission:progress_report.view')
-        ->name('progress.index');
-    Route::get('/progress/create', [ProgressController::class, 'create'])
-        ->middleware('permission:progress_report.create')
-        ->name('progress.create');
-    Route::post('/progress', [ProgressController::class, 'store'])
-        ->middleware('permission:progress_report.create')
-        ->name('progress.store');
-    Route::get('/progress/{progress}/show', [ProgressController::class, 'show'])
-        ->middleware('permission:progress_report.show')
-        ->name('progress.show');
-    Route::get('/progress/{progress}/edit', [ProgressController::class, 'edit'])
-        ->middleware('permission:progress_report.edit')
-        ->name('progress.edit');
-    Route::put('/progress/{progress}', [ProgressController::class, 'update'])
-        ->middleware('permission:progress_report.edit')
-        ->name('progress.update');
-    Route::delete('/progress/{progress}', [ProgressController::class, 'destroy'])
-        ->middleware('permission:progress_report.delete')
-        ->name('progress.destroy');
-});
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/progress', [ProgressController::class, 'index'])
+//         ->middleware('permission:progress_report.view')
+//         ->name('progress.index');
+//     Route::get('/progress/create', [ProgressController::class, 'create'])
+//         ->middleware('permission:progress_report.create')
+//         ->name('progress.create');
+//     Route::post('/progress', [ProgressController::class, 'store'])
+//         ->middleware('permission:progress_report.create')
+//         ->name('progress.store');
+//     Route::get('/progress/{progress}/show', [ProgressController::class, 'show'])
+//         ->middleware('permission:progress_report.show')
+//         ->name('progress.show');
+//     Route::get('/progress/{progress}/edit', [ProgressController::class, 'edit'])
+//         ->middleware('permission:progress_report.edit')
+//         ->name('progress.edit');
+//     Route::put('/progress/{progress}', [ProgressController::class, 'update'])
+//         ->middleware('permission:progress_report.edit')
+//         ->name('progress.update');
+//     Route::delete('/progress/{progress}', [ProgressController::class, 'destroy'])
+//         ->middleware('permission:progress_report.delete')
+//         ->name('progress.destroy');
+// });
 
 // Resource routes for CRUD operations
 Route::middleware(['auth'])->group(function () {
@@ -158,15 +203,15 @@ Route::middleware(['auth', 'verified'])->prefix('plants')->name('plants.')->grou
         ->name('destroy');
 });
 
-// Noteds Routes
-Route::middleware(['auth', 'verified'])->prefix('noteds')->name('noteds.')->group(function () {
-    Route::get('/', [NotedController::class, 'index'])
+// Notes Routes
+Route::middleware(['auth', 'verified'])->prefix('notes')->name('notes.')->group(function () {
+    Route::get('/', [NoteController::class, 'index'])
         ->name('index');
-    Route::post('/', [NotedController::class, 'store'])
+    Route::post('/', [NoteController::class, 'store'])
         ->name('store');
-    Route::put('/{noted}', [NotedController::class, 'update'])
+    Route::put('/{note}', [NoteController::class, 'update'])
         ->name('update');
-    Route::delete('/{noted}', [NotedController::class, 'destroy'])
+    Route::delete('/{note}', [NoteController::class, 'destroy'])
         ->name('destroy');
 });
 

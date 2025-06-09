@@ -25,6 +25,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'discipline_id'
     ];
 
     /**
@@ -50,6 +51,8 @@ class User extends Authenticatable
         ];
     }
 
+    
+
     // relasi ke document
     public function documents()
     {
@@ -73,5 +76,13 @@ class User extends Authenticatable
                 $subquery->where('name', $role);
             });
         });
+    }
+
+    /**
+     * Get the discipline that owns the user.
+     */
+    public function discipline()
+    {
+        return $this->belongsTo(Discipline::class);
     }
 }

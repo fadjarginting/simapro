@@ -39,31 +39,31 @@ class PlantSeeder extends Seeder
         }
 
         // noted table
-        $noted = [
-            ['noted_code' => '01', 'name' => 'Belum ada ERF', 'slug' => 'belum-ada-erf'],
-            ['noted_code' => '02', 'name' => 'ERF belum disetujui oleh User di e-DEMS', 'slug' => 'erf-belum-disetujui-oleh-user-di-e-dems'],
-            ['noted_code' => '03', 'name' => 'Proses verifikasi ERF', 'slug' => 'proses-verifikasi-erf'],
-            ['noted_code' => '04', 'name' => 'Approval pengesahan ERF oleh User di e-DEMS', 'slug' => 'approval-pengesahan-erf-oleh-user-di-e-dems'],
-            ['noted_code' => '05', 'name' => 'Proses EAT', 'slug' => 'proses-eat'],
-            ['noted_code' => '06', 'name' => 'Approval EAT di e-DEMS', 'slug' => 'approval-eat-di-e-dems'],
-            ['noted_code' => '07', 'name' => 'Approval EAT di e-DEMS oleh Ka. Unit', 'slug' => 'approval-eat-di-e-dems-oleh-ka-unit'],
-            ['noted_code' => '08', 'name' => 'Hold. Pekerjaan ditangguhkan karena ada pekerjaan lainnya yang lebih mendesak sementara sumber daya Fungsi Engineering tidak mencukupi', 'slug' => 'hold-pekerjaan-ditangguhkan'],
-            ['noted_code' => '09', 'name' => 'Hold. Terdapat kebutuhan tambahan atau perubahan informasi yang belum bisa diperoleh dalam masa pelaksanaan pekerjaan', 'slug' => 'hold-terdapat-kebutuhan-tambahan'],
-            ['noted_code' => '10', 'name' => 'Penyusunan dokumen DED', 'slug' => 'penyusunan-dokumen-ded'],
-            ['noted_code' => '11', 'name' => 'Penyusunan dokumen Technical Assist', 'slug' => 'penyusunan-dokumen-technical-assist'],
-            ['noted_code' => '12', 'name' => 'Penyusunan dokumen Kajian', 'slug' => 'penyusunan-dokumen-kajian'],
-            ['noted_code' => '13', 'name' => 'Approval dokumen di e-DEMS', 'slug' => 'approval-dokumen-di-e-dems'],
-            ['noted_code' => '14', 'name' => 'Approval dokumen di e-DEMS oleh Ka. Unit', 'slug' => 'approval-dokumen-di-e-dems-oleh-ka-unit'],
-            ['noted_code' => '15', 'name' => 'Approval dokumen di e-DEMS oleh Ka. Dept.', 'slug' => 'approval-dokumen-di-e-dems-oleh-ka-dept'],
-            ['noted_code' => '16', 'name' => 'Dokumen terkirim ke User melalui e-DEMS', 'slug' => 'dokumen-terkirim-ke-user-melalui-e-dems'],
-            ['noted_code' => '17', 'name' => 'Cancel. ERF tidak sesuai dengan tupoksi Fungsi Engineering', 'slug' => 'cancel-erf-tidak-sesuai-dengan-tupoksi-fungsi-engineering'],
-            ['noted_code' => '18', 'name' => 'Cancel. ERF tidak sesuai dengan kebijakan manajemen', 'slug' => 'cancel-erf-tidak-sesuai-dengan-kebijakan-manajemen'],
-            ['noted_code' => '19', 'name' => 'Cancel. Terdapat ERF yang sama secara judul, latar belakang, maksud, tujuan dan ruang lingkup', 'slug' => 'cancel-terdapat-erf-yang-sama'],
-            ['noted_code' => '20', 'name' => 'Cancel. Informasi yang diminta pada saat verifikasi masih belum dapat dilengkapi oleh Fungsi Peminta setelah 30 hari kalender atau setelah kesepakatan due date pada saat verifikasi', 'slug' => 'cancel-informasi-yang-diminta-belum-dilengkapi']
-        ];
+        // $noted = [
+        //     ['noted_code' => '01', 'name' => 'Belum ada ERF', 'slug' => 'belum-ada-erf'],
+        //     ['noted_code' => '02', 'name' => 'ERF belum disetujui oleh User di e-DEMS', 'slug' => 'erf-belum-disetujui-oleh-user-di-e-dems'],
+        //     ['noted_code' => '03', 'name' => 'Proses verifikasi ERF', 'slug' => 'proses-verifikasi-erf'],
+        //     ['noted_code' => '04', 'name' => 'Approval pengesahan ERF oleh User di e-DEMS', 'slug' => 'approval-pengesahan-erf-oleh-user-di-e-dems'],
+        //     ['noted_code' => '05', 'name' => 'Proses EAT', 'slug' => 'proses-eat'],
+        //     ['noted_code' => '06', 'name' => 'Approval EAT di e-DEMS', 'slug' => 'approval-eat-di-e-dems'],
+        //     ['noted_code' => '07', 'name' => 'Approval EAT di e-DEMS oleh Ka. Unit', 'slug' => 'approval-eat-di-e-dems-oleh-ka-unit'],
+        //     ['noted_code' => '08', 'name' => 'Hold. Pekerjaan ditangguhkan karena ada pekerjaan lainnya yang lebih mendesak sementara sumber daya Fungsi Engineering tidak mencukupi', 'slug' => 'hold-pekerjaan-ditangguhkan'],
+        //     ['noted_code' => '09', 'name' => 'Hold. Terdapat kebutuhan tambahan atau perubahan informasi yang belum bisa diperoleh dalam masa pelaksanaan pekerjaan', 'slug' => 'hold-terdapat-kebutuhan-tambahan'],
+        //     ['noted_code' => '10', 'name' => 'Penyusunan dokumen DED', 'slug' => 'penyusunan-dokumen-ded'],
+        //     ['noted_code' => '11', 'name' => 'Penyusunan dokumen Technical Assist', 'slug' => 'penyusunan-dokumen-technical-assist'],
+        //     ['noted_code' => '12', 'name' => 'Penyusunan dokumen Kajian', 'slug' => 'penyusunan-dokumen-kajian'],
+        //     ['noted_code' => '13', 'name' => 'Approval dokumen di e-DEMS', 'slug' => 'approval-dokumen-di-e-dems'],
+        //     ['noted_code' => '14', 'name' => 'Approval dokumen di e-DEMS oleh Ka. Unit', 'slug' => 'approval-dokumen-di-e-dems-oleh-ka-unit'],
+        //     ['noted_code' => '15', 'name' => 'Approval dokumen di e-DEMS oleh Ka. Dept.', 'slug' => 'approval-dokumen-di-e-dems-oleh-ka-dept'],
+        //     ['noted_code' => '16', 'name' => 'Dokumen terkirim ke User melalui e-DEMS', 'slug' => 'dokumen-terkirim-ke-user-melalui-e-dems'],
+        //     ['noted_code' => '17', 'name' => 'Cancel. ERF tidak sesuai dengan tupoksi Fungsi Engineering', 'slug' => 'cancel-erf-tidak-sesuai-dengan-tupoksi-fungsi-engineering'],
+        //     ['noted_code' => '18', 'name' => 'Cancel. ERF tidak sesuai dengan kebijakan manajemen', 'slug' => 'cancel-erf-tidak-sesuai-dengan-kebijakan-manajemen'],
+        //     ['noted_code' => '19', 'name' => 'Cancel. Terdapat ERF yang sama secara judul, latar belakang, maksud, tujuan dan ruang lingkup', 'slug' => 'cancel-terdapat-erf-yang-sama'],
+        //     ['noted_code' => '20', 'name' => 'Cancel. Informasi yang diminta pada saat verifikasi masih belum dapat dilengkapi oleh Fungsi Peminta setelah 30 hari kalender atau setelah kesepakatan due date pada saat verifikasi', 'slug' => 'cancel-informasi-yang-diminta-belum-dilengkapi']
+        // ];
 
-        foreach ($noted as $note) {
-            Noted::create($note);
-        }
+        // foreach ($noted as $note) {
+        //     Noted::create($note);
+        // }
     }
 }

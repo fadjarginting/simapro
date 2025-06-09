@@ -15,7 +15,8 @@ defineOptions({
 const props = defineProps({
     errors: Object,
     roles: Array,
-    user: Object
+    user: Object,
+    disciplines: Array
 });
 
 // Form data menggunakan inertia
@@ -24,7 +25,8 @@ const form = useForm({
     email: props.user.email || '',
     password: '',
     password_confirmation: '',
-    role: props.user.role || ''
+    role: props.user.role || '',
+    discipline_id: props.user.discipline_id || ''
 });
 
 
@@ -158,6 +160,21 @@ const cancel = () => {
                                     type="password" placeholder="Confirm Password" class="mt-1 block w-full"
                                     :class="{ 'border-red-500': errors.password_confirmation }" autocomplete="new-password" />
                                 <InputError :message="errors.password_confirmation" />
+                            </div>
+
+                            <!-- Discipline Selection -->
+                            <div class="mb-4">
+                                <InputLabel for="discipline" value="Discipline" />
+                                <select id="discipline" v-model="form.discipline_id" required
+                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                                    :class="{ 'border-red-500': errors.discipline_id }">
+                                    <option value="">Select Discipline</option>
+                                    <option v-for="discipline in disciplines" :key="discipline.id"
+                                        :value="discipline.id">
+                                        {{ discipline.name }}
+                                    </option>
+                                </select>
+                                <InputError :message="errors.discipline_id" />
                             </div>
 
                             <!-- Role Selection -->

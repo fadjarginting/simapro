@@ -16,7 +16,8 @@ const page = usePage();
 // Deklarasi props
 const props = defineProps({
     errors: Object,
-    roles: Array
+    roles: Array,
+    disciplines: Array
 });
 
 
@@ -27,6 +28,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    discipline_id:'',
     role: ''
 });
 
@@ -137,8 +139,8 @@ const cancel = () => {
                             <div class="mb-4">
                                 <InputLabel for="email" value="Email" />
                                 <TextInput id="email" v-model="form.email" type="email" placeholder="Enter Email"
-                                    class="mt-1 block w-full" :class="{ 'border-red-500': errors.email }" required aria-autocomplete="false"
-                                    />
+                                    class="mt-1 block w-full" :class="{ 'border-red-500': errors.email }" required
+                                    aria-autocomplete="false" />
                                 <InputError :message="errors.email" />
                             </div>
 
@@ -160,6 +162,22 @@ const cancel = () => {
                                     :class="{ 'border-red-500': errors.password_confirmation }" required
                                     autocomplete="new-password" />
                                 <InputError :message="errors.password_confirmation" />
+                            </div>
+
+                            <!-- Discipline Selection -->
+                            <!-- Discipline Selection -->
+                            <div class="mb-4">
+                                <InputLabel for="discipline_id" value="Discipline" />
+                                <select id="discipline_id" v-model="form.discipline_id" required
+                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                                    :class="{ 'border-red-500': errors.discipline }">
+                                    <option value="">Select Discipline</option>
+                                    <option v-for="discipline in disciplines" :key="discipline.id"
+                                        :value="discipline.id">
+                                        {{ discipline.name }}
+                                    </option>
+                                </select>
+                                <InputError :message="errors.discipline" />
                             </div>
 
                             <!-- Role Selection -->

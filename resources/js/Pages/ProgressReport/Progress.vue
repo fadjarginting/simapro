@@ -145,11 +145,11 @@ function formatDate(dateStr) {
         </h2>
     </template>
 
-    <div class="container mx-auto px-4 py-12">
-        <div class="mx-auto max-w-full sm:px-6 lg:px-8">
+    <div class=" px-4 py-12">
+        <div class=" sm:px-6 lg:px-8">
             <!-- table docs -->
             <div class="flex flex-wrap -mx-3">
-                <div class="flex-none w-full max-w-full px-3">
+                <div class="flex-none w-full  px-3">
                     <div
                         class="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl sm:rounded-lg bg-clip-border"
                     >

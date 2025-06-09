@@ -18,15 +18,6 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->timestamps();
         });
-
-        // noted table
-        Schema::create('noteds', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('noted_code');
-            $table->string('slug')->unique();
-            $table->timestamps();
-        });
     }
 
     /**
@@ -35,6 +26,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('plants');
-        Schema::dropIfExists('noteds');
     }
 };

@@ -26,7 +26,7 @@ function formatDate(dateStr) {
     <Head title="Detail Progress" />
 
     <div class="py-12">
-        <div class="mx-auto max-w-5xl sm:px-6 lg:px-8">
+        <div class=" sm:px-6 lg:px-8">
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-2xl font-bold mb-6 text-gray-800">
                     Detail Progress

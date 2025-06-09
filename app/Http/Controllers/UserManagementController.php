@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\Discipline;
 use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Controller;
@@ -35,7 +37,7 @@ class UserManagementController extends Controller
         $sortDirection = $request->input('direction', 'asc');
         
         // Build the query with filters, sorting and pagination
-        $users = User::with('roles')
+        $users = User::with('roles', 'discipline')
             ->filter($request->only(['search', 'role']))
             ->when($sortField && $sortDirection, function($query) use ($sortField, $sortDirection) {
                 return $query->orderBy($sortField, $sortDirection);
@@ -63,9 +65,11 @@ class UserManagementController extends Controller
         $roles = Cache::remember('roles_list', 3600, function () {
             return Role::select('name')->get();
         });
- // Only fetch necessary fields to optimize performance
+        $disciplines = Discipline::select('id', 'name')->get();
+        // Only fetch necessary fields to optimize performance
         return Inertia::render('UsersManagement/CreateUser', [
             'roles' => $roles,
+            'disciplines' => $disciplines,
             'breadcrumbs' => $breadcrumbs,
         ]);
     }
@@ -82,6 +86,7 @@ class UserManagementController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'discipline_id'=> $request->discipline_id,
         ]);
 
         $user->assignRole($request->role);
@@ -98,8 +103,10 @@ class UserManagementController extends Controller
         ];
 
         $roles = Role::all();
+        $disciplines = Discipline::select('id', 'name')->get();
         return Inertia::render('UsersManagement/EditUser', [
             'user' => $user,
+            'disciplines' => $disciplines,
             'roles' => $roles,
             'breadcrumbs' => $breadcrumbs,
         ]);
@@ -114,10 +121,10 @@ class UserManagementController extends Controller
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
+            'discipline_id' => $request->discipline_id,
         ]);
 
         $user->syncRoles($request->role);
-
         return redirect()->route('users.index');
     }
 
@@ -125,5 +132,27 @@ class UserManagementController extends Controller
     {
         $user->delete();
         return redirect()->route('users.index');
+    }
+
+    // UserController.php
+    public function search(Request $request)
+    {
+        $search = $request->get('search');
+        $limit = $request->get('limit', 10);
+        
+        $users = User::with('roles')
+            ->where(function($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            })
+            ->whereHas('roles', function($query) {
+                $query->where('name', 'lead');
+            })
+            ->limit($limit)
+            ->get(['id', 'name', 'email']);
+        
+        return response()->json([
+            'data' => $users
+        ]);
     }
 }

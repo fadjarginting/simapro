@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionsSeeder::class);
         $this->call(UsersSeeder::class);
         $this->call(PlantSeeder::class);
-        $this->call(PrioritySeeder::class);
+        // $this->call(PrioritySeeder::class);
 
 
         $user = User::factory()->create([

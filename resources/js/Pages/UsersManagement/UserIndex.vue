@@ -13,6 +13,8 @@ const props = defineProps({
     users: Object,
     filters: Object,
     roles: Array,
+    disciplines: Array,
+    errors: Object,
     breadcrumbs: Array
 });
 
@@ -20,6 +22,7 @@ const props = defineProps({
 const form = ref({
     search: props.filters.search || '',
     role: props.filters.role || null,
+    discipline_id: props.filters.discipline_id || null,
     page: props.users.current_page || 1,
     perPage: props.filters.perPage || 10
 });
@@ -223,6 +226,12 @@ const deleteUser = (userId) => {
                                                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                                                 </span>
                                             </th>
+                                            <th class="px-4 py-3 cursor-pointer" @click="toggleSort('discipline')">
+                                                Discipline
+                                                <span v-if="sortKey === 'discipline'" class="ml-1">
+                                                    {{ sortOrder === 'asc' ? '▲' : '▼' }}
+                                                </span>
+                                            </th>
                                             <th class="px-4 py-3">Role</th>
 
                                             <th class="px-4 py-3 text-center">Actions</th>
@@ -233,6 +242,9 @@ const deleteUser = (userId) => {
                                             class="border-b border-gray-200 hover:bg-gray-100">
                                             <td class="px-4 py-3">{{ user.name }}</td>
                                             <td class="px-4 py-3">{{ user.email }}</td>
+                                            <td class="px-4 py-3">
+                                                {{ user.discipline ? user.discipline.name : 'N/A' }}
+                                            </td>
                                             <td class="px-4 py-3">
                                                 {{user.roles.map(role => role.name).join(", ")}}
                                             </td>

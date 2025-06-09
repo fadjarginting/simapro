@@ -33,6 +33,8 @@
         <!-- Scripts -->
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
+        <!-- @vite(['resources/js/app.js'], ['devServer' => env('VITE_DEV_SERVER_URL')]) -->
+
         @inertiaHead
     </head>
 
@@ -49,15 +51,15 @@
     <!-- chart js -->
 
     <!-- main script file  -->
-    <script src="{{ asset('../assets/js/argon-dashboard-tailwind.js')}}" async></script>
+    
 
     <!-- github button -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <!-- plugin for scrollbar  -->
-    <script src="{{ asset('/assets/js/plugins/chartjs.min.js')}}" async></script>
+    <script src="{{ asset('assets/js/plugins/chartjs.min.js')}}" async></script>
     <!-- plugin for scrollbar  -->
-    <script src="{{ asset('/assets/js/plugins/perfect-scrollbar.min.js')}}" async></script>
+    <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js')}}" async></script>
     <!-- main script file  -->
-    <script  async src="{{ asset('/assets/js/argon-dashboard-tailwind.js?v=1.0.1')}}" async></script>
+  
 </html>
 
