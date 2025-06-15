@@ -29,6 +29,18 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'captcha_answer' => ['required', 'numeric'],
+        ];
+    }
+
+    /**
+     * Get custom validation messages.
+     */
+    public function messages(): array
+    {
+        return [
+            'captcha_answer.required' => 'Jawaban CAPTCHA harus diisi.',
+            'captcha_answer.numeric' => 'Jawaban CAPTCHA harus berupa angka.',
         ];
     }
 
@@ -41,6 +53,9 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        // Validate CAPTCHA first
+        $this->validateCaptcha();
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
@@ -50,6 +65,26 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Validate CAPTCHA answer.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function validateCaptcha(): void
+    {
+        $sessionAnswer = session('captcha_answer');
+        $userAnswer = $this->input('captcha_answer');
+
+        if (!$sessionAnswer || (int)$userAnswer !== (int)$sessionAnswer) {
+            throw ValidationException::withMessages([
+                'captcha_answer' => 'Jawaban salah. Silakan coba lagi.',
+            ]);
+        }
+
+        // Clear the captcha from session after successful validation
+        session()->forget('captcha_answer');
     }
 
     /**

@@ -66,8 +66,7 @@ return new class extends Migration
         Schema::create('erf_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('work_id')->constrained('works')->onDelete('cascade');
-            
-            $table->string('file_name');
+            $table->string('document_name');
             $table->string('file_url');
             $table->timestamp('uploaded_at')->nullable();
             $table->foreignId('uploaded_by')->nullable()->constrained('users')->onDelete('set null');

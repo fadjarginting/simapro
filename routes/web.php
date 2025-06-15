@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Contracts\Role;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ErfController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\WorkController;
 use App\Http\Controllers\NotedController;
 use App\Http\Controllers\PlantController;
@@ -18,7 +19,7 @@ use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DisciplinesController;
 use App\Http\Controllers\EatScheduleController;
-use App\Http\Controllers\NoteController;
+use App\Http\Controllers\WorkDocumentController;
 use App\Http\Controllers\UserManagementController;
 
 // Route::get('/', function () {
@@ -88,6 +89,17 @@ Route::middleware(['auth'])->prefix('works')->name('works.')->group(function () 
         ->name('show');
     Route::put('/{work}/update-timeline', [WorkController::class, 'updateTimeline'])
         ->name('update-timeline');
+});
+
+Route::prefix('works/{work}/documents')->name('works.documents.')->group(function () {
+    Route::get('/', [WorkDocumentController::class, 'index'])->name('index');
+    Route::post('/', [WorkDocumentController::class, 'store'])->name('store');
+    Route::get('/{document}', [WorkDocumentController::class, 'show'])->name('show');
+    Route::get('/{document}/download', [WorkDocumentController::class, 'download'])->name('download');
+    Route::delete('/{document}', [WorkDocumentController::class, 'destroy'])->name('destroy');
+    
+    // API endpoint untuk mendapatkan documents sebagai JSON
+    Route::get('/api/list', [WorkDocumentController::class, 'getDocuments'])->name('api.list');
 });
 
 // Search users API

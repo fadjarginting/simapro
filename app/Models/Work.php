@@ -12,6 +12,7 @@ use App\Enums\VerificationStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -194,5 +195,14 @@ class Work extends Model
     {
         return $query->when($startDate, fn($q) => $q->where('entry_date', '>=', $startDate))
                     ->when($endDate, fn($q) => $q->where('entry_date', '<=', $endDate));
+    }
+    
+
+    /**
+     * Get the documents for the work.
+    */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ErfDocument::class);
     }
 }

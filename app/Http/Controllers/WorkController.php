@@ -259,12 +259,19 @@ class WorkController extends Controller
             'note:id,content',
         ]);
 
+        // documents
+        $documents = $work->documents()
+            ->select('id', 'document_name', 'file_url', 'uploaded_at', 'uploaded_by')
+            ->with('uploadedBy:id,name')
+            ->get();
+
         // notes
         $notes = Note::select('id', 'content')
             ->get();
 
         return Inertia::render('WorksManagement/Detail/WorkDetailMain', [
             'work' => $work,
+            'documents' => $documents,
             'notes' => $notes,
             // Only include essential permissions for display
         ]);

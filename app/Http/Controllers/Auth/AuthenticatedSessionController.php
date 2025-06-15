@@ -18,9 +18,13 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): Response
     {
+        // Generate random math captcha
+        $captcha = $this->generateMathCaptcha();
+        
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
+            'captcha' => $captcha,
         ]);
     }
 
@@ -33,7 +37,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard', absolute: true));
     }
 
     /**
@@ -49,4 +53,34 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
-}
+
+    /**
+     * Generate new captcha for refresh.
+     */
+    public function refreshCaptcha(): \Illuminate\Http\JsonResponse
+    {
+        $captcha = $this->generateMathCaptcha();
+        
+        return response()->json($captcha);
+    }
+
+    /**
+     * Generate random math captcha.
+     */
+    private function generateMathCaptcha(): array
+    {
+        $num1 = rand(1, 10);
+        $num2 = rand(1, 10);
+        $answer = $num1 + $num2;
+
+        // Store answer in session
+        session(['captcha_answer' => $answer]);
+
+        return [
+            'question' => "{$num1} + {$num2} = ?",
+            'num1' => $num1,
+            'num2' => $num2,
+            'operation' => '+',
+        ];
+    }
+}   
