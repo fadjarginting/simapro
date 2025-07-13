@@ -17,6 +17,7 @@ class UserSharedResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'discipline_id' => $this->discipline_id,
             'email' => $this->email,
             'roles' => $this->roles->pluck('name'),
             'permissions' => $this->getAllPermissions()->pluck('name'),

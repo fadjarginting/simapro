@@ -97,12 +97,15 @@ class PermissionsSeeder extends Seeder
         }
 
         // Assign permission to roles
-        $role = Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'Admin']);
         $role->givePermissionTo($permissions);
 
-        $role = Role::create(['name' => 'user']);
-        $role->givePermissionTo([
+        $role = Role::create(['name' => 'Lead']);
+        $role->givePermissionTo($permissions);
 
+
+        $role = Role::create(['name' => 'User']);
+        $role->givePermissionTo([
             'erf_management.view',
             'progress_report.view',
             'morning_report.view',

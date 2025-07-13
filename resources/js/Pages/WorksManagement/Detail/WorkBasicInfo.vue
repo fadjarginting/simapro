@@ -31,6 +31,12 @@ const selectedUser = ref(null)
 const isDropdownOpen = ref(true)
 const userSelectRef = ref(null)
 
+// Notes dropdown state
+const notesDropdownRef = ref(null)
+const isNotesDropdownOpen = ref(false)
+const notesSearchQuery = ref('')
+const selectedNote = ref(null)
+
 // Edit state
 const isEditing = ref(false)
 const editForm = ref({
@@ -42,6 +48,40 @@ const editForm = ref({
 const form = ref({
     lead_engineer_id: null
 })
+
+// Notes dropdown functions
+const handleNotesInputFocus = () => {
+    isNotesDropdownOpen.value = true
+}
+
+const selectNote = (note) => {
+    selectedNote.value = note
+    editForm.value.note_id = note.id
+    notesSearchQuery.value = note.content
+    isNotesDropdownOpen.value = false
+}
+
+const clearNotesSelection = () => {
+    selectedNote.value = null
+    editForm.value.note_id = ''
+    notesSearchQuery.value = ''
+    isNotesDropdownOpen.value = false
+}
+
+// Filtered notes based on search
+const filteredNotes = computed(() => {
+    if (!notesSearchQuery.value) return notesOptions.value
+    return notesOptions.value.filter(note =>
+        note.content.toLowerCase().includes(notesSearchQuery.value.toLowerCase())
+    )
+})
+
+// Handle click outside for notes dropdown
+const handleNotesClickOutside = (event) => {
+    if (notesDropdownRef.value && !notesDropdownRef.value.contains(event.target)) {
+        isNotesDropdownOpen.value = false
+    }
+}
 
 // Get selected note content for display
 const getSelectedNoteContent = () => {
@@ -59,6 +99,8 @@ const toggleEditMode = () => {
         editForm.value.note_id = props.work.note?.id || ''
         editForm.value.lead_engineer_id = props.work.lead_engineer?.id || null
         selectedUser.value = props.work.lead_engineer || null
+        selectedNote.value = props.work.note || null
+        notesSearchQuery.value = props.work.note?.content || ''
         error.value = ''
     } else {
         // Start edit - initialize form with current values
@@ -66,6 +108,8 @@ const toggleEditMode = () => {
         editForm.value.note_id = props.work.note?.id || ''
         editForm.value.lead_engineer_id = props.work.lead_engineer?.id || null
         selectedUser.value = props.work.lead_engineer || null
+        selectedNote.value = props.work.note || null
+        notesSearchQuery.value = props.work.note?.content || ''
         error.value = ''
     }
 }
@@ -208,33 +252,6 @@ const notesOptions = computed(() => {
     return props.notes && Array.isArray(props.notes) ? props.notes : []
 })
 
-// Fungsi untuk submit form assign lead engineer (untuk mode non-edit)
-const submitAssignLead = () => {
-    if (!form.value.lead_engineer_id) {
-        error.value = 'Silakan pilih lead engineer terlebih dahulu'
-        return
-    }
-
-    isSubmitting.value = true
-    error.value = ''
-
-    router.post(route('works.assign-lead', props.work.slug), {
-        lead_engineer_id: form.value.lead_engineer_id
-    }, {
-        preserveState: true,
-        onSuccess: () => {
-            closeLeadModal()
-        },
-        onError: (errors) => {
-            console.error('Assign lead error:', errors)
-            error.value = errors.lead_engineer_id || errors.error || 'Gagal menetapkan lead engineer'
-        },
-        onFinish: () => {
-            isSubmitting.value = false
-        }
-    })
-}
-
 // Fungsi untuk confirm pilihan lead engineer dalam mode edit
 const confirmLeadSelection = () => {
     closeLeadModal()
@@ -243,10 +260,12 @@ const confirmLeadSelection = () => {
 // Lifecycle hooks
 onMounted(() => {
     document.addEventListener('click', handleClickOutside)
+    document.addEventListener('click', handleNotesClickOutside)
 })
 
 onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside)
+    document.removeEventListener('click', handleNotesClickOutside)
     if (searchTimeout) {
         clearTimeout(searchTimeout)
     }
@@ -368,20 +387,60 @@ onBeforeUnmount(() => {
                 <div class="sm:col-span-2">
                     <dt class="text-sm font-medium text-gray-500">Catatan</dt>
                     <dd class="mt-1">
-                        <!-- Mode Edit with select dropdown -->
-                        <div v-if="isEditing" class="flex flex-col">
-                            <select v-model="editForm.note_id"
-                                class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <option value="">Pilih catatan</option>
-                                <option v-for="note in notesOptions" :key="note.id" :value="note.id">
-                                    {{ note.content }}
-                                </option>
-                            </select>
-                            <!-- Preview selected note -->
-                            <div v-if="editForm.note_id"
-                                class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-700">
-                                <strong>Preview:</strong> {{ getSelectedNoteContent() }}
+                        <!-- Mode Edit with searchable dropdown -->
+                        <div v-if="isEditing" class="relative" ref="notesDropdownRef">
+                            <div class="relative">
+                                <!-- Dropdown di atas input -->
+                                <div v-if="isNotesDropdownOpen"
+                                    class="absolute z-50 w-full bottom-full mb-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                    <!-- No results -->
+                                    <div v-if="filteredNotes.length === 0" class="p-3 text-center text-gray-500">
+                                        {{ notesSearchQuery ? 'Tidak ada catatan yang ditemukan' : 'Ketik untuk mencari catatan' }}
+                                    </div>
+                                    <!-- Notes list -->
+                                    <div v-else>
+                                        <button v-for="note in filteredNotes" :key="note.id" type="button"
+                                            @click="selectNote(note)"
+                                            class="w-full px-3 py-2 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                                            :class="{ 'bg-blue-50': selectedNote && selectedNote.id === note.id }">
+                                            <div
+                                                class="whitespace-normal leading-relaxed text-sm text-gray-900 break-words">
+                                                {{ note.content }}
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <input type="text" v-model="notesSearchQuery" @focus="handleNotesInputFocus"
+                                    @input="isNotesDropdownOpen = true" placeholder="Cari dan pilih catatan..."
+                                    class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm pr-10"
+                                    autocomplete="off" />
+                                <!-- Clear button -->
+                                <button v-if="selectedNote" type="button" @click="clearNotesSelection"
+                                    class="absolute inset-y-0 right-8 flex items-center">
+                                    <i class="fas fa-times text-gray-400 hover:text-gray-600"></i>
+                                </button>
+                                <!-- Search icon -->
+                                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
                             </div>
+                            <!-- Selected note display -->
+                            <div v-if="selectedNote" class="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200">
+                                <div class="flex items-start space-x-3">
+                                    <div
+                                        class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0 mt-0.5">
+                                        <i class="fas fa-sticky-note"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-xs text-blue-600 font-medium mb-1">Catatan terpilih:</div>
+                                        <div
+                                            class="text-sm text-blue-900 whitespace-normal leading-relaxed break-words">
+                                            {{ selectedNote.content }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-1 text-xs text-gray-500">Ketik untuk mencari catatan yang tersedia</div>
                         </div>
                         <!-- Mode View -->
                         <div v-else class="text-sm text-gray-900 break-words">
@@ -447,7 +506,7 @@ onBeforeUnmount(() => {
                         <div class="flex-1 min-w-0">
                             <div class="font-medium text-blue-900 truncate">{{ selectedUser.name }}</div>
                             <div class="text-sm text-blue-700 truncate" v-if="selectedUser.email">{{ selectedUser.email
-                            }}</div>
+                                }}</div>
                         </div>
                         <button type="button" @click="clearSelection"
                             class="text-blue-600 hover:text-blue-800 transition-colors" :disabled="isSubmitting">
@@ -476,7 +535,7 @@ onBeforeUnmount(() => {
                     <div v-else-if="filteredUsers.length === 0" class="p-4 text-center text-gray-500">
                         <i class="fas fa-search mr-2"></i>
                         <span>{{ searchQuery ? 'Tidak ada pengguna yang ditemukan' : 'Ketik untuk mencari pengguna'
-                        }}</span>
+                            }}</span>
                     </div>
 
                     <!-- User list -->
@@ -517,20 +576,12 @@ onBeforeUnmount(() => {
                     :disabled="isSubmitting">
                     Batal
                 </button>
-                <button type="button" @click="isEditing ? confirmLeadSelection() : submitAssignLead()"
+                <button type="button" @click="confirmLeadSelection"
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="!selectedUser || isSubmitting">
-                    <span v-if="isSubmitting && !isEditing">
-                        <i class="fas fa-spinner fa-spin mr-2"></i>
-                        Menetapkan...
-                    </span>
-                    <span v-else-if="isEditing">
+                    :disabled="isSubmitting">
+                    <span >
                         <i class="fas fa-check mr-2"></i>
-                        Pilih
-                    </span>
-                    <span v-else>
-                        <i class="fas fa-check mr-2"></i>
-                        Tetapkan Lead Engineer
+                        Konfirmasi Pilihan
                     </span>
                 </button>
             </div>

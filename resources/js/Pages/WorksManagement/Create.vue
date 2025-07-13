@@ -59,6 +59,12 @@ const isLoading = ref(false);
 const selectedUser = ref(null);
 const userSelectRef = ref(null);
 
+// Notes dropdown functionality
+const isNotesDropdownOpen = ref(false);
+const selectedNote = ref(null);
+const notesDropdownRef = ref(null);
+const notesSearchQuery = ref('');
+
 // Search users function
 const searchUsers = async (query = '') => {
     if (query.length < 2 && query.length > 0) {
@@ -111,10 +117,36 @@ const handleInputFocus = () => {
     }
 };
 
+// Notes dropdown functions
+const selectNote = (note) => {
+    selectedNote.value = note;
+    form.note_id = note ? note.id : null;
+    notesSearchQuery.value = note ? note.content : '';
+    isNotesDropdownOpen.value = false;
+};
+
+const toggleNotesDropdown = () => {
+    isNotesDropdownOpen.value = !isNotesDropdownOpen.value;
+};
+
+const handleNotesInputFocus = () => {
+    isNotesDropdownOpen.value = true;
+};
+
+const clearNotesSelection = () => {
+    selectedNote.value = null;
+    form.note_id = null;
+    notesSearchQuery.value = '';
+    isNotesDropdownOpen.value = false;
+};
+
 // Handle click outside to close dropdown
 const handleClickOutside = (event) => {
     if (userSelectRef.value && !userSelectRef.value.contains(event.target)) {
         isDropdownOpen.value = false;
+    }
+    if (notesDropdownRef.value && !notesDropdownRef.value.contains(event.target)) {
+        isNotesDropdownOpen.value = false;
     }
 };
 
@@ -136,6 +168,24 @@ const filteredUsers = computed(() => {
         user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
+});
+
+// Filtered notes based on search
+const filteredNotes = computed(() => {
+    if (!notesSearchQuery.value) return props.notes;
+    return props.notes.filter(note =>
+        note.content.toLowerCase().includes(notesSearchQuery.value.toLowerCase())
+    );
+});
+
+// Get selected note display text
+const selectedNoteDisplay = computed(() => {
+    if (!selectedNote.value) return '';
+    // Truncate long text for display in input
+    const maxLength = 50;
+    return selectedNote.value.content.length > maxLength
+        ? selectedNote.value.content.substring(0, maxLength) + '...'
+        : selectedNote.value.content;
 });
 
 // Submit form
@@ -263,8 +313,7 @@ const submit = () => {
                                         <option disabled value="">
                                             Pilih Prioritas Pekerjaan
                                         </option>
-                                        <option v-for="priority in workPriorities" :key="priority"
-                                            :value="priority">
+                                        <option v-for="priority in workPriorities" :key="priority" :value="priority">
                                             {{ priority }}
                                         </option>
                                     </select>
@@ -310,8 +359,7 @@ const submit = () => {
                                         <option disabled value="">
                                             Pilih Kategori Permintaan
                                         </option>
-                                        <option v-for="category in requestCategories" :key="category"
-                                            :value="category">
+                                        <option v-for="category in requestCategories" :key="category" :value="category">
                                             {{ category }}
                                         </option>
                                     </select>
@@ -428,7 +476,7 @@ const submit = () => {
 
                             <!-- ERF Validated Date -->
                             <div class="mb-2">
-                                <InputLabel for="erf_validated_date" value="Tanggal Validasi ERF" />
+                                <InputLabel for="erf_validated_date" value="Tanggal ERF Disahkan" />
                                 <TextInput id="erf_validated_date" type="date" v-model="form.erf_validated_date"
                                     class="mt-1 block w-full" />
                                 <InputError :message="form.errors.erf_validated_date" />
@@ -489,26 +537,79 @@ const submit = () => {
                                 </div>
                                 <InputError :message="form.errors.project_status" />
                             </div>
-                            <!-- Notes / Catatan -->
-                            <div class="mb-2 relative">
-                                <InputLabel for="note_id">
+
+                            <!-- Notes / Catatan - Floating Searchable Dropdown (Dropdown di atas input) -->
+                            <div class="mb-2 relative" ref="notesDropdownRef">
+                                <InputLabel for="notes_search">
                                     <span>Catatan <span class="text-gray-400">(opsional)</span></span>
                                 </InputLabel>
                                 <div class="relative">
-                                    <select id="note_id" v-model="form.note_id"
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10">
-                                        <option value="null">
-                                            Pilih Catatan
-                                        </option>
-                                        <option v-for="note in notes" :key="note.id" :value="note.id">
-                                            {{ note.content }}
-                                        </option>
-                                    </select>
-                                    <!-- Ikon panah bawah -->
+                                    <!-- Dropdown di atas input -->
+                                    <div
+                                        v-if="isNotesDropdownOpen"
+                                        class="absolute z-50 w-full bottom-full mb-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                                    >
+                                        <!-- No results -->
+                                        <div v-if="filteredNotes.length === 0" class="p-3 text-center text-gray-500">
+                                            {{ notesSearchQuery ? 'Tidak ada catatan yang ditemukan' : 'Ketik untuk mencari catatan' }}
+                                        </div>
+                                        <!-- Notes list -->
+                                        <div v-else>
+                                            <button
+                                                v-for="note in filteredNotes"
+                                                :key="note.id"
+                                                type="button"
+                                                @click="selectNote(note)"
+                                                class="w-full px-3 py-2 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                                                :class="{ 'bg-blue-50': selectedNote && selectedNote.id === note.id }"
+                                            >
+                                                <div class="whitespace-normal leading-relaxed text-sm text-gray-900 break-words">
+                                                    {{ note.content }}
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input
+                                        id="notes_search"
+                                        type="text"
+                                        v-model="notesSearchQuery"
+                                        @focus="handleNotesInputFocus"
+                                        @input="isNotesDropdownOpen = true"
+                                        placeholder="Cari dan pilih catatan..."
+                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 pr-10"
+                                        autocomplete="off"
+                                    />
+                                    <!-- Clear button -->
+                                    <button
+                                        v-if="selectedNote"
+                                        type="button"
+                                        @click="clearNotesSelection"
+                                        class="absolute inset-y-0 right-8 flex items-center"
+                                    >
+                                        <i class="fas fa-times text-gray-400 hover:text-gray-600"></i>
+                                    </button>
+                                    <!-- Search icon -->
                                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i class="fa fa-chevron-down text-gray-400"></i>
+                                        <i class="fas fa-search text-gray-400"></i>
                                     </div>
                                 </div>
+                                <!-- Selected note display -->
+                                <div v-if="selectedNote" class="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
+                                    <div class="flex items-center space-x-2">
+                                        <div
+                                            class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs font-semibold text-white"
+                                        >
+                                            <i class="fas fa-sticky-note"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-xs text-blue-600 font-medium mb-1">Catatan terpilih:</div>
+                                            <div class="text-sm text-blue-900 whitespace-normal leading-relaxed break-words">
+                                                {{ selectedNote.content }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-500">Dapat diisi nanti jika belum ada keputusan</span>
                                 <InputError :message="form.errors.note_id" />
                             </div>
                         </div>
@@ -516,13 +617,15 @@ const submit = () => {
                         <!-- Submit Button -->
                         <div class="mt-4">
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 disabled:opacity-25 transition ease-in-out duration-150">
-                                Simpan Pekerjaan Baru
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus
+                                :shadow-outline-blue transition ease-in-out duration-150">
+                                <i class="fas fa-save mr-2"></i>
+                                Simpan Pekerjaan    
                             </button>
                         </div>
-                    </form>
+                    </form> 
                 </div>
-            </div>
+            </div>  
         </div>
     </div>
 </template>

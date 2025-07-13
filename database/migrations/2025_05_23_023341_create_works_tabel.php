@@ -26,26 +26,22 @@ return new class extends Migration
             $table->text('description');
             $table->date('entry_date');
 
-            // Informasi Dasar
             $table->foreignId('plant_id')->nullable()->constrained('plants')->onDelete('set null');
             $table->string('requester_unit', 100)->nullable();
             $table->enum('work_priority', ['HIGH', 'MEDIUM'])->nullable();
             $table->enum('work_type', ['FEED/DED', 'Kajian Engineering', 'Technical Assist'])->nullable();
             $table->enum('request_category', ['CAPEX', 'OPEX'])->nullable();
 
-            // Timeline
             $table->date('erf_approved_date')->nullable();
             $table->date('clarification_date')->nullable();
             $table->date('erf_validated_date')->nullable();
             $table->date('initiating_target_date')->nullable();
 
-            // EAT (Executing Actual/Target)
             $table->date('executing_start_date')->nullable();
             $table->date('executing_target_date')->nullable();
             $table->date('executing_actual_date')->nullable();
 
-            // Status
-            $table->enum('verification_status', ['Belum Verifikasi', 'Finish Verifikasi', 'In Progress Verifikasi'])->nullable();
+            $table->enum('verification_status', ['Belum Verifikasi', 'In Progress Verifikasi','Finish Verifikasi'])->nullable();
             $table->enum('project_status', ['Not Started', 'In Progress', 'Finish', 'On Hold', 'Cancelled'])->nullable();
             $table->enum('current_phase', ['Not started', 'Initiating', 'Executing', 'Closing', 'Hold', 'Reject'])->nullable();
             
@@ -73,17 +69,17 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // work progress table
-        Schema::create('work_progress', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('work_id')->constrained('works')->onDelete('cascade');
-            $table->text('progress_description');
-            $table->integer('progress_percentage')->default(0);
-            $table->date('progress_date');
-            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('attachment_url')->nullable();
-            $table->timestamps();
-        });
+        // // work progress table
+        // Schema::create('work_progress', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('work_id')->constrained('works')->onDelete('cascade');
+        //     $table->text('progress_description');
+        //     $table->integer('progress_percentage')->default(0);
+        //     $table->date('progress_date');
+        //     $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+        //     $table->string('attachment_url')->nullable();
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -91,9 +87,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('noted');
         Schema::dropIfExists('works');
         Schema::dropIfExists('erf_documents');
-        Schema::dropIfExists('pic_pekerjaan');
-        Schema::dropIfExists('work_progress');
+        // Schema::dropIfExists('pic_pekerjaan');
+        // Schema::dropIfExists('work_progress');
     }
 };

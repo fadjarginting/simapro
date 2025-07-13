@@ -120,7 +120,7 @@ onMounted(() => {
         </div>
 
         <!-- CONTENT with fixed width -->
-        <div ref="sideElement" class="py-2 relative flex-1 overflow-auto w-64">
+        <div ref="sideElement" class="py-2 relative flex-1 overflow-y-auto w-64">
             <ul class="flex flex-col pl-0 mb-0">
                 <!-- Dashboard -->
                 <li v-if="hasPermission('dashboard.view')" :class="[
@@ -457,3 +457,24 @@ onMounted(() => {
         </div>
     </aside>
 </template>
+
+
+<style scoped>
+.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>

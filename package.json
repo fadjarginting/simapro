@@ -24,6 +24,7 @@
         "chart.js": "^4.4.8",
         "d3": "^7.9.0",
         "perfect-scrollbar": "^1.5.6",
-        "sweetalert2": "^11.19.1"
+        "sweetalert2": "^11.19.1",
+        "vue-multiselect": "^3.2.0"
     }
 }

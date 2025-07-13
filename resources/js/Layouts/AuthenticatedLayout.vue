@@ -22,7 +22,7 @@ onMounted(() => {
     <SideBar />
     <!-- Page Content -->
     <main ref="mainElement"
-        class="relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl overflow-y-auto">
+        class="py-4 relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl overflow-y-auto">
         <NavBar />
         <slot />
     </main>

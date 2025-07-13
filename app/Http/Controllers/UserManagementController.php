@@ -155,4 +155,32 @@ class UserManagementController extends Controller
             'data' => $users
         ]);
     }
+
+    // ambil user dengan discipline terpilih
+    public function getUsersByDiscipline(Discipline $discipline)
+    {
+        $users = User::where('discipline_id', $discipline->id)
+            ->select('id', 'name', 'email')
+            ->get();
+        
+        return response()->json([
+            'data' => $users
+        ]);
+    }
+
+    // ambil semua user yang memiliki role Lead dan memiliki discipline tertentu
+    public function getUsersForDiscipline(Request $request)
+    {
+        $disciplineId = $request->input('discipline_id');
+        $users = User::whereHas('roles', function($query) {
+            $query->where('name', 'lead');
+        })
+        ->where('discipline_id', $disciplineId)
+        ->select('id', 'name', 'email')
+        ->get();
+
+        return response()->json([
+            'data' => $users
+        ]);
+    }
 }

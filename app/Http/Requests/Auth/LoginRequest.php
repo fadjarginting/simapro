@@ -29,7 +29,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'captcha_answer' => ['required', 'numeric'],
+            'captcha_answer' => ['required', 'integer'],
         ];
     }
 
@@ -40,7 +40,7 @@ class LoginRequest extends FormRequest
     {
         return [
             'captcha_answer.required' => 'Jawaban CAPTCHA harus diisi.',
-            'captcha_answer.numeric' => 'Jawaban CAPTCHA harus berupa angka.',
+            'captcha_answer.integer' => 'Jawaban CAPTCHA harus berupa angka.',
         ];
     }
 
@@ -79,7 +79,7 @@ class LoginRequest extends FormRequest
 
         if (!$sessionAnswer || (int)$userAnswer !== (int)$sessionAnswer) {
             throw ValidationException::withMessages([
-                'captcha_answer' => 'Jawaban salah. Silakan coba lagi.',
+                'captcha_answer' => 'Jawaban CAPTCHA salah. Silakan coba lagi.',
             ]);
         }
 

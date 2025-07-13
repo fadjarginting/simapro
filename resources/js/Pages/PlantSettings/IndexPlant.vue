@@ -276,19 +276,16 @@ const changePage = (url) => {
 </script>
 
 <template>
-
     <Head>
         <title>Plant Settings</title>
     </Head>
-
     <template name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
             Plant Settings
         </h2>
     </template>
-
-    <div class="container mx-auto px-4 py-12">
-        <div class="mx-auto max-w-full sm:px-6 lg:px-8">
+    <div class=" py-6">
+        <div class="mx-auto sm:px-6 lg:px-8 ">
             <div class="flex flex-wrap -mx-3">
                 <div class="flex-none w-full max-w-full px-3">
                     <div
@@ -409,54 +406,52 @@ const changePage = (url) => {
         <!-- Add Plant Modal -->
         <Modal :show="showAddPlantModal" @close="showAddPlantModal = false" maxWidth="md">
             <div class="p-6">
-            <h2 class="text-lg font-semibold mb-4">Add New Plant</h2>
-            <form @submit.prevent="submitCreateForm">
-                <div class="mb-4">
-                <InputLabel for="plantName" value="Plant Name" />
-                <TextInput id="name" type="text" class="mt-1 block w-full" autofocus v-model="createForm.name"
-                    required />
-                <InputError :message="createForm.errors.name" />
-                </div>
+                <h2 class="text-lg font-semibold mb-4">Add New Plant</h2>
+                <form @submit.prevent="submitCreateForm">
+                    <div class="mb-4">
+                        <InputLabel for="plantName" value="Plant Name" />
+                        <TextInput id="name" type="text" class="mt-1 block w-full" autofocus v-model="createForm.name"
+                            required />
+                        <InputError :message="createForm.errors.name" />
+                    </div>
 
-                <div class="flex justify-end gap-2">
-                <button type="submit" class="bg-transparent px-4 rounded-lg text-blue-500 whitespace-nowrap text-center
-                    transition duration-300 hover:bg-blue-500 hover:text-white py-1"
-                    :disabled="createForm.processing">
-                    <i class="fas fa-save"></i> Save
-                </button>
-                <button type="button" @click="cancelCreate" class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center
+                    <div class="flex justify-end gap-2">
+                        <button type="submit" class="bg-transparent px-4 rounded-lg text-blue-500 whitespace-nowrap text-center
+                    transition duration-300 hover:bg-blue-500 hover:text-white py-1" :disabled="createForm.processing">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button type="button" @click="cancelCreate" class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center
                     transition duration-300 hover:bg-red-500 hover:text-white py-1">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-                </div>
-            </form>
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
         </Modal>
 
         <!-- Edit Plant Modal -->
         <Modal :show="showEditPlantModal" @close="showEditPlantModal = false" maxWidth="md">
             <div class="p-6">
-            <h2 class="text-lg font-semibold mb-4">Edit Plant</h2>
-            <form @submit.prevent="submitEditForm">
-                <div class="mb-4">
-                <InputLabel for="editPlantName" value="Plant Name" />
-                <TextInput id="editName" type="text" class="mt-1 block w-full" autofocus v-model="editForm.name"
-                    required />
-                <InputError :message="editForm.errors.name" />
-                </div>
+                <h2 class="text-lg font-semibold mb-4">Edit Plant</h2>
+                <form @submit.prevent="submitEditForm">
+                    <div class="mb-4">
+                        <InputLabel for="editPlantName" value="Plant Name" />
+                        <TextInput id="editName" type="text" class="mt-1 block w-full" autofocus v-model="editForm.name"
+                            required />
+                        <InputError :message="editForm.errors.name" />
+                    </div>
 
-                <div class="flex justify-end gap-2">
-                <button type="submit" class="bg-transparent px-4 rounded-lg text-blue-500 whitespace-nowrap text-center
-                    transition duration-300 hover:bg-blue-500 hover:text-white py-1"
-                    :disabled="editForm.processing">
-                    <i class="fas fa-save"></i> Update
-                </button>
-                <button type="button" @click="cancelEdit" class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center
+                    <div class="flex justify-end gap-2">
+                        <button type="submit" class="bg-transparent px-4 rounded-lg text-blue-500 whitespace-nowrap text-center
+                    transition duration-300 hover:bg-blue-500 hover:text-white py-1" :disabled="editForm.processing">
+                            <i class="fas fa-save"></i> Update
+                        </button>
+                        <button type="button" @click="cancelEdit" class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center
                     transition duration-300 hover:bg-red-500 hover:text-white py-1">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-                </div>
-            </form>
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
         </Modal>
     </div>

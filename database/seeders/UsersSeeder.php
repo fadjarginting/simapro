@@ -21,13 +21,14 @@ class UsersSeeder extends Seeder
             'name' => 'Saya',
             'email' => 'saya@example.com',
         ]);
-        $admin->assignRole('admin');
+        $admin->assignRole('Admin');
 
         // Create a user with the 'user' role
         $user = User::factory()->create([
             'name' => 'aan',
             'email' => 'aan@example.com',
+            'discipline_id' => 1, // Assuming discipline_id is required
         ]);
-        $user->assignRole('user');
+        $user->assignRole('Lead');
     }
 }

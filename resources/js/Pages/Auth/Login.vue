@@ -114,15 +114,7 @@ const refreshCaptcha = async () => {
                                     <span class="text-lg font-mono font-bold text-gray-700 flex-1">
                                         {{ captchaData.question }}
                                     </span>
-                                    <button type="button" @click="refreshCaptcha" :disabled="isRefreshing"
-                                        class="ml-3 p-2 text-blue-600 hover:text-blue-800 disabled:opacity-50 flex-shrink-0"
-                                        title="Refresh CAPTCHA">
-                                        <svg :class="{ 'animate-spin': isRefreshing }" class="w-5 h-5" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                    </button>
+                                   
                                 </div>
 
                                 <TextInput id="captcha" type="text" inputmode="numeric" pattern="[0-9]*" class="w-full"

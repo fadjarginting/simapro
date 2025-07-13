@@ -63,21 +63,21 @@ const timelineItems = computed(() => [
         completed: !!props.work.clarification_date
     },
     {
-        label: 'ERF Divalidasi',
+        label: 'ERF Disahkan',
         field: 'erf_validated_date',
         date: props.work.erf_validated_date,
         color: 'bg-purple-600',
         completed: !!props.work.erf_validated_date
     },
     {
-        label: 'Fase Inisiasi',
+        label: 'Fase Inisiasi Selesai',
         field: 'initiating_target_date',
         date: props.work.initiating_target_date,
         color: 'bg-indigo-600',
         completed: !!props.work.initiating_target_date
     },
     {
-        label: 'Fase Executing',
+        label: 'Start Fase Executing',
         field: 'executing_start_date',
         date: props.work.executing_start_date,
         color: 'bg-orange-600',
@@ -91,7 +91,7 @@ const timelineItems = computed(() => [
         completed: !!props.work.executing_target_date
     },
     {
-        label: 'Penyelesaian Aktual',
+        label: 'Realisasi Selesai',
         field: 'executing_actual_date',
         date: props.work.executing_actual_date,
         color: 'bg-emerald-600',

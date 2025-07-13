@@ -109,4 +109,13 @@ class DisciplinesController extends Controller
             return redirect()->back()->with('error', 'Failed to delete discipline: ' . $e->getMessage());
         }
     }
+
+    /**
+     * get all disciplines for select options.
+     */
+    public function getAllDisciplines()
+    {
+        $disciplines = Discipline::all(['id', 'name']);
+        return response()->json($disciplines);
+    }
 }

@@ -5,10 +5,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Contracts\Role;
 use Illuminate\Foundation\Application;
+use App\Http\Controllers\EatController;
 use App\Http\Controllers\ErfController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\WorkController;
-use App\Http\Controllers\NotedController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\MorningController;
@@ -21,6 +21,7 @@ use App\Http\Controllers\DisciplinesController;
 use App\Http\Controllers\EatScheduleController;
 use App\Http\Controllers\WorkDocumentController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\ActivityProgressController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Auth/Login', [
@@ -65,6 +66,10 @@ Route::middleware(['auth'])->prefix('users')->name('users.')->group(function () 
     Route::delete('/{user}', [UserManagementController::class, 'destroy'])
         ->middleware('permission:user_management.delete')
         ->name('destroy');
+    Route::get('/by-discipline/{discipline}', [UserManagementController::class, 'getUsersByDiscipline'])
+        ->name('by-discipline');
+    Route::get('/for-discipline', [UserManagementController::class, 'getUsersForDiscipline'])
+        ->name('for-discipline');
 });
 
 // works management
@@ -96,10 +101,32 @@ Route::prefix('works/{work}/documents')->name('works.documents.')->group(functio
     Route::post('/', [WorkDocumentController::class, 'store'])->name('store');
     Route::get('/{document}', [WorkDocumentController::class, 'show'])->name('show');
     Route::get('/{document}/download', [WorkDocumentController::class, 'download'])->name('download');
-    Route::delete('/{document}', [WorkDocumentController::class, 'destroy'])->name('destroy');
-    
+    Route::delete('/{document}', [WorkDocumentController::class, 'destroy'])->name('destroy'); 
     // API endpoint untuk mendapatkan documents sebagai JSON
     Route::get('/api/list', [WorkDocumentController::class, 'getDocuments'])->name('api.list');
+});
+
+// EAT Management
+Route::middleware(['auth'])->prefix('eat')->name('eat.')->group(function () {
+    Route::post('/', [EatController::class, 'store'])
+        ->name('store');
+    Route::put('/{eat}', [EatController::class, 'update'])
+        ->name('update');
+    Route::post('/{eat}/approve', [EatController::class, 'approve'])
+        ->name('approve');
+    Route::get('/by-work/{workId}', [EatController::class, 'getEATByWork'])
+        ->name('by-work');
+    Route::get('/{eat}/export-pdf', [EatController::class, 'exportPdf'])
+        ->name('export-pdf');
+    Route::get('/disciplines', [EatController::class, 'getDisciplines'])
+        ->name('disciplines');
+    Route::get('/users', [EatController::class, 'getUsers'])
+        ->name('users');
+});
+
+Route::middleware(['auth'])->prefix('activities')->name('activities.')->group(function () {
+    Route::post('/{activity}/progress', [ActivityProgressController::class, 'addProgress'])
+        ->name('add-progress');
 });
 
 // Search users API
@@ -115,6 +142,8 @@ Route::middleware(['auth'])->prefix('disciplines')->name('disciplines.')->group(
         ->name('update');
     Route::delete('/{discipline}', [DisciplinesController::class, 'destroy'])
         ->name('destroy');
+    Route::get('/api/all', [DisciplinesController::class, 'getAllDisciplines'])
+        ->name('api.all');
 });
 
 

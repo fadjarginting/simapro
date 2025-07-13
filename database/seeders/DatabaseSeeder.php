@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Note;
 use App\Models\Plant;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -15,9 +16,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // call RolesTableSeeder
+        $this->call(DisciplineSeeder::class);
         $this->call(PermissionsSeeder::class);
         $this->call(UsersSeeder::class);
         $this->call(PlantSeeder::class);
+        $this->call(NotedSeeder::class);
         // $this->call(PrioritySeeder::class);
 
 
