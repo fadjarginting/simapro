@@ -2,18 +2,15 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import EATCreateModal from './EATCreateModal.vue';
 import ActivityProgressModal from './ActivityProgressModal.vue';
-import EATApprovalModal from './EATApprovalModal.vue'; // Import the new approval modal
+import ActivityProgressHistoryModal from './ActivityProgressHistoryModal.vue';
+import EATApprovalModal from './EATApprovalModal.vue';
 import axios from 'axios';
 import { usePage } from "@inertiajs/vue3";
+import { usePermissions } from "@/composables/permissions";
 
 // Composable untuk permissions
-function usePermissions() {
-    const hasRole = (name) => usePage().props.auth.user.data.roles.includes(name);
-    const hasPermission = (name) => usePage().props.auth.user.data.permissions.includes(name);
-    return { hasRole, hasPermission };
-}
 
-// Props from parent component
+
 const props = defineProps({
     work: {
         type: Object,
@@ -21,7 +18,6 @@ const props = defineProps({
     }
 });
 
-// Reactive data
 const eatData = ref(null);
 const disciplines = ref([]);
 const users = ref([]);
@@ -30,22 +26,20 @@ const error = ref(null);
 const showEatModal = ref(false);
 const refreshTrigger = ref(0);
 
-// Updated approval modal state
 const showApprovalModal = ref(false);
 const selectedApproval = ref(null);
 const approvalAction = ref('');
 
-// Progress modal state
 const showProgressModal = ref(false);
 const selectedActivity = ref(null);
 
-// Permission composable
+const showProgressHistoryModal = ref(false);
+const selectedActivityForHistory = ref(null);
+
 const { hasRole, hasPermission } = usePermissions();
 
-// Computed properties
 const hasEAT = computed(() => !!eatData.value);
 
-// Permission computed properties
 const currentUser = computed(() => usePage().props.auth.user.data);
 
 const isWorkLead = computed(() => {
@@ -53,20 +47,29 @@ const isWorkLead = computed(() => {
         props.work.lead_engineer?.id === currentUser.value.id;
 });
 
-const canCreateEAT = computed(() => {
-    return isWorkLead.value;
-});
+const canCreateEAT = computed(() => isWorkLead.value);
 
 const canUpdateEAT = computed(() => {
-    return isWorkLead.value && eatData.value?.status !== 'submitted' && eatData.value?.status !== 'approved';
+    // The work lead can edit the EAT if it exists and is in a state that allows modification (e.g., draft or rejected).
+    return isWorkLead.value && hasEAT.value && (eatData.value.status === 'draft' || eatData.value.status === 'rejected');
 });
 
 const canViewEAT = computed(() => {
-    return isWorkLead.value || hasPermission('eat_schedule.view') || hasPermission('eat_schedule.view');
-});
-
-const canManageEATActivities = computed(() => {
-    return isWorkLead.value;
+    // This check allows anyone with the base permission or the work lead to attempt to view.
+    // The backend will ultimately decide if they can see the specific EAT data.
+    // We add a check for PIC status after data is loaded.
+    if (eatData.value) {
+        const isPic = eatData.value.activities?.some(activity =>
+            activity.pics?.some(pic => pic.id === currentUser.value.id)
+        );
+        const isApprover = eatData.value.approvals?.some(approval =>
+            approval.approver_id === currentUser.value.id
+        );
+        return isWorkLead.value || hasPermission('manajemen_pekerjaan.view') || isPic || isApprover;
+    }
+    // Before data is loaded, we allow the fetch to proceed if the user is lead or has general view permission.
+    // The backend will return 403/404 if they are not involved (e.g., as PIC/Approver) and lack general permissions.
+    return isWorkLead.value || hasPermission('manajemen_pekerjaan.view');
 });
 
 const canUpdateProgress = computed(() => {
@@ -79,91 +82,85 @@ function isPicForActivity(activity) {
     );
 }
 
-// Check if current user can approve for specific discipline
 const canApproveForDiscipline = (disciplineId) => {
     if (!eatData.value?.approvals) return false;
-
     const approval = eatData.value.approvals.find(a =>
         a.discipline_id === disciplineId &&
         a.approver_id === currentUser.value.id
     );
-
     return approval && approval.status === 'pending';
 };
 
-// Check if current user has any pending approvals
 const hasPendingApprovals = computed(() => {
     if (!eatData.value?.approvals) return false;
-
     return eatData.value.approvals.some(approval =>
         approval.approver_id === currentUser.value.id &&
         approval.status === 'pending'
     );
 });
 
-// Get pending approvals for current user
 const myPendingApprovals = computed(() => {
     if (!eatData.value?.approvals) return [];
-
     return eatData.value.approvals.filter(approval =>
         approval.approver_id === currentUser.value.id &&
         approval.status === 'pending'
     );
 });
 
-// Check if EAT can be submitted
 const canSubmitEAT = computed(() => {
     return isWorkLead.value &&
         eatData.value?.status === 'draft' &&
         eatData.value?.activities?.length > 0;
 });
 
-// Group activities by discipline
+// Warna progress bar berbeda-beda
+const progressBarColors = [
+    'bg-gradient-to-r from-blue-400 to-blue-600',
+    'bg-gradient-to-r from-green-400 to-green-600',
+    'bg-gradient-to-r from-pink-400 to-pink-600',
+    'bg-gradient-to-r from-yellow-400 to-yellow-600',
+    'bg-gradient-to-r from-purple-400 to-purple-600',
+    'bg-gradient-to-r from-teal-400 to-teal-600',
+    'bg-gradient-to-r from-orange-400 to-orange-600',
+    'bg-gradient-to-r from-indigo-400 to-indigo-600',
+    'bg-gradient-to-r from-red-400 to-red-600',
+    'bg-gradient-to-r from-cyan-400 to-cyan-600',
+];
+const getProgressBarColor = (idx) => progressBarColors[idx % progressBarColors.length];
+
 const groupedActivities = computed(() => {
     if (!eatData.value?.activities) return {};
-
     const grouped = {};
     eatData.value.activities.forEach(activity => {
-        const disciplineName = activity.discipline?.name || 'Tidak Ada Disiplin';
+        const disciplineName = activity.discipline || 'Tidak Ada Disiplin';
         if (!grouped[disciplineName]) {
             grouped[disciplineName] = [];
         }
         grouped[disciplineName].push(activity);
     });
-
     return grouped;
 });
 
-// Calculate overall progress
 const overallProgress = computed(() => {
     if (!eatData.value?.activities?.length) return 0;
-
     const totalProgress = eatData.value.activities.reduce((sum, activity) => {
         return sum + (activity.latest_progress?.percentage || 0);
     }, 0);
-
     return (totalProgress / eatData.value.activities.length).toFixed(2);
 });
 
-// Methods
 const fetchEATData = async (showLoadingState = true) => {
     if (!canViewEAT.value) {
         error.value = 'Anda tidak memiliki izin untuk melihat EAT';
         return;
     }
-
     try {
-        if (showLoadingState) {
-            loading.value = true;
-        }
+        if (showLoadingState) loading.value = true;
         error.value = null;
-
         const response = await axios.get(route('eat.by-work', props.work.id), {
             params: { _t: Date.now() }
         });
-
         eatData.value = response.data;
-
     } catch (err) {
         if (err.response?.status === 404) {
             eatData.value = null;
@@ -174,9 +171,7 @@ const fetchEATData = async (showLoadingState = true) => {
             console.error('Error fetching EAT data:', err);
         }
     } finally {
-        if (showLoadingState) {
-            loading.value = false;
-        }
+        if (showLoadingState) loading.value = false;
     }
 };
 
@@ -188,7 +183,6 @@ const openModal = async () => {
     showEatModal.value = true;
 };
 
-// Progress modal methods
 const openProgressModal = (activity) => {
     if (!isPicForActivity || !canUpdateProgress.value) {
         error.value = 'Anda tidak memiliki izin untuk mengelola progress aktivitas ini';
@@ -203,22 +197,26 @@ const closeProgressModal = () => {
     selectedActivity.value = null;
 };
 
+const openProgressHistoryModal = (activity) => {
+    selectedActivityForHistory.value = activity;
+    showProgressHistoryModal.value = true;
+};
+
+const closeProgressHistoryModal = () => {
+    showProgressHistoryModal.value = false;
+    selectedActivityForHistory.value = null;
+};
+
 const handleProgressSuccess = async (data) => {
     try {
-        // Update local state jika diperlukan
         if (data.activity && eatData.value?.activities) {
             const activityIndex = eatData.value.activities.findIndex(a => a.id === data.activity.id);
             if (activityIndex !== -1) {
                 eatData.value.activities[activityIndex].progress = data.progress.progress_percentage;
             }
         }
-
-        // Refresh data untuk memastikan sinkronisasi
         await fetchEATData(false);
-
-        // Tutup modal
         closeProgressModal();
-
     } catch (error) {
         console.error('Error handling progress success:', error);
         error.value = 'Gagal memperbarui progress';
@@ -228,25 +226,18 @@ const handleProgressSuccess = async (data) => {
 const handleProgressError = (errorMessage) => {
     console.error('Progress error:', errorMessage);
     error.value = errorMessage;
-    // Modal tetap terbuka untuk memungkinkan user mencoba lagi
+    showProgressModal.value = true;
 };
 
 const handleEATUpdated = async (updatedData = null) => {
     try {
         showEatModal.value = false;
-
-        if (updatedData) {
-            eatData.value = updatedData;
-        }
-
+        if (updatedData) eatData.value = updatedData;
         await fetchEATData(false);
-
         setTimeout(async () => {
             await fetchEATData(false);
         }, 300);
-
         console.log('EAT berhasil diperbarui');
-
     } catch (error) {
         console.error('Error saat refresh data:', error);
     }
@@ -254,14 +245,9 @@ const handleEATUpdated = async (updatedData = null) => {
 
 const handleFormSubmitSuccess = async (response) => {
     try {
-        if (response && response.data) {
-            eatData.value = response.data;
-        }
-
+        if (response && response.data) eatData.value = response.data;
         showEatModal.value = false;
         await fetchEATData(false);
-        // showSuccessNotification('EAT berhasil disimpan');
-
     } catch (error) {
         console.error('Error handling form success:', error);
     }
@@ -271,20 +257,14 @@ const handleProgressUpdateSuccess = async (activityId, newProgress) => {
     try {
         if (eatData.value && eatData.value.activities) {
             const activity = eatData.value.activities.find(a => a.id === activityId);
-            if (activity) {
-                activity.progress = newProgress;
-            }
+            if (activity) activity.progress = newProgress;
         }
-
         await fetchEATData(false);
-        showSuccessNotification('Progress berhasil diperbarui');
-
     } catch (error) {
         console.error('Error updating progress:', error);
     }
 };
 
-// Updated approval methods for the new modal
 const openApprovalModal = (approval, action) => {
     selectedApproval.value = approval;
     approvalAction.value = action;
@@ -299,12 +279,10 @@ const closeApprovalModal = () => {
 
 const handleApprovalSuccess = async (data) => {
     try {
-        // Update local state
         if (data.approval && eatData.value?.approvals) {
             const approvalIndex = eatData.value.approvals.findIndex(
                 a => a.id === data.approval.id
             );
-
             if (approvalIndex !== -1) {
                 eatData.value.approvals[approvalIndex] = {
                     ...eatData.value.approvals[approvalIndex],
@@ -314,18 +292,8 @@ const handleApprovalSuccess = async (data) => {
                 };
             }
         }
-
-        // Close modal
         closeApprovalModal();
-
-        // // Show success notification
-        // showSuccessNotification(
-        //     `Persetujuan berhasil ${data.action === 'approved' ? 'disetujui' : 'ditolak'}`
-        // );
-
-        // Refresh data
         await fetchEATData(false);
-
     } catch (error) {
         console.error('Error handling approval success:', error);
         error.value = 'Gagal memproses persetujuan';
@@ -375,7 +343,6 @@ const getApprovalIcon = (status) => {
     return icons[status] || 'fas fa-question';
 };
 
-// Watch untuk auto-refresh ketika work ID berubah
 watch(
     () => props.work.id,
     async (newWorkId, oldWorkId) => {
@@ -385,17 +352,14 @@ watch(
     }
 );
 
-// Watch untuk refresh trigger
 watch(refreshTrigger, async () => {
     await fetchEATData(false);
 });
 
-// Lifecycle
 onMounted(() => {
     fetchEATData();
 });
 
-// Expose methods untuk digunakan dari parent component
 defineExpose({
     fetchEATData,
     refreshTrigger
@@ -403,93 +367,74 @@ defineExpose({
 </script>
 
 <template>
-    <div class="bg-white border rounded-lg shadow-sm">
-        <!-- Permission Denied -->
-        <div v-if="!canViewEAT" class="p-8 text-center">
-            <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i class="fas fa-lock text-red-500"></i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Akses Dibatasi</h3>
-            <p class="text-sm text-gray-500">
-                Anda tidak memiliki izin untuk melihat EAT ini. Hanya lead pekerjaan yang dapat mengelola EAT.
-            </p>
-        </div>
-
+    <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
         <!-- Loading State -->
-        <div v-else-if="loading" class="p-8 text-center">
-            <div class="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3">
-            </div>
+        <div v-if="loading" class="p-6 text-center">
+            <div class="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
             <p class="text-sm text-gray-500">Memuat data EAT...</p>
         </div>
 
         <!-- Error State -->
-        <div v-else-if="error" class="p-8 text-center">
-            <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i class="fas fa-exclamation-triangle text-red-500"></i>
+        <div v-else-if="error" class="p-6 text-center">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow">
+            <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Gagal Memuat Data</h3>
-            <p class="text-sm text-gray-500 mb-4">{{ error }}</p>
-            <button v-if="canViewEAT" @click="fetchEATData"
-                class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition">
-                <i class="fas fa-refresh text-xs"></i>
-                Coba Lagi
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">Gagal Memuat Data</h3>
+            <p class="text-sm text-gray-500 mb-3">{{ error }}</p>
+            <button @click="fetchEATData"
+            class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 shadow transition">
+            <i class="fas fa-refresh text-xs"></i>
+            Coba Lagi
             </button>
         </div>
 
         <!-- Content -->
         <div v-else>
             <!-- Header -->
-            <div class="border-b p-4">
+            <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-tasks text-white text-sm"></i>
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                            <i class="fas fa-tasks text-white text-lg"></i>
                         </div>
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900">
+                            <h2 class="text-xl font-bold text-gray-900 tracking-tight">
                                 Engineering Assignment Task
                             </h2>
-                            <div class="flex items-center gap-2 mt-1">
+                            <div class="flex items-center gap-2 mt-1 flex-wrap">
                                 <span :class="getStatusClass(eatData?.status)"
-                                    class="px-2 py-1 text-xs font-medium rounded-full">
+                                    class="px-2.5 py-0.5 text-xs font-semibold rounded-full shadow">
                                     {{ eatData?.status || 'draft' }}
                                 </span>
-                                <span class="text-xs text-gray-500">
-                                    <i class="fas fa-calendar-alt text-gray-400 text-xs"></i>
-                                    <span class="text-xs text-gray-500"> Tanggal Mulai: {{
-                                        formatDate(eatData?.start_date) || 'N/A' }}</span>
-                                    <span class="text-xs text-gray-500"> | Tanggal Selesai: {{
-                                        formatDate(eatData?.end_date) || 'N/A' }}</span>
+                                <span class="text-xs text-gray-500 flex items-center gap-1">
+                                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                                    <span>{{ formatDate(eatData?.start_date) || 'N/A' }}</span>
+                                    <span>- {{ formatDate(eatData?.end_date) || 'N/A' }}</span>
                                 </span>
-                                <span v-if="hasEAT" class="text-xs text-gray-500">
-                                    Progress: {{ overallProgress }}%
+                                <span v-if="hasEAT" class="text-xs text-gray-500 flex items-center gap-1">
+                                    <i class="fas fa-chart-line text-blue-400"></i>
+                                    Progress: <span class="font-semibold">{{ overallProgress }}%</span>
                                 </span>
                             </div>
                         </div>
                     </div>
-
                     <div class="flex gap-2">
                         <button v-if="canUpdateEAT" @click="openModal"
-                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition">
                             <i class="fas fa-edit text-xs"></i>
                             Edit
-                        </button>
-                        <button v-else-if="canCreateEAT && !hasEAT" @click="openModal"
-                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
-                            <i class="fas fa-plus text-xs"></i>
-                            Buat EAT
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Permission info banner -->
-            <div v-if="!isWorkLead && hasEAT" class="bg-blue-50 border-b p-3">
-                <div class="flex items-center gap-2 text-blue-700">
-                    <i class="fas fa-info-circle text-xs"></i>
-                    <span class="text-xs">
+            <div v-if="!isWorkLead && hasEAT" class="bg-blue-50 border-b p-2">
+                <div class="flex items-center gap-2 text-blue-700 text-xs">
+                    <i class="fas fa-info-circle"></i>
+                    <span>
                         Hanya lead pekerjaan (<strong>{{ props.work.lead_engineer?.name || 'N/A' }}</strong>) yang dapat
-                        melakukan perubahan
+                        melakukan perubahan.
                     </span>
                 </div>
             </div>
@@ -497,107 +442,105 @@ defineExpose({
             <!-- Content Body -->
             <div class="p-4">
                 <!-- My Pending Approvals Alert -->
-                <div v-if="hasPendingApprovals" class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div class="flex items-center gap-2 mb-2">
+                <div v-if="hasPendingApprovals" class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm">
+                    <div class="flex items-center gap-2 mb-1">
                         <i class="fas fa-exclamation-triangle text-yellow-600"></i>
-                        <span class="text-sm font-medium text-yellow-800">Persetujuan Menunggu</span>
+                        <span class="text-sm font-semibold text-yellow-800">Persetujuan Menunggu</span>
                     </div>
                     <p class="text-xs text-yellow-700 mb-2">
-                        Anda memiliki {{ myPendingApprovals.length }} persetujuan yang menunggu tindakan
+                        Anda memiliki {{ myPendingApprovals.length }} persetujuan yang menunggu tindakan.
                     </p>
-                    <div class="flex gap-2">
+                    <div class="flex gap-1.5 flex-wrap">
                         <span v-for="approval in myPendingApprovals" :key="approval.id"
-                            class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
+                            class="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full shadow-sm">
                             {{ approval.discipline?.name }}
                         </span>
                     </div>
                 </div>
 
                 <!-- Tampilan jika EAT sudah ada -->
-                <div v-if="hasEAT" class="space-y-6">
+                <div v-if="hasEAT" class="space-y-4">
                     <!-- Overall Progress -->
-                    <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg p-4 shadow-sm">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-medium text-gray-700">Progress Keseluruhan</span>
-                            <span class="text-sm font-semibold text-gray-900">{{ overallProgress }}%</span>
+                            <span class="text-sm font-semibold text-gray-700">Progress Keseluruhan</span>
+                            <span class="text-sm font-bold text-gray-900">{{ overallProgress }}%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 shadow-inner">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2.5 rounded-full transition-all duration-300"
                                 :style="{ width: overallProgress + '%' }"></div>
                         </div>
                     </div>
 
                     <!-- Grouped Activities -->
                     <div class="space-y-4">
-                        <h3 class="text-base font-semibold text-gray-900">Aktivitas per Disiplin</h3>
-
+                        <h3 class="text-base font-bold text-gray-900">Aktivitas per Disiplin</h3>
                         <div v-for="(activities, disciplineName) in groupedActivities" :key="disciplineName"
-                            class="border rounded-lg overflow-hidden">
+                            class="border rounded-lg overflow-hidden shadow-sm bg-white">
                             <!-- Discipline Header -->
-                            <div class="bg-gray-50 border-b px-4 py-3">
+                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 border-b px-4 py-2">
                                 <div class="flex items-center justify-between">
-                                    <h4 class="text-sm font-medium text-gray-900">{{ disciplineName }}</h4>
+                                    <h4 class="text-sm font-semibold text-blue-900">{{ disciplineName }}</h4>
                                     <span class="text-xs text-gray-500">{{ activities.length }} aktivitas</span>
                                 </div>
                             </div>
-
                             <!-- Activities List -->
                             <div class="divide-y">
-                                <div v-for="activity in activities" :key="activity.id" class="p-4">
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div class="flex-1">
-                                            <h5 class="text-sm font-medium text-gray-900 mb-1">
+                                <div v-for="(activity, idx) in activities" :key="activity.id" class="p-3 hover:bg-blue-50 transition">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1 pr-4">
+                                            <h5 class="text-sm font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                                                <span class="inline-block w-2 h-2 rounded-full" :class="getProgressBarColor(idx)"></span>
                                                 {{ activity.activity_name }}
                                             </h5>
-                                            <div class="flex items-center gap-4 text-xs text-gray-500">
-                                                <span v-if="activity.pics?.length">
-                                                    <i class="fas fa-user text-xs mr-1"></i>
+                                            <div class="flex items-center gap-3 text-xs text-gray-500 flex-wrap mb-1.5">
+                                                <span v-if="activity.pics?.length" class="flex items-center gap-1">
+                                                    <i class="fas fa-user"></i>
                                                     {{activity.pics.map(p => p.name).join(', ')}}
                                                 </span>
-                                                <span>
-                                                    <i class="fas fa-calendar text-xs mr-1"></i>
-                                                    {{ formatDate(activity.start_date) }}
-                                                    -
-                                                    {{ formatDate(activity.end_date) }}
+                                                <span class="flex items-center gap-1">
+                                                    <i class="fas fa-calendar"></i>
+                                                    {{ formatDate(activity.start_date) }} - {{ formatDate(activity.end_date) }}
                                                 </span>
-
-                                                <!-- last updated progress -->
-                                                <span v-if="activity.latest_progress">
-                                                    <i class="fas fa-clock text-xs mr-1"></i>
-                                                    {{ formatDate(activity.latest_progress.updated_at) }}
-                                                </span>
+                                            </div>
+                                            <div v-if="activity.latest_progress?.description" class="mt-1 text-xs text-gray-600 bg-gray-50 p-1.5 rounded border border-gray-200">
+                                                <p class="whitespace-pre-wrap"><i class="fas fa-comment-alt mr-1.5 text-gray-400"></i>{{ activity.latest_progress.description }}</p>
                                             </div>
                                         </div>
-
-                                        <!-- last updated progress -->
-
-                                        <div class="flex items-center gap-2 ml-4">
-                                            <div class="text-right">
-                                                <span class="text-xs font-medium text-gray-900">
+                                        <div class="flex items-center gap-2 ml-2">
+                                            <div class="text-right min-w-[50px]">
+                                                <span class="text-xs font-bold text-gray-900">
                                                     {{ Number(activity.latest_progress?.percentage || 0) }}%
                                                 </span>
-                                                <div class="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
-                                                    <div class="bg-blue-600 h-1.5 rounded-full transition-all"
-                                                        :style="{ width: Number(activity.latest_progress?.percentage || 0) + '%' }"></div>
+                                                <div class="w-20 bg-gray-200 rounded-full h-2 mt-1 shadow-inner">
+                                                    <div :class="getProgressBarColor(idx)" class="h-2 rounded-full transition-all"
+                                                        :style="{ width: Number(activity.latest_progress?.percentage || 0) + '%' }">
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            <button v-if="isPicForActivity(activity) && canUpdateProgress"
-                                                @click="openProgressModal(activity)"
-                                                class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                                                title="Update Progress">
-                                                <i class="fas fa-edit text-xs"></i>
-                                            </button>
-                                            <span v-else-if="!isPicForActivity(activity)"
-                                                class="p-1.5 text-gray-300 cursor-not-allowed"
-                                                title="Anda bukan PIC untuk aktivitas ini">
-                                                <i class="fas fa-user-slash text-xs"></i>
-                                            </span>
-                                            <span v-else-if="canUpdateProgress"
-                                                class="p-1.5 text-gray-300 cursor-not-allowed"
-                                                title="Tunggu semua persetujuan selesai untuk mengupdate progress">
-                                                <i class="fas fa-edit text-xs"></i>
-                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <button @click="openProgressHistoryModal(activity)"
+                                                    class="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded-full transition shadow-sm"
+                                                    title="Lihat Riwayat Progress">
+                                                    <i class="fas fa-history text-sm"></i>
+                                                </button>
+                                                <button v-if="isPicForActivity(activity) && canUpdateProgress"
+                                                    @click="openProgressModal(activity)"
+                                                    class="w-7 h-7 flex items-center justify-center text-blue-600 hover:bg-blue-100 rounded-full transition shadow-sm"
+                                                    title="Update Progress">
+                                                    <i class="fas fa-edit text-sm"></i>
+                                                </button>
+                                                <span v-else-if="!isPicForActivity(activity)"
+                                                    class="w-7 h-7 flex items-center justify-center text-gray-300 cursor-not-allowed"
+                                                    title="Anda bukan PIC untuk aktivitas ini">
+                                                    <i class="fas fa-user-slash text-sm"></i>
+                                                </span>
+                                                <span v-else-if="canUpdateProgress"
+                                                    class="w-7 h-7 flex items-center justify-center text-gray-300 cursor-not-allowed"
+                                                    title="Tunggu semua persetujuan selesai untuk mengupdate progress">
+                                                    <i class="fas fa-edit text-sm"></i>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -608,60 +551,38 @@ defineExpose({
                     <!-- Approvals Section -->
                     <div v-if="eatData.approvals?.length" class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-base font-semibold text-gray-900">Persetujuan</h3>
+                            <h3 class="text-base font-bold text-gray-900">Persetujuan</h3>
                             <span class="text-xs text-gray-500">
-                                {{eatData.approvals.filter(a => a.status === 'approved').length}} / {{
-                                eatData.approvals.length }} disetujui
+                                {{eatData.approvals.filter(a => a.status === 'approved').length}} / {{ eatData.approvals.length }} disetujui
                             </span>
                         </div>
-
-                        <div class="grid grid-cols-1 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div v-for="approval in eatData.approvals" :key="approval.id"
-                                class="border rounded-lg p-3 transition-all hover:shadow-sm">
+                                class="border rounded-lg p-3 transition-all hover:shadow-md bg-gradient-to-br from-white to-blue-50">
                                 <div class="flex items-center justify-between">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2 mb-1">
-                                            <i :class="getApprovalIcon(approval.status)" class="text-xs"></i>
-                                            <p class="text-sm font-medium text-gray-900">
-                                                {{ approval.discipline || 'N/A' }}
-                                            </p>
+                                            <i :class="getApprovalIcon(approval.status)" class="text-base"></i>
+                                            <p class="text-sm font-semibold text-gray-900">{{ approval.discipline || 'N/A' }}</p>
                                         </div>
-                                        <p class="text-xs text-gray-500 mb-2">
-                                            Approver: {{ approval.approver || 'N/A' }}
-                                        </p>
-                                        <p v-if="approval.notes" class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                                            <i class="fas fa-comment text-xs mr-1"></i>
-                                            {{ approval.notes }}
+                                        <p class="text-xs text-gray-500 mb-1">Approver: {{ approval.approver || 'N/A' }}</p>
+                                        <p v-if="approval.notes" class="text-xs text-gray-600 bg-gray-50 p-1.5 rounded">
+                                            <i class="fas fa-comment text-xs mr-1"></i>{{ approval.notes }}
                                         </p>
                                     </div>
-
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1">
                                         <span :class="getApprovalStatusClass(approval.status)"
-                                            class="px-2 py-1 text-xs font-medium rounded border">
-                                            {{ approval.status === 'pending' ? 'Menunggu' :
-                                            approval.status === 'approved' ? 'Disetujui' : 'Ditolak' }}
+                                            class="px-2 py-0.5 text-xs font-semibold rounded-full border shadow-sm">
+                                            {{ approval.status === 'pending' ? 'Menunggu' : approval.status === 'approved' ? 'Disetujui' : 'Ditolak' }}
                                         </span>
-
-                                        <!-- Approval Actions -->
-                                        <div v-if="approval.approver_id === currentUser.id && canApproveForDiscipline(approval.discipline_id)" class="flex gap-1">
-                                            <button @click="openApprovalModal(approval, 'approved')"
-                                                class="p-1.5 text-green-600 hover:bg-green-50 rounded transition"
-                                                title="Setujui">
-                                                <i class="fas fa-check text-xs"></i>
-                                            </button>
-                                            <button @click="openApprovalModal(approval, 'rejected')"
-                                                class="p-1.5 text-red-600 hover:bg-red-50 rounded transition"
-                                                title="Tolak">
-                                                <i class="fas fa-times text-xs"></i>
-                                            </button>
+                                        <div v-if="approval.approver_id === currentUser.id && canApproveForDiscipline(approval.discipline_id)" class="flex">
+                                            <button @click="openApprovalModal(approval, 'approved')" class="w-6 h-6 flex items-center justify-center text-green-600 hover:bg-green-100 rounded-full transition" title="Setujui"><i class="fas fa-check text-sm"></i></button>
+                                            <button @click="openApprovalModal(approval, 'rejected')" class="w-6 h-6 flex items-center justify-center text-red-600 hover:bg-red-100 rounded-full transition" title="Tolak"><i class="fas fa-times text-sm"></i></button>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Approval timestamp -->
-                                <p v-if="approval.approval_date" class="text-xs text-gray-400 mt-2">
-                                    {{ approval.status === 'approved' ? 'Disetujui' : 'Ditolak' }} pada:
-                                    {{ formatDate(approval.approval_date) }}
+                                <p v-if="approval.approval_date" class="text-xs text-gray-400 mt-1.5">
+                                    {{ approval.status === 'approved' ? 'Disetujui' : 'Ditolak' }} pada: {{ formatDate(approval.approval_date) }}
                                 </p>
                             </div>
                         </div>
@@ -669,25 +590,28 @@ defineExpose({
                 </div>
 
                 <!-- Tampilan jika EAT belum ada -->
-                <div v-else class="py-12 text-center">
-                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-file-signature text-gray-400"></i>
+                <div v-else class="py-10 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow">
+                        <i class="fas fa-file-signature text-blue-400 text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">EAT Belum Dikonfigurasi</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">EAT Belum Dikonfigurasi</h3>
                     <p class="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
                         Atur aktivitas engineering, PIC, dan alur persetujuan dengan membuat EAT untuk pekerjaan ini.
                     </p>
-
-                    <button v-if="canCreateEAT" @click="openModal"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition">
-                        <i class="fas fa-plus text-xs"></i>
+                    <button v-if="canCreateEAT && !hasEAT && props.work.verification_status === 'Finish Verifikasi'" @click="openModal"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 shadow transition">
+                        <i class="fas fa-plus"></i>
                         Buat EAT Baru
                     </button>
-
                     <div v-else class="text-center">
-                        <div
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 bg-gray-100 rounded-md">
-                            <i class="fas fa-lock text-xs"></i>
+                        <div v-if="props.work.verification_status !== 'Finish Verifikasi'"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 bg-gray-100 rounded-lg shadow">
+                            <i class="fas fa-lock"></i>
+                            Verifikasi ERF belum selesai
+                        </div>
+                        <div v-else
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 bg-gray-100 rounded-lg shadow">
+                            <i class="fas fa-lock"></i>
                             Hanya lead pekerjaan yang dapat membuat EAT
                         </div>
                         <p class="text-xs text-gray-400 mt-2">
@@ -708,6 +632,12 @@ defineExpose({
         <ActivityProgressModal v-if="showProgressModal && selectedActivity" :activity="selectedActivity" :users="users"
             :disciplines="disciplines" @close="closeProgressModal" @success="handleProgressSuccess"
             @error="handleProgressError" />
+
+        <!-- Modal untuk riwayat progress aktivitas -->
+        <ActivityProgressHistoryModal v-if="showProgressHistoryModal && selectedActivityForHistory"
+            :activity-id="selectedActivityForHistory.id"
+            :activity-name="selectedActivityForHistory.activity_name"
+            @close="closeProgressHistoryModal" />
 
         <!-- Modal untuk persetujuan EAT -->
         <EATApprovalModal v-if="showApprovalModal && selectedApproval" :approval="selectedApproval"

@@ -1,103 +1,130 @@
 <template>
-    <div class="bg-white shadow-sm border border-gray-200 sm:rounded-lg">
-        <div class="px-4 py-4 sm:px-6 sm:py-5">
-            <div class="flex justify-between items-center mb-3 lg:mb-4">
-                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                    Work Documents
-                </h3>
+    <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                        <i class="fas fa-folder-open text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 tracking-tight">
+                            Work Documents
+                        </h2>
+                    </div>
+                </div>
                 <button 
+                    v-if="documents.length > 0"
                     @click="showAddDocModal = true"
-                    class="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition"
                 >
+                    <i class="fas fa-plus text-xs"></i>
                     Add Document
                 </button>
             </div>
-            
+        </div>
+
+        <!-- Content Body -->
+        <div class="p-4">
+            <!-- Document List -->
             <div v-if="documents.length > 0" :class="documentContainerClass">
                 <div v-for="(document, index) in documents" :key="index" 
-                    class="flex items-center justify-between p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div class="flex items-center space-x-3">
+                    class="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-white hover:bg-blue-50 hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center space-x-3 min-w-0">
                         <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-file-alt text-white"></i>
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center border border-blue-200">
+                                <i class="fas fa-file-alt text-blue-600"></i>
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-900 truncate">{{ document.title }}</p>
-                            <p class="text-xs text-gray-600">{{ document.document_name }}</p>
+                            <p class="text-sm font-semibold text-gray-900 truncate" :title="document.title">{{ document.title }}</p>
+                            <p class="text-xs text-gray-500 truncate">{{ document.document_name }}</p>
                         </div>
                     </div>
-                    <div class="flex space-x-2">
+                    <div class="flex space-x-1.5 flex-shrink-0 ml-2">
                         <button
                             @click="downloadDocument(document)"
-                            class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                            class="w-7 h-7 flex items-center justify-center text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-full transition shadow-sm"
                             title="Download"
                         >
-                            <i class="fas fa-download"></i>
+                            <i class="fas fa-download text-sm"></i>
                         </button>
                         <button
                             @click="removeDocument(document.id)"
-                            class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                            class="w-7 h-7 flex items-center justify-center text-red-600 bg-red-100 hover:bg-red-200 rounded-full transition shadow-sm"
                             title="Delete"
                         >
-                            <i class="fas fa-trash"></i>
+                            <i class="fas fa-trash text-sm"></i>
                         </button>
                     </div>
                 </div>
             </div>
             
-            <div v-else class="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                    <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+            <!-- Empty State -->
+            <div v-else class="py-10 text-center">
+                <div class="w-14 h-14 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow">
+                    <i class="fas fa-file-alt text-blue-400 text-2xl"></i>
                 </div>
-                <h3 class="text-base font-medium text-gray-900 mb-1">No documents yet</h3>
-                <p class="text-sm text-gray-500 mb-4">Upload documents related to this work</p>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">No Documents Yet</h3>
+                <p class="text-sm text-gray-500 mb-6 max-w-sm mx-auto">Upload documents related to this work to get started.</p>
                 <button 
                     @click="showAddDocModal = true"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 shadow transition"
                 >
+                    <i class="fas fa-plus"></i>
                     Add New Document
                 </button>
             </div>
         </div>
 
         <!-- Add Document Modal -->
-        <div v-if="showAddDocModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div v-if="showAddDocModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+            <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
                 <div class="mt-3">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
-                        Add New Document
-                    </h3>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Document Title</label>
-                        <input
-                            v-model="newDocument.title"
-                            type="text"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            placeholder="Enter document title"
-                        />
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">
+                            Add New Document
+                        </h3>
+                        <button @click="closeAddDocModal" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
-                        <input
-                            type="file"
-                            @change="handleFileUpload"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        />
+                    <div class="space-y-4">
+                        <div>
+                            <label for="doc-title" class="block text-sm font-medium text-gray-700 mb-1">Document Title</label>
+                            <input
+                                id="doc-title"
+                                v-model="newDocument.title"
+                                type="text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition"
+                                placeholder="e.g., Engineering Drawing"
+                            />
+                        </div>
+                        <div>
+                            <label for="doc-file" class="block text-sm font-medium text-gray-700 mb-1">Upload File</label>
+                            <input
+                                id="doc-file"
+                                type="file"
+                                @change="handleFileUpload"
+                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                        </div>
                     </div>
-                    <div class="flex justify-end space-x-3">
+                    <div class="flex justify-end space-x-3 mt-6">
                         <button 
                             @click="closeAddDocModal"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
                         >
                             Cancel
                         </button>
                         <button 
                             @click="uploadDocument"
                             :disabled="!isFormValid || isUploading"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
                         >
-                            <span v-if="isUploading">Uploading...</span>
+                            <span v-if="isUploading">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>Uploading...
+                            </span>
                             <span v-else>Upload</span>
                         </button>
                     </div>
@@ -133,10 +160,9 @@ const isFormValid = computed(() => {
 });
 
 const documentContainerClass = computed(() => {
-    // If there are more than 5 documents, add scroll properties
     return props.documents.length > 5 
-        ? 'space-y-4 overflow-y-auto max-h-80'
-        : 'space-y-4';
+        ? 'space-y-3 overflow-y-auto max-h-[22rem] pr-2'
+        : 'space-y-3';
 });
 
 const handleFileUpload = (event) => {
@@ -164,9 +190,8 @@ const uploadDocument = () => {
     router.post(route('works.documents.store', props.work.slug), formData, {
         onSuccess: () => {
             closeAddDocModal();
-            isUploading.value = false;
         },
-        onError: () => {
+        onFinish: () => {
             isUploading.value = false;
         }
     });

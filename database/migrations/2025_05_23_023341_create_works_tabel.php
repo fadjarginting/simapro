@@ -42,8 +42,8 @@ return new class extends Migration
             $table->date('executing_actual_date')->nullable();
 
             $table->enum('verification_status', ['Belum Verifikasi', 'In Progress Verifikasi','Finish Verifikasi'])->nullable();
-            $table->enum('project_status', ['Not Started', 'In Progress', 'Finish', 'On Hold', 'Cancelled'])->nullable();
-            $table->enum('current_phase', ['Not started', 'Initiating', 'Executing', 'Closing', 'Hold', 'Reject'])->nullable();
+            $table->enum('project_status', ['Not Started', 'In Progress', 'Finish', 'On Hold', 'Cancel'])->nullable();
+            $table->enum('current_phase', ['Not started', 'Initiating', 'Planning', 'Executing', 'Closing', 'Hold', 'Cancel'])->nullable();
             
             // Keterangan Progress
             $table->foreignId('note_id')->nullable()->constrained('noted')->onDelete('set null');

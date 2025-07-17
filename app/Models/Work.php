@@ -102,6 +102,12 @@ class Work extends Model
         return $this->belongsTo(User::class, 'lead_engineer_id');
     }
 
+    // relasi tabel eat satu pekerjaan punya satu eat
+    public function eat(): BelongsTo
+    {
+        return $this->belongsTo(Eat::class, 'id', 'work_id');
+    }
+
     /**
      * Get the user who created the work.
      */

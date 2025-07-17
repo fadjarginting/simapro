@@ -123,6 +123,7 @@ const cancel = () => {
 </script>
 
 <template>
+
     <Head>
         <title>Edit Role</title>
     </Head>
@@ -140,24 +141,14 @@ const cancel = () => {
                 </div>
 
                 <!-- Form edit roles -->
-                <div
-                    class="max-w-full mt-0 pt-0 p-6 bg-white rounded-lg shadow-md"
-                >
+                <div class="max-w-full mt-0 pt-0 p-6 bg-white rounded-lg shadow-md">
                     <form @submit.prevent="submit" class="space-y-6">
                         <!-- Input role name -->
                         <div class="mb-4">
                             <InputLabel for="role-name" value="Role Name" />
-                            <TextInput
-                                id="role-name"
-                                v-model="form.name"
-                                type="text"
-                                class="mt-1 block w-full"
-                                autofocus
-                            />
-                            <div
-                                v-if="form.errors.name"
-                                class="text-red-500 text-sm mt-1"
-                            >
+                            <TextInput id="role-name" v-model="form.name" type="text" class="mt-1 block w-full"
+                                autofocus />
+                            <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.name }}
                             </div>
                         </div>
@@ -167,40 +158,24 @@ const cancel = () => {
                         </h6>
 
                         <!-- Input role permission -->
-                        <div
-                            v-for="(perms, groupName) in groupedPermissions"
-                            :key="groupName"
-                            class="mb-4 border-b pb-4"
-                        >
+                        <div v-for="(perms, groupName) in groupedPermissions" :key="groupName"
+                            class="mb-4 border-b pb-4">
                             <!-- Group name (menu) -->
                             <h6 class="text-sm font-semibold mb-2 capitalize">
                                 {{ extractGroup(groupName) }}
                             </h6>
                             <!-- Permission list in this group -->
-                            <div
-                                class="pl-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"
-                            >
-                                <div
-                                    v-for="permission in perms"
-                                    :key="permission.id"
-                                    class="flex items-center"
-                                >
+                            <div class="pl-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                <div v-for="permission in perms" :key="permission.id" class="flex items-center">
                                     <!-- Checkbox component with array binding -->
-                                    <Checkbox
-                                        :id="permission.name"
-                                        :value="permission.name"
-                                        v-model:checked="form.permissions"
-                                        :checked="
-                                            form.permissions.includes(
-                                                permission.name
-                                            )
-                                        "
-                                    />
+                                    <Checkbox :id="permission.name" :value="permission.name"
+                                        v-model:checked="form.permissions" :checked="form.permissions.includes(
+                                            permission.name
+                                        )
+                                            " />
                                     <!-- Permission text (action part only) -->
-                                    <label
-                                        :for="permission.name"
-                                        class="ml-2 text-sm text-gray-600 whitespace-normal break-words"
-                                    >
+                                    <label :for="permission.name"
+                                        class="ml-2 text-sm text-gray-600 whitespace-normal break-words">
                                         {{ extractAction(permission.name) }}
                                     </label>
                                 </div>
@@ -209,17 +184,12 @@ const cancel = () => {
 
                         <!-- Action buttons -->
                         <div class="flex mt-6 space-x-4 justify-end">
-                            <button
-                                type="submit"
-                                class="bg-transparent px-4 rounded-lg text-green-500 whitespace-nowrap text-center transition duration-300 hover:bg-green-500 hover:text-white py-1"
-                            >
+                            <button type="submit"
+                                class="bg-transparent px-4 rounded-lg text-green-500 whitespace-nowrap text-center transition duration-300 hover:bg-green-500 hover:text-white py-1">
                                 <i class="fas fa-save"></i> Save
                             </button>
-                            <button
-                                type="button"
-                                @click="cancel"
-                                class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center transition duration-300 hover:bg-red-500 hover:text-white py-1"
-                            >
+                            <button type="button" @click="cancel"
+                                class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center transition duration-300 hover:bg-red-500 hover:text-white py-1">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>

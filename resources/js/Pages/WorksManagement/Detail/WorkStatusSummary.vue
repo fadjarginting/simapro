@@ -1,10 +1,20 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { usePermissions } from "@/composables/permissions";
+import { usePage } from "@inertiajs/vue3";
+
+const { hasPermission, hasRole } = usePermissions();
 
 const props = defineProps({
     work: Object
 })
+
+const currentUser = computed(() => usePage().props.auth.user.data);
+
+const isWorkLead = computed(() => {
+    return props.work.lead_engineer_id === currentUser.value.id;
+});
 
 // Edit state
 const isEditing = ref(false)
@@ -30,49 +40,51 @@ const projectStatusOptions = [
     'In Progress',
     'Finish',
     'On Hold',
-    'Cancelled'
+    'Cancel'
 ]
 
 const currentPhaseOptions = [
     'Not started',
     'Initiating',
+    'Planning',
     'Executing',
     'Closing',
     'Hold',
-    'Reject'
+    'Cancel'
 ]
 
 // Style functions
 const getVerificationClass = (status) => {
     const classes = {
-        "Belum Verifikasi": "bg-gray-50 text-gray-600 ring-gray-500/10",
-        "In Progress Verifikasi": "bg-yellow-50 text-yellow-800 ring-yellow-600/20",
-        "Finish Verifikasi": "bg-green-50 text-green-700 ring-green-600/20",
+        "Belum Verifikasi": "bg-gray-100 text-gray-700",
+        "In Progress Verifikasi": "bg-yellow-100 text-yellow-700",
+        "Finish Verifikasi": "bg-green-100 text-green-700",
     };
-    return classes[status] || "bg-gray-50 text-gray-600 ring-gray-500/10";
+    return classes[status] || "bg-gray-100 text-gray-700";
 };
 
 const getStatusClass = (status) => {
     const classes = {
-        "Not Started": "bg-gray-50 text-gray-600 ring-gray-500/10",
-        "In Progress": "bg-yellow-50 text-yellow-800 ring-yellow-600/20",
-        "Finish": "bg-green-50 text-green-700 ring-green-600/20",
-        "On Hold": "bg-orange-50 text-orange-700 ring-orange-600/20",
-        "Cancelled": "bg-red-50 text-red-700 ring-red-600/20",
+        "Not Started": "bg-gray-100 text-gray-700",
+        "In Progress": "bg-yellow-100 text-yellow-700",
+        "Finish": "bg-green-100 text-green-700",
+        "On Hold": "bg-orange-100 text-orange-700",
+        "Cancel": "bg-red-100 text-red-700",
     };
-    return classes[status] || "bg-gray-50 text-gray-600 ring-gray-500/10";
+    return classes[status] || "bg-gray-100 text-gray-700";
 };
 
 const getPhaseClass = (phase) => {
     const classes = {
-        "Not started": "bg-gray-50 text-gray-600 ring-gray-500/10",
-        "Initiating": "bg-blue-50 text-blue-700 ring-blue-600/20",
-        "Executing": "bg-yellow-50 text-yellow-800 ring-yellow-600/20",
-        "Closing": "bg-green-50 text-green-700 ring-green-600/20",
-        "Hold": "bg-orange-50 text-orange-700 ring-orange-600/20",
-        "Reject": "bg-red-50 text-red-700 ring-red-600/20",
+        "Not started": "bg-gray-100 text-gray-700",
+        "Initiating": "bg-blue-100 text-blue-700",
+        "Planning": "bg-purple-100 text-purple-700",
+        "Executing": "bg-yellow-100 text-yellow-700",
+        "Closing": "bg-green-100 text-green-700",
+        "Hold": "bg-orange-100 text-orange-700",
+        "Reject": "bg-red-100 text-red-700",
     };
-    return classes[phase] || "bg-gray-50 text-gray-600 ring-gray-500/10";
+    return classes[phase] || "bg-gray-100 text-gray-700";
 };
 
 // Toggle edit mode
@@ -80,16 +92,13 @@ const toggleEditMode = () => {
     if (isEditing.value) {
         // Cancel edit - reset form to original values
         isEditing.value = false
-        editForm.value.verification_status = props.work.verification_status || ''
-        editForm.value.project_status = props.work.project_status || ''
-        editForm.value.current_phase = props.work.current_phase || ''
         error.value = ''
     } else {
         // Start edit - initialize form with current values
+        editForm.value.verification_status = props.work.verification_status || 'Belum Verifikasi'
+        editForm.value.project_status = props.work.project_status || 'Not Started'
+        editForm.value.current_phase = props.work.current_phase || 'Not started'
         isEditing.value = true
-        editForm.value.verification_status = props.work.verification_status || ''
-        editForm.value.project_status = props.work.project_status || ''
-        editForm.value.current_phase = props.work.current_phase || ''
         error.value = ''
     }
 }
@@ -107,12 +116,18 @@ const saveChanges = () => {
 
     router.put(route('works.update-status', props.work.slug), data, {
         preserveState: true,
-        onSuccess: () => {
+        onSuccess: (page) => {
+            if (page.props.flash && page.props.flash.error) {
+            error.value = page.props.flash.error;
+            isEditing.value = true;
+            } else {
             isEditing.value = false
             error.value = ''
+            }
         },
         onError: (errors) => {
             console.error('Update status error:', errors)
+            isEditing.value = true
             error.value = errors.verification_status ||
                 errors.project_status ||
                 errors.current_phase ||
@@ -140,47 +155,59 @@ const currentPhase = computed(() => {
 </script>
 
 <template>
-    <div class="bg-white shadow-sm border border-gray-200 sm:rounded-lg">
-        <div class="px-4 py-4 sm:px-6 sm:py-5">
-            <!-- Header dengan tombol edit -->
-            <div class="flex items-center justify-between mb-3 lg:mb-4">
-                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                    Status
-                </h3>
-                <div class="flex items-center space-x-2">
+    <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                        <i class="fas fa-clipboard-check text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 tracking-tight">
+                            Status Pekerjaan
+                        </h2>
+                    </div>
+                </div>
+                <div v-if="hasRole('Admin') || isWorkLead" class="flex items-center space-x-2">
                     <button v-if="!isEditing" @click="toggleEditMode"
-                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                        <i class="fas fa-edit mr-2"></i>
-                        Edit Status
+                        class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition">
+                        <i class="fas fa-edit"></i>
+                        Edit
                     </button>
                     <div v-else class="flex items-center space-x-2">
                         <button @click="saveChanges" :disabled="isSubmitting"
-                            class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <i class="fas fa-save mr-2" v-if="!isSubmitting"></i>
-                            <i class="fas fa-spinner fa-spin mr-2" v-else></i>
-                            {{ isSubmitting ? 'Menyimpan...' : 'Simpan' }}
+                            class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-spinner fa-spin" v-if="isSubmitting"></i>
+                            <i class="fas fa-save" v-else></i>
+                            {{ isSubmitting ? 'Menyimpan' : 'Simpan' }}
                         </button>
                         <button @click="toggleEditMode" :disabled="isSubmitting"
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <i class="fas fa-times mr-2"></i>
+                            class="inline-flex items-center gap-1 px-2.5 py-1 bg-white text-gray-700 text-xs font-semibold rounded-md hover:bg-gray-50 border border-gray-300 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-times"></i>
                             Batal
                         </button>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Content Body -->
+        <div class="p-4">
             <!-- Error message -->
-            <div v-if="error && isEditing" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <div class="flex">
-                    <i class="fas fa-exclamation-triangle text-red-400 mr-2 mt-0.5"></i>
-                    <span class="text-sm text-red-700">{{ error }}</span>
+            <div v-if="error && isEditing" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg shadow-sm">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    <span class="text-sm font-medium text-red-800">{{ error }}</span>
                 </div>
             </div>
 
-            <dl class="space-y-3 lg:space-y-4">
+            <dl class="space-y-4">
                 <!-- Status Verifikasi -->
-                <div>
-                    <dt class="text-sm font-medium text-gray-500 mb-1">
+                <div
+                    class="border rounded-lg p-3 transition-all hover:shadow-md bg-gradient-to-br from-white to-blue-50">
+                    <dt class="text-sm font-semibold text-gray-700 mb-2">
                         Status Verifikasi ERF
                     </dt>
                     <dd>
@@ -188,7 +215,7 @@ const currentPhase = computed(() => {
                         <div v-if="isEditing">
                             <select v-model="editForm.verification_status"
                                 :disabled="currentVerificationStatus === 'Finish Verifikasi'"
-                                class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
                                 <option v-for="option in verificationStatusOptions" :key="option" :value="option">
                                     {{ option }}
                                 </option>
@@ -197,7 +224,7 @@ const currentPhase = computed(() => {
                         <!-- Mode View -->
                         <div v-else>
                             <span :class="getVerificationClass(currentVerificationStatus)"
-                                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset w-full justify-center">
+                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm w-full justify-center">
                                 {{ currentVerificationStatus }}
                             </span>
                         </div>
@@ -205,15 +232,16 @@ const currentPhase = computed(() => {
                 </div>
 
                 <!-- Status Proyek -->
-                <div>
-                    <dt class="text-sm font-medium text-gray-500 mb-1">
+                <div
+                    class="border rounded-lg p-3 transition-all hover:shadow-md bg-gradient-to-br from-white to-blue-50">
+                    <dt class="text-sm font-semibold text-gray-700 mb-2">
                         Status Pekerjaan
                     </dt>
                     <dd>
                         <!-- Mode Edit -->
                         <div v-if="isEditing">
                             <select v-model="editForm.project_status"
-                                class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                                 <option v-for="option in projectStatusOptions" :key="option" :value="option">
                                     {{ option }}
                                 </option>
@@ -222,7 +250,7 @@ const currentPhase = computed(() => {
                         <!-- Mode View -->
                         <div v-else>
                             <span :class="getStatusClass(currentProjectStatus)"
-                                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset w-full justify-center">
+                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm w-full justify-center">
                                 {{ currentProjectStatus }}
                             </span>
                         </div>
@@ -230,19 +258,16 @@ const currentPhase = computed(() => {
                 </div>
 
                 <!-- Fase Saat Ini -->
-                <div>
-                    <dt class="text-sm font-medium text-gray-500 mb-1">
+                <div
+                    class="border rounded-lg p-3 transition-all hover:shadow-md bg-gradient-to-br from-white to-blue-50">
+                    <dt class="text-sm font-semibold text-gray-700 mb-2">
                         Fase Pekerjaan Saat Ini
-                        <br>
-                        <small class="text-sm text-gray-500">
-                          Tanggal: {{ new Date().toISOString().slice(0, 10) }}
-                        </small>
                     </dt>
                     <dd>
                         <!-- Mode Edit -->
                         <div v-if="isEditing">
                             <select v-model="editForm.current_phase"
-                                class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                                 <option v-for="option in currentPhaseOptions" :key="option" :value="option">
                                     {{ option }}
                                 </option>
@@ -251,7 +276,7 @@ const currentPhase = computed(() => {
                         <!-- Mode View -->
                         <div v-else>
                             <span :class="getPhaseClass(currentPhase)"
-                                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset w-full justify-center">
+                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm w-full justify-center">
                                 {{ currentPhase }}
                             </span>
                         </div>

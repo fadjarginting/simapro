@@ -7,28 +7,30 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="sm:flex sm:items-center sm:justify-between mb-6 lg:mb-8">
-        <div class="min-w-0 flex-1">
-            <h2 class="text-xl font-bold leading-7 text-gray-900 sm:text-2xl lg:text-3xl sm:tracking-tight">
-                Detail Pekerjaan
-            </h2>
-            <div class="mt-1 flex flex-col sm:mt-2 sm:flex-row sm:flex-wrap sm:space-x-6">
-                <div class="mt-2 flex items-center text-sm text-gray-500">
-                    <span>Nomor ERF: {{ work.erf_number || "-" }}</span>
+    <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100 rounded-2xl mb-2">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow"
+                >
+                    <i class="fas fa-briefcase text-white text-lg"></i>
                 </div>
-                <div class="mt-2 flex items-center text-sm text-gray-500">
-                    <span>Plant: {{ work.plant.name }}</span>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 tracking-tight sm:text-2xl">
+                        Detail Pekerjaan
+                    </h2>
+                    <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-4">
+                        <div class="mt-1 flex items-center text-xs text-gray-500">
+                            <i class="fas fa-hashtag mr-1.5 text-gray-400"></i>
+                            <span>Nomor ERF: {{ work.erf_number || "-" }}</span>
+                        </div>
+                        <div class="mt-1 flex items-center text-xs text-gray-500">
+                            <i class="fas fa-industry mr-1.5 text-gray-400"></i>
+                            <span>Plant: {{ work.plant.name }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2 sm:ml-4 sm:mt-0">
-            <Link
-                :href="route('works.index')"
-                class="bg-gray-200 px-3 py-2 text-xs rounded inline-block whitespace-nowrap text-center font-bold leading-none text-gray-700 transition duration-300 hover:bg-gray-300"
-            >
-                <i class="fas fa-arrow-left mr-2 text-xs leading-none"></i>
-                <span>Kembali</span>
-            </Link>
         </div>
     </div>
 </template>

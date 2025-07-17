@@ -21,31 +21,22 @@ class PermissionsSeeder extends Seeder
         $permissions = [
             // Dashboard
             'dashboard.view',
+            'my_dashboard.view',
 
             // ERF Management
-            'erf_management.view',
-            'erf_management.create',
-            'erf_management.edit',
-            'erf_management.delete',
+            'manajemen_pekerjaan.view',
+            'manajemen_pekerjaan.create',
+            'manajemen_pekerjaan.edit',
+            'manajemen_pekerjaan.delete',
 
-            // Progress Report
-            'progress_report.view',
-            'progress_report.create',
-            'progress_report.show',
-            'progress_report.edit',
-            'progress_report.delete',
+            // My Works
+            'my_works.view',
 
             // Morning Report
             'morning_report.view',
 
             // Key Performance Indicator
             'kpi_management.view',
-
-            // EAT Schedule
-            'eat_schedule.view',
-            'eat_schedule.create',
-            'eat_schedule.edit',
-            'eat_schedule.delete',
 
             // Plant Settings
             'plant_settings.view',
@@ -58,12 +49,6 @@ class PermissionsSeeder extends Seeder
             'noted_management.create',
             'noted_management.edit',
             'noted_management.delete',
-
-            // Work Priority Settings
-            'work_priority.view',
-            'work_priority.create',
-            'work_priority.edit',
-            'work_priority.delete',
 
             // Request Category Settings
             'category.view',
@@ -98,17 +83,51 @@ class PermissionsSeeder extends Seeder
 
         // Assign permission to roles
         $role = Role::create(['name' => 'Admin']);
-        $role->givePermissionTo($permissions);
+        $role->givePermissionTo([
+            'dashboard.view',
+            'manajemen_pekerjaan.view',
+            'manajemen_pekerjaan.create',
+            'manajemen_pekerjaan.edit',
+            'manajemen_pekerjaan.delete',
+            'morning_report.view',
+            'kpi_management.view',
+            'plant_settings.view',
+            'plant_settings.create',
+            'plant_settings.edit',
+            'plant_settings.delete',
+            'noted_management.view',
+            'noted_management.create',
+            'noted_management.edit',
+            'noted_management.delete',
+            'category.view',
+            'category.create',
+            'category.edit',
+            'category.delete',
+            'user_management.view',
+            'user_management.create',
+            'user_management.edit',
+            'user_management.delete',
+            'user_management.reset_password',
+            'role_management.view',
+            'role_management.create',
+            'role_management.edit',
+            'role_management.delete',
+            'work_audit.view',
+            'login_audit_trail.view'
+        ]); // Sync all permissions to admin role    
 
         $role = Role::create(['name' => 'Lead']);
-        $role->givePermissionTo($permissions);
+        $role->givePermissionTo([
+            'my_dashboard.view',
+            'my_works.view',
+            'kpi_management.view',
+        ]);
 
 
         $role = Role::create(['name' => 'User']);
         $role->givePermissionTo([
-            'erf_management.view',
-            'progress_report.view',
-            'morning_report.view',
+            'my_dashboard.view',
+            'my_works.view',
             'kpi_management.view',
         ]);
     }

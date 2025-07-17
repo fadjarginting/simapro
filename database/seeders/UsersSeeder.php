@@ -30,5 +30,24 @@ class UsersSeeder extends Seeder
             'discipline_id' => 1, // Assuming discipline_id is required
         ]);
         $user->assignRole('Lead');
+
+        $leads = [
+            ['name' => 'AULIA EKADANA FAUTHRISNO', 'email' => 'aulia.e@example.com', 'discipline_id' => 1],
+            ['name' => 'NOVRIADI M', 'email' => 'novriadi.m@example.com', 'discipline_id' => 2],
+            ['name' => 'MOCH CHOIRIL ANAM', 'email' => 'anam.mc@example.com', 'discipline_id' => 3],
+            ['name' => 'ANDRA NOVENDRI', 'email' => 'andra.n@example.com', 'discipline_id' => 2],
+            ['name' => 'MARJUKI', 'email' => 'marjuki@example.com', 'discipline_id' => 4],
+            ['name' => 'MUHAMMAD FATHUL MUBIN', 'email' => 'fathul.mubin@example.com', 'discipline_id' => 1],
+        ];
+
+        foreach ($leads as $leadData) {
+            $lead = User::factory()->create([
+            'name' => $leadData['name'],
+            'email' => $leadData['email'],
+            'discipline_id' => $leadData['discipline_id'],
+            ]);
+            $lead->assignRole('Lead');
+        }
+
     }
 }

@@ -4,7 +4,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, router, usePage } from "@inertiajs/vue3";
 import Swal from 'sweetalert2';
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 
 defineOptions({
     layout: AuthenticatedLayout,
@@ -69,14 +69,14 @@ const changePage = (url) => {
 // Handle delete role with sweetalert2 confirmation
 const deleteRole = (roleId, roleName) => {
     Swal.fire({
-        title: 'Confirm Deletion',
-        text: `Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`,
+        title: 'Konfirmasi Hapus',
+        text: `Apakah Anda yakin ingin menghapus role "${roleName}"? Tindakan ini tidak dapat dibatalkan.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#EF4444',
         cancelButtonColor: '#9CA3AF',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Hapus',
+        cancelButtonText: 'Batal',
         customClass: {
             popup: 'rounded-lg shadow-lg',
             title: 'text-lg font-semibold text-gray-800',
@@ -97,24 +97,16 @@ const deleteRole = (roleId, roleName) => {
                             showConfirmButton: false,
                             timer: 4000,
                             timerProgressBar: true,
-                            customClass: {
-                                popup: 'rounded-lg shadow-lg',
-                                title: 'text-sm font-semibold text-gray-800',
-                            }
                         });
                     } else {
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
                             icon: 'success',
-                            title: 'The role has been successfully deleted.',
+                            title: 'Role berhasil dihapus.',
                             showConfirmButton: false,
                             timer: 3000,
                             timerProgressBar: true,
-                            customClass: {
-                                popup: 'rounded-lg shadow-lg',
-                                title: 'text-sm font-semibold text-gray-800',
-                            }
                         });
                     }
                 },
@@ -123,14 +115,10 @@ const deleteRole = (roleId, roleName) => {
                         toast: true,
                         position: 'top-end',
                         icon: 'error',
-                        title: 'Failed to delete the role.',
+                        title: 'Gagal menghapus role.',
                         showConfirmButton: false,
                         timer: 4000,
                         timerProgressBar: true,
-                        customClass: {
-                            popup: 'rounded-lg shadow-lg',
-                            title: 'text-sm font-semibold text-gray-800',
-                        }
                     });
                 }
             });
@@ -143,124 +131,131 @@ const deleteRole = (roleId, roleName) => {
 
     <Head title="Roles Management" />
 
-    <template name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Roles Management
-        </h2>
-    </template>
-
-    <div class="container mx-auto px-4 py-12">
-        <div class="mx-auto max-w-full sm:px-6 lg:px-8">
-            <div class="flex flex-wrap -mx-3">
-                <div class="flex-none w-full max-w-full px-3">
-                    <div
-                        class="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl sm:rounded-lg bg-clip-border">
-                        <div
-                            class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
-                            <h6 class="dark:text-white text-base font-bold">
-                                Roles Management
-                            </h6>
-                            <div class="flex items-center justify-end">
-                                <Link :href="route('roles.create')"
-                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-green-500 transition duration-300 hover:bg-gradient-to-tl hover:from-green-500 hover:to-teal-400 hover:text-white">
-                                <i class="fas fa-plus mr-2 text-xs leading-none"></i>
-                                <span>Add Role</span>
-                                </Link>
+    <div class="py-12">
+        <div class=" mx-auto ">
+            <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                                <i class="fas fa-user-shield text-white text-lg"></i>
                             </div>
-                        </div>
-
-                        <!-- Filters and search -->
-                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel for="search" value="Search Role" />
-                                <div class="relative">
-                                    <TextInput v-model="form.search" type="text" placeholder="Search by Role Name"
-                                        class="w-full" />
-                                    <span v-if="form.search" @click="form.search = ''"
-                                        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-red-300 hover:text-gray-700 focus:outline-none mr-2">
-                                        <i class="fas fa-times"></i>
-                                    </span>
-                                </div>
+                                <h2 class="text-xl font-bold text-gray-900 tracking-tight">
+                                    Manajemen Role
+                                </h2>
+                                <p class="text-sm text-gray-500">
+                                    Kelola role, izin, dan pengguna.
+                                </p>
                             </div>
                         </div>
+                        <div class="flex gap-2">
+                            <Link :href="route('roles.create')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition">
+                                <i class="fas fa-plus text-xs"></i>
+                                Tambah Role
+                            </Link>
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="flex-auto px-0 pt-0 pb-2">
-                            <div class="p-0 overflow-x-auto">
-                                <table class="w-full table-auto">
-                                    <thead class="bg-gray-100">
-                                        <tr class="text-sm font-normal text-gray-600 border-t border-b text-left">
-                                            <th class="px-4 py-3">Role Name</th>
-                                            <th class="px-4 py-3">Users</th>
-                                            <th class="px-4 py-3">Permissions</th>
-                                            <th class="px-4 py-3 text-center">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-sm font-normal text-gray-700">
-                                        <tr v-for="role in roles.data" :key="role.id"
-                                            class="border-b border-gray-200 hover:bg-gray-100">
-                                            <td class="px-4 py-3">{{ role.name }}</td>
-                                            <td class="px-4 py-3">
-                                                <span
-                                                    class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                                                    {{ role.users.length }} Users
-                                                </span>
-                                            </td>
-                                            <td class="px-4 py-3">
-                                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                                    {{ role.permissions.length }} Permissions
-                                                </span>
-                                            </td>
-                                            <td class="px-4 py-3 text-center">
+                <!-- Content Body -->
+                <div class="p-4 space-y-4">
+                    <!-- Filters and search -->
+                    <div class="bg-white border rounded-lg p-3 shadow-sm">
+                        <InputLabel for="search" value="Cari Role" class="mb-1 text-sm font-medium" />
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <TextInput v-model="form.search" type="text" placeholder="Cari berdasarkan nama role..."
+                                class="w-full pl-10" />
+                            <button v-if="form.search" @click="form.search = ''"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-hidden border rounded-lg shadow-sm bg-white">
+                        <div class="overflow-x-auto">
+                            <table class="w-full table-auto">
+                                <thead class="bg-gradient-to-r from-gray-50 to-blue-50 border-b">
+                                    <tr class="text-sm font-semibold text-blue-900 text-left">
+                                        <th class="px-4 py-3">Nama Role</th>
+                                        <th class="px-4 py-3">Pengguna</th>
+                                        <th class="px-4 py-3">Izin</th>
+                                        <th class="px-4 py-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm text-gray-700 divide-y">
+                                    <tr v-for="role in roles.data" :key="role.id"
+                                        class="hover:bg-blue-50 transition">
+                                        <td class="px-4 py-3 font-medium text-gray-900">{{ role.name }}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full shadow-sm bg-green-100 text-green-800">
+                                                {{ role.users.length }} Pengguna
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full shadow-sm bg-blue-100 text-blue-800">
+                                                {{ role.permissions.length }} Izin
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <div class="flex items-center justify-center gap-2">
                                                 <Link :href="route('roles.edit', role.id)"
-                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-blue-500 transition duration-300 hover:bg-gradient-to-tl hover:from-blue-500 hover:to-blue-400 hover:text-white">
-                                                <i class="fas fa-edit mr-2 text-xs leading-none"></i>
-                                                <span>Edit</span>
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 shadow-sm transition">
+                                                    <i class="fas fa-edit"></i>
+                                                    <span>Edit</span>
                                                 </Link>
                                                 <button @click="deleteRole(role.id, role.name)"
-                                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-red-500 transition duration-300 hover:bg-gradient-to-tl hover:from-red-500 hover:to-red-400 hover:text-white">
-                                                    <i class="fas fa-trash mr-2 text-xs leading-none"></i>
-                                                    <span>Delete</span>
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 shadow-sm transition">
+                                                    <i class="fas fa-trash"></i>
+                                                    <span>Hapus</span>
                                                 </button>
-                                            </td>
-                                        </tr>
-                                        <tr v-if="roles.data.length === 0">
-                                            <td colspan="4" class="px-4 py-3 text-center text-gray-500">
-                                                No roles found
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="roles.data.length === 0">
+                                        <td colspan="4" class="px-4 py-6 text-center text-gray-500">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <i class="fas fa-folder-open text-4xl text-gray-300 mb-2"></i>
+                                                <span class="font-medium">Tidak ada role ditemukan</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                            <!-- Pagination -->
-                            <div class="flex justify-between items-center p-4 bg-gray-50">
-                                <div class="flex items-center">
-                                    <span class="mr-2 text-sm text-gray-700">Show</span>
-                                    <select v-model="form.perPage"
-                                        class="px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="10">10</option>
-                                        <option value="15">15</option>
-                                        <option value="20">20</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                    </select>
-                                    <span class="ml-2 text-sm text-gray-700">rows</span>
-                                </div>
-                                <div class="overflow-x-auto bg-gray-50 flex justify-between items-center p-4">
-                                    <div class="min-w-max flex items-center space-x-1">
-                                        <template v-for="(link, i) in roles.links" :key="i">
-                                            <button @click="changePage(link.url)" :disabled="!link.url"
-                                                class="px-2 py-1 text-xs rounded-md min-w-[28px] text-center" :class="{
-                                                    'bg-blue-500 text-white': link.active,
-                                                    'bg-gray-50 text-gray-700 hover:bg-blue-500 hover:text-white': !link.active && link.url,
-                                                    'bg-gray-50 text-gray-400': !link.url && link.label === '...',
-                                                }">
-                                                <span v-html="link.label"></span>
-                                            </button>
-                                        </template>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center p-3 bg-white border rounded-lg shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-700">Tampilkan</span>
+                            <select v-model="form.perPage"
+                                class="px-2 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                            <span class="text-sm text-gray-700">baris</span>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <template v-for="(link, i) in roles.links" :key="i">
+                                <button @click="changePage(link.url)" :disabled="!link.url"
+                                    class="px-3 py-1.5 text-xs font-medium rounded-md min-w-[32px] text-center transition shadow-sm"
+                                    :class="{
+                                        'bg-blue-600 text-white hover:bg-blue-700': link.active,
+                                        'bg-white text-gray-700 border hover:bg-blue-50': !link.active && link.url,
+                                        'bg-gray-100 text-gray-400 cursor-not-allowed': !link.url,
+                                    }">
+                                    <span v-html="link.label"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>

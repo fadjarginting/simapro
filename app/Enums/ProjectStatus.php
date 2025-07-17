@@ -8,7 +8,7 @@ enum ProjectStatus: string
     case IN_PROGRESS = 'In Progress';
     case FINISH = 'Finish';
     case ON_HOLD = 'On Hold';
-    case CANCELLED = 'Cancelled';
+    case CANCEL = 'Cancel';
 
     public function label(): string
     {
@@ -17,7 +17,7 @@ enum ProjectStatus: string
             self::IN_PROGRESS => 'In Progress',
             self::FINISH => 'Finish',
             self::ON_HOLD => 'On Hold',
-            self::CANCELLED => 'Cancelled',
+            self::CANCEL => 'Cancel',
         };
     }
 }

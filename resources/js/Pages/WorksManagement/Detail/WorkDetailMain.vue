@@ -39,7 +39,8 @@ const props = defineProps({
             <div class="xl:col-span-3 space-y-4 lg:space-y-6">
                 <WorkBasicInfo :work="work" :notes="notes" />
                 <WorkEAT :work="work" />
-                <WorkProgressSection :work="work"  />
+                <!-- <WorkProgressSection :work="work" /> -->
+                <WorkMetadata :work="work" />
 
             </div>
 
@@ -47,8 +48,8 @@ const props = defineProps({
             <div class="xl:col-span-1 space-y-4 lg:space-y-6 ">
                 <WorkStatusSummary :work="work" />
                 <WorkTimeline :work="work" />
-                <WorkMetadata :work="work" />
                 <WorkDocs :work="work" :documents="documents" />
+
             </div>
         </div>
     </div>

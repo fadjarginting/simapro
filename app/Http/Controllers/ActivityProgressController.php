@@ -52,4 +52,33 @@ class ActivityProgressController extends Controller
             'progress' => $progress,
         ], 200);
     }
-}
+
+    // Method to fetch progress history for an activity
+    public function getProgressHistory(Activity $activity)
+    {
+        $progressHistory = $activity->progress()->latest()->get();
+        if ($progressHistory->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No progress history found for this activity.'
+            ], 404);
+        }
+        // Format the progress history for response
+        $progressHistory = $progressHistory->map(function ($progress) {
+            return [
+                'id' => $progress->id,
+                'progress_date' => $progress->formatted_progress_date,
+                'description' => $progress->progress_description,
+                'percentage' => $progress->progress_percentage,
+                'reporter' => $progress->reporter ? $progress->reporter->name : 'Unknown',
+                'attachment_url' => $progress->hasAttachment() ? $progress->attachment_url : null,
+                'created_at' => $progress->created_at->format('Y-m-d H:i:s'),
+                'updated_at' => $progress->updated_at->format('Y-m-d H:i:s'),
+            ];
+        });
+        return response()->json([
+            'success' => true,
+            'progress_history' => $progressHistory,
+        ]);
+    }  
+ }

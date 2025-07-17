@@ -142,108 +142,114 @@ const cancel = () => {
     </Head>
 
     <div class="container mx-auto px-4 py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-3 text-gray-900">
-                    <div class="p-2 text-gray-900">
-                        <h2 class="text-2xl font-semibold mb-2">Manage Roles</h2>
-                        <h6 class="text-lg font-semibold">
-                            Please fill in role and permission information
-                        </h6>
+        <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                        <i class="fas fa-user-shield text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 tracking-tight">
+                            Create New Role
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Please fill in role and permission information.
+                        </p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Form add roles -->
-                <div class="max-w-full mt-0 pt-0 p-6 bg-white rounded-lg shadow-md">
-                    <form @submit.prevent="submit" class="space-y-6">
-                        <!-- Input role name -->
-                        <div class="mb-4">
-                            <InputLabel for="role-name" value="Role Name" />
-                            <TextInput id="role-name" v-model="form.name" type="text" class="mt-1 block w-full"
-                                autofocus />
-                        </div>
+            <!-- Form add roles -->
+            <div class="p-6">
+                <form @submit.prevent="submit" class="space-y-6">
+                    <!-- Input role name -->
+                    <div>
+                        <InputLabel for="role-name" value="Role Name" class="font-semibold text-gray-700" />
+                        <TextInput id="role-name" v-model="form.name" type="text" class="mt-1 block w-full" autofocus />
+                    </div>
 
-                        <h6 class="text-lg font-semibold">
-                            Input Permission for this Role
-                        </h6>
+                    <div class="space-y-4">
+                        <h3 class="text-base font-bold text-gray-900">Assign Permissions</h3>
 
                         <!-- Select all permissions checkbox -->
-                        <div class="pl-12">
-                            <Checkbox :value="'select-all'"
-                                :checked="form.permissions.length === Object.values(groupedPermissions).flat().length"
-                                @change="(e) => {
-                                    if (e.target.checked) {
-                                        Object.values(groupedPermissions).flat().forEach(permission => {
-                                            if (!form.permissions.includes(permission.name)) {
-                                                form.permissions.push(permission.name);
-                                            }
-                                        });
-                                    } else {
-                                        form.permissions = [];
-                                    }
-                                }" />
-                            <span class="ml-2 text-sm text-gray-600 whitespace-normal break-words">Select All
-                                Permissions</span>
-                        </div>
-
-                        <!-- Input role permission -->
-                        <div v-for="(perms, groupName) in groupedPermissions" :key="groupName"
-                            class="mb-4 border-b pb-4">
-
-                            <!-- Nama group (menu) -->
-                            <h6 class="text-sm font-semibold mb-2 capitalize">
-                                {{ extractGroup(groupName) }}
-                            </h6>
-
-                            <!-- Select all checkbox for group -->
-                            <div class="pl-12 mb-2">
-                                <Checkbox :value="`select-all-${groupName}`"
-                                    :checked="perms.every(permission => form.permissions.includes(permission.name))"
+                        <div class="border rounded-lg p-3 bg-white shadow-sm">
+                            <label class="pl-12 flex items-center cursor-pointer">
+                                <Checkbox :value="'select-all'"
+                                    :checked="form.permissions.length === Object.values(groupedPermissions).flat().length"
                                     @change="(e) => {
                                         if (e.target.checked) {
-                                            perms.forEach(permission => {
+                                            Object.values(groupedPermissions).flat().forEach(permission => {
                                                 if (!form.permissions.includes(permission.name)) {
                                                     form.permissions.push(permission.name);
                                                 }
                                             });
                                         } else {
-                                            form.permissions = form.permissions.filter(permissionName =>
-                                                !perms.some(permission => permission.name === permissionName)
-                                            );
+                                            form.permissions = [];
                                         }
                                     }" />
-                                <span class="ml-2 text-sm text-gray-600 whitespace-normal break-words">Select All in {{
-                                    extractGroup(groupName) }}</span>
+                                <span class="ml-2 text-sm font-semibold text-gray-700">Select All
+                                    Permissions</span>
+                            </label>
+                        </div>
+
+                        <!-- Input role permission -->
+                        <div v-for="(perms, groupName) in groupedPermissions" :key="groupName"
+                            class="pl-4 border rounded-lg overflow-hidden shadow-sm bg-white">
+                            <!-- Group Header -->
+                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 border-b px-4 py-2">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-sm font-semibold text-blue-900 capitalize">{{ extractGroup(groupName) }}</h4>
+                                    <label class="flex items-center cursor-pointer">
+                                        <Checkbox :value="`select-all-${groupName}`"
+                                            :checked="perms.every(permission => form.permissions.includes(permission.name))"
+                                            @change="(e) => {
+                                                if (e.target.checked) {
+                                                    perms.forEach(permission => {
+                                                        if (!form.permissions.includes(permission.name)) {
+                                                            form.permissions.push(permission.name);
+                                                        }
+                                                    });
+                                                } else {
+                                                    form.permissions = form.permissions.filter(permissionName =>
+                                                        !perms.some(permission => permission.name === permissionName)
+                                                    );
+                                                }
+                                            }" />
+                                        <span class="ml-2 text-xs text-gray-600">Select All</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <!-- Daftar permission di group ini -->
-                            <div class="pl-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                            <!-- Permissions List -->
+                            <div class="pl-12 p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 <div v-for="permission in perms" :key="permission.id" class="flex items-center">
-                                    <!-- Checkbox komponen dengan binding update array -->
-                                    <Checkbox name="permissions" :value="permission.name"
-                                        :checked="form.permissions.includes(permission.name)"
-                                        @change="(e) => handleCheckboxChange(e, permission.name)" />
-                                    <!-- Teks permission (hanya bagian action) -->
-                                    <span class="ml-2 text-sm text-gray-600 whitespace-normal break-words">
-                                        {{ extractAction(permission.name) }}
-                                    </span>
+                                    <label class="flex items-center cursor-pointer">
+                                        <Checkbox name="permissions" :value="permission.name"
+                                            :checked="form.permissions.includes(permission.name)"
+                                            @change="(e) => handleCheckboxChange(e, permission.name)" />
+                                        <span class="ml-2 text-sm text-gray-600 whitespace-normal break-words">
+                                            {{ extractAction(permission.name) }}
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Tombol action -->
-                        <div class="flex mt-6 space-x-4 justify-end">
-                            <button type="submit"
-                                class="bg-transparent px-4 rounded-lg text-green-500 whitespace-nowrap text-center transition duration-300 hover:bg-green-500 hover:text-white py-1">
-                                <i class="fas fa-save"></i> Save
-                            </button>
-                            <button type="button" @click="cancel"
-                                class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center transition duration-300 hover:bg-red-500 hover:text-white py-1">
-                                <i class="fas fa-times"></i> Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <!-- Tombol action -->
+                    <div class="flex mt-6 space-x-3 justify-end border-t pt-6">
+                        <button type="button" @click="cancel"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-orange-500 rounded-lg hover:from-red-600 hover:to-orange-600 shadow transition">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" :disabled="form.processing"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 shadow transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-save"></i> Save Role
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

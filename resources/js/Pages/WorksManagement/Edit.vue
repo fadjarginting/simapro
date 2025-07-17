@@ -46,6 +46,7 @@ const userSelectRef = ref(null);
 // Search users function
 const searchUsers = async (query = '') => {
     if (query.length < 2 && query.length > 0) {
+        users.value = [];
         return;
     }
 
@@ -68,8 +69,11 @@ const searchUsers = async (query = '') => {
 
 // Watch search query changes
 watch(searchQuery, (newQuery) => {
-    searchUsers(newQuery);
+    if (!selectedUser.value || newQuery !== selectedUser.value.name) {
+        searchUsers(newQuery);
+    }
 }, { debounce: 300 });
+
 
 // Select user function
 const selectUser = (user) => {
@@ -83,12 +87,13 @@ const clearSelection = () => {
     selectedUser.value = null;
     searchQuery.value = '';
     isDropdownOpen.value = false;
+    searchUsers('');
 };
 
 // Handle input focus
 const handleInputFocus = () => {
     isDropdownOpen.value = true;
-    if (users.value.length === 0) {
+    if (users.value.length === 0 && !searchQuery.value) {
         searchUsers();
     }
 };
@@ -102,7 +107,9 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
-    searchUsers();
+    if (!props.work?.lead_engineer) {
+        searchUsers();
+    }
 });
 
 onBeforeUnmount(() => {
@@ -111,7 +118,9 @@ onBeforeUnmount(() => {
 
 // Filtered users based on search
 const filteredUsers = computed(() => {
-    if (!searchQuery.value) return users.value;
+    if (!searchQuery.value || (selectedUser.value && searchQuery.value === selectedUser.value.name)) {
+        return users.value;
+    }
     return users.value.filter(user =>
         user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -120,14 +129,12 @@ const filteredUsers = computed(() => {
 
 // Submit form
 const submit = () => {
-    // Tambahkan lead_engineer_id ke form data jika ada user yang dipilih
     const formData = {
         ...form.data(),
         lead_engineer_id: selectedUser.value ? selectedUser.value.id : null,
     };
 
-    form.put(route("works.update", props.work.slug), {
-        data: formData,
+    router.put(route("works.update", props.work.slug), formData, {
         onSuccess: () => {
             Swal.fire({
                 icon: "success",
@@ -139,6 +146,11 @@ const submit = () => {
         },
         onError: (errors) => {
             console.error(errors);
+            Swal.fire({
+                icon: "error",
+                title: "Gagal",
+                text: "Terdapat kesalahan pada input Anda.",
+            });
         },
     });
 };
@@ -152,262 +164,233 @@ const submit = () => {
 
     <div class="py-2">
         <div class="mx-auto sm:px-6 lg:px-8">
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div
-                    class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
-                    <h1 class="text-lg font-semibold text-gray-800 leading-tight">
-                        Edit Pekerjaan
-                        <p class="mt-1 text-sm text-gray-600">
-                            Form ini digunakan untuk mengubah data esensial pekerjaan. Hanya data dasar yang dapat
-                            diubah pada halaman ini.
-                        </p>
-                    </h1>
-                    <!-- kembali ke list -->
-                    <div class="flex items-center justify-end">
-                        <Link :href="route('works.index')"
-                            class="bg-gray-200 px-3 py-2 text-xs rounded inline-block whitespace-nowrap text-center font-bold leading-none text-gray-700 transition duration-300 hover:bg-gray-300">
-                        <i class="fas fa-arrow-left mr-2 text-xs leading-none"></i>
-                        <span>Kembali</span>
-                        </Link>
+            <div
+                class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                                <i class="fas fa-edit text-white text-lg"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-lg font-bold text-gray-900 tracking-tight">
+                                    Edit Pekerjaan
+                                </h1>
+                                <p class="mt-1 text-xs text-gray-600">
+                                    Form ini digunakan untuk mengubah data esensial pekerjaan.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <Link :href="route('works.index')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-200 text-gray-800 text-xs font-semibold rounded-md hover:bg-gray-300 shadow-sm transition">
+                            <i class="fas fa-arrow-left text-xs"></i>
+                            <span>Kembali</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Form-->
-                <div class="max-w-full mt-0 pt-0 p-6 bg-white rounded-lg shadow-md">
+                <div class="p-4">
                     <form @submit.prevent="submit">
                         <!-- Legenda Keterangan -->
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <div class="inline-flex items-center space-x-2">
-                                <span class="text-red-600 text-lg">*</span>
-                                <span class="text-sm text-gray-600">Wajib diisi</span>
+                                <span class="text-red-600 text-sm">*</span>
+                                <span class="text-xs text-gray-600">Wajib diisi</span>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
                             <!-- ERF Number -->
-                            <div class="mb-4">
-                                <InputLabel for="erf_number">
-                                    <span>No ERF</span>
-                                </InputLabel>
+                            <div class="mb-2">
+                                <InputLabel for="erf_number" value="No ERF" class="text-xs" />
                                 <TextInput id="erf_number" v-model="form.erf_number" placeholder="No ERF"
-                                    class="mt-1 block w-full" />
-                                <InputError :message="form.errors.erf_number" />
+                                    class="mt-1 block w-full text-sm" />
+                                <InputError :message="form.errors.erf_number" class="mt-1" />
                             </div>
 
                             <!-- Description -->
-                            <div class="mb-4">
-                                <InputLabel for="description">
+                            <div class="mb-2">
+                                <InputLabel for="description" class="text-xs">
                                     <span>Deskripsi Pekerjaan <span class="text-red-600">*</span></span>
                                 </InputLabel>
                                 <TextInput id="description" v-model="form.description" placeholder="Deskripsi Pekerjaan"
-                                    class="mt-1 block w-full" required />
-                                <InputError :message="form.errors.description" />
+                                    class="mt-1 block w-full text-sm" required />
+                                <InputError :message="form.errors.description" class="mt-1" />
                             </div>
 
                             <!-- Plant -->
-                            <div class="mb-4 relative">
-                                <InputLabel for="plant_id">
+                            <div class="mb-2">
+                                <InputLabel for="plant_id" class="text-xs">
                                     <span>Plant <span class="text-red-600">*</span></span>
                                 </InputLabel>
-                                <div class="relative">
+                                <div class="relative mt-1">
                                     <select id="plant_id" v-model="form.plant_id" required
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10">
-                                        <option disabled value="">
-                                            Pilih Plant
-                                        </option>
+                                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none pr-8">
+                                        <option disabled value="">Pilih Plant</option>
                                         <option v-for="plant in plants" :key="plant.id" :value="plant.id">
                                             {{ plant.name }}
                                         </option>
                                     </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i class="fa fa-chevron-down text-gray-400"></i>
+                                    <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                                        <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.plant_id" />
+                                <InputError :message="form.errors.plant_id" class="mt-1" />
                             </div>
 
                             <!-- Requester Unit -->
-                            <div class="mb-4">
-                                <InputLabel for="requester_unit">
+                            <div class="mb-2">
+                                <InputLabel for="requester_unit" class="text-xs">
                                     <span>Unit Kerja Peminta <span class="text-red-600">*</span></span>
                                 </InputLabel>
                                 <TextInput id="requester_unit" v-model="form.requester_unit"
-                                    placeholder="Unit Kerja Peminta" class="mt-1 block w-full" required />
-                                <InputError :message="form.errors.requester_unit" />
+                                    placeholder="Unit Kerja Peminta" class="mt-1 block w-full text-sm" required />
+                                <InputError :message="form.errors.requester_unit" class="mt-1" />
                             </div>
 
                             <!-- Work Priority -->
-                            <div class="mb-4 relative">
-                                <InputLabel for="work_priority">
+                            <div class="mb-2">
+                                <InputLabel for="work_priority" class="text-xs">
                                     <span>Prioritas Pekerjaan <span class="text-red-600">*</span></span>
                                 </InputLabel>
-                                <div class="relative">
+                                <div class="relative mt-1">
                                     <select id="work_priority" v-model="form.work_priority" required
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10">
-                                        <option disabled value="">
-                                            Pilih Prioritas Pekerjaan
-                                        </option>
+                                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none pr-8">
+                                        <option disabled value="">Pilih Prioritas</option>
                                         <option v-for="priority in workPriorities" :key="priority" :value="priority">
                                             {{ priority }}
                                         </option>
                                     </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i class="fa fa-chevron-down text-gray-400"></i>
+                                    <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                                        <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.work_priority" />
+                                <InputError :message="form.errors.work_priority" class="mt-1" />
                             </div>
 
                             <!-- Work Type -->
-                            <div class="mb-4 relative">
-                                <InputLabel for="work_type">
+                            <div class="mb-2">
+                                <InputLabel for="work_type" class="text-xs">
                                     <span>Jenis Pekerjaan <span class="text-red-600">*</span></span>
                                 </InputLabel>
-                                <div class="relative">
+                                <div class="relative mt-1">
                                     <select id="work_type" v-model="form.work_type" required
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10">
-                                        <option disabled value="">
-                                            Pilih Jenis Pekerjaan
-                                        </option>
+                                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none pr-8">
+                                        <option disabled value="">Pilih Jenis</option>
                                         <option v-for="type in workTypes" :key="type" :value="type">
                                             {{ type }}
                                         </option>
                                     </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i class="fa fa-chevron-down text-gray-400"></i>
+                                    <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                                        <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.work_type" />
+                                <InputError :message="form.errors.work_type" class="mt-1" />
                             </div>
 
                             <!-- Request Category -->
-                            <div class="mb-4 relative">
-                                <InputLabel for="request_category">
+                            <div class="mb-2">
+                                <InputLabel for="request_category" class="text-xs">
                                     <span>Kategori Permintaan <span class="text-red-600">*</span></span>
                                 </InputLabel>
-                                <div class="relative">
+                                <div class="relative mt-1">
                                     <select id="request_category" v-model="form.request_category" required
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 appearance-none pr-10">
-                                        <option disabled value="">
-                                            Pilih Kategori Permintaan
-                                        </option>
+                                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none pr-8">
+                                        <option disabled value="">Pilih Kategori</option>
                                         <option v-for="category in requestCategories" :key="category" :value="category">
                                             {{ category }}
                                         </option>
                                     </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i class="fa fa-chevron-down text-gray-400"></i>
+                                    <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                                        <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
                                     </div>
                                 </div>
-                                <InputError :message="form.errors.request_category" />
+                                <InputError :message="form.errors.request_category" class="mt-1" />
                             </div>
 
                             <!-- Lead Engineer - Searchable Select -->
-                            <div class="mb-4 relative" ref="userSelectRef">
-                                <InputLabel for="lead_search" value="Lead Engineer (opsional)" />
-                                <div class="relative">
-                                    <input id="lead_search" type="text" v-model="searchQuery" @focus="handleInputFocus"
-                                        @input="isDropdownOpen = true" placeholder="Cari dan pilih lead engineer..."
-                                        class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 pr-10"
+                            <div class="mb-2 relative" ref="userSelectRef">
+                                <InputLabel for="lead_search" value="Lead Engineer (opsional)" class="text-xs" />
+                                <div class="relative mt-1">
+                                    <TextInput id="lead_search" type="text" v-model="searchQuery"
+                                        @focus="handleInputFocus" @input="isDropdownOpen = true"
+                                        placeholder="Cari lead engineer..." class="w-full text-sm pr-10"
                                         autocomplete="off" />
 
-                                    <!-- Clear button -->
-                                    <button v-if="selectedUser" type="button" @click="clearSelection"
-                                        class="absolute inset-y-0 right-8 flex items-center">
-                                        <i class="fas fa-times text-gray-400 hover:text-gray-600"></i>
-                                    </button>
-
-                                    <!-- Search icon -->
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-search text-gray-400" v-if="!isLoading"></i>
-                                        <i class="fas fa-spinner fa-spin text-gray-400" v-if="isLoading"></i>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-2">
+                                        <button v-if="selectedUser" type="button" @click="clearSelection"
+                                            class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-times text-xs"></i>
+                                        </button>
+                                        <i v-if="!isLoading && !selectedUser"
+                                            class="fas fa-search text-gray-400 ml-2"></i>
+                                        <i v-if="isLoading" class="fas fa-spinner fa-spin text-gray-400 ml-2"></i>
                                     </div>
 
-                                    <!-- Dropdown -->
                                     <div v-if="isDropdownOpen"
                                         class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                                        <!-- Loading state -->
-                                        <div v-if="isLoading" class="p-3 text-center text-gray-500">
-                                            <i class="fas fa-spinner fa-spin mr-2"></i>
-                                            Mencari pengguna...
+                                        <div v-if="isLoading" class="p-2 text-center text-xs text-gray-500">Mencari...
                                         </div>
-
-                                        <!-- No results -->
                                         <div v-else-if="filteredUsers.length === 0"
-                                            class="p-3 text-center text-gray-500">
-                                            {{ searchQuery ? 'Tidak ada pengguna yang ditemukan' : 'Ketik untuk mencari pengguna' }}
+                                            class="p-2 text-center text-xs text-gray-500">
+                                            {{ searchQuery ? 'Tidak ditemukan' : 'Ketik untuk mencari' }}
                                         </div>
-
-                                        <!-- User list -->
                                         <div v-else>
                                             <button v-for="user in filteredUsers" :key="user.id" type="button"
                                                 @click="selectUser(user)"
-                                                class="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center space-x-3 border-b border-gray-100 last:border-b-0"
+                                                class="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center space-x-2 border-b border-gray-100 last:border-b-0"
                                                 :class="{ 'bg-blue-50': selectedUser && selectedUser.id === user.id }">
                                                 <div
-                                                    class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-semibold text-gray-600">
+                                                    class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs font-semibold text-gray-600">
                                                     {{ user.name.charAt(0).toUpperCase() }}
                                                 </div>
                                                 <div class="flex-1 min-w-0">
-                                                    <div class="font-medium text-gray-900 truncate">{{ user.name }}
-                                                    </div>
-                                                    <div class="text-sm text-gray-500 truncate" v-if="user.email">{{
-                                                        user.email }}</div>
+                                                    <div class="font-medium text-gray-900 truncate text-sm">{{ user.name
+                                                        }}</div>
+                                                    <div class="text-xs text-gray-500 truncate">{{ user.email }}</div>
                                                 </div>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Selected user display -->
-                                <div v-if="selectedUser" class="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
-                                    <div class="flex items-center space-x-2">
-                                        <div
-                                            class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs font-semibold text-white">
-                                            {{ selectedUser.name.charAt(0).toUpperCase() }}
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="text-sm font-medium text-blue-900">{{ selectedUser.name }}</div>
-                                            <div class="text-xs text-blue-600" v-if="selectedUser.email">{{
-                                                selectedUser.email }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <span class="text-xs text-gray-500">Lead Engineer dapat diubah jika diperlukan</span>
+                                <InputError :message="form.errors.lead_engineer_id" class="mt-1" />
                             </div>
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="mt-6 flex items-center gap-4">
-                            <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 disabled:opacity-25 transition ease-in-out duration-150">
-                                <i class="fas fa-save mr-2"></i>
-                                Simpan Perubahan
+                        <!-- Submit & Action Buttons -->
+                        <div class="mt-4 flex items-center gap-2">
+                            <button type="submit" :disabled="form.processing"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition disabled:opacity-50">
+                                <i class="fas fa-save text-xs"></i>
+                                Simpan
                             </button>
 
                             <Link :href="route('works.show', work.slug)"
-                                class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-700 focus:outline-none focus:border-gray-700 focus:ring focus:ring-gray-200 disabled:opacity-25 transition ease-in-out duration-150">
-                            <i class="fas fa-eye mr-2"></i>
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-md hover:bg-gray-50 shadow-sm transition">
+                            <i class="fas fa-eye text-xs"></i>
                             Lihat Detail
                             </Link>
                         </div>
 
                         <!-- Info Box -->
-                        <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
-                            <div class="flex">
+                        <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <div class="flex items-start">
                                 <div class="flex-shrink-0">
-                                    <i class="fas fa-info-circle text-amber-400"></i>
+                                    <i class="fas fa-info-circle text-amber-400 mt-0.5"></i>
                                 </div>
-                                <div class="ml-3">
+                                <div class="ml-2">
                                     <h3 class="text-sm font-medium text-amber-800">
                                         Informasi
                                     </h3>
-                                    <div class="mt-2 text-sm text-amber-700">
-                                        <p>Halaman ini hanya untuk mengedit data esensial pekerjaan. Untuk mengubah
-                                            tanggal target, status, atau data dinamis lainnya, gunakan fitur khusus di
-                                            halaman detail pekerjaan.</p>
+                                    <div class="mt-1 text-xs text-amber-700">
+                                        <p>Untuk mengubah tanggal target, status, atau data dinamis lainnya, gunakan
+                                            fitur khusus di halaman detail pekerjaan.</p>
                                     </div>
                                 </div>
                             </div>

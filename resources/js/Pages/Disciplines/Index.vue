@@ -37,10 +37,11 @@ watch(search, (newValue) => {
         { search: newValue },
         {
             preserveState: true,
-            preserveScroll: true
+            preserveScroll: true,
+            debounce: 300
         }
     );
-}, { debounce: 300 });
+});
 
 // Modal functions
 const openCreateModal = () => {
@@ -75,46 +76,31 @@ const closeModal = () => {
 
 // Submit form
 const submitForm = () => {
+    const options = {
+        onSuccess: () => {
+            closeModal();
+            Swal.fire({
+                title: 'Success!',
+                text: `Discipline ${isEditing.value ? 'updated' : 'created'} successfully`,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        },
+        onError: (errors) => {
+            // This part can be enhanced to show specific validation errors
+            Swal.fire({
+                title: 'Error!',
+                text: `Failed to ${isEditing.value ? 'update' : 'create'} discipline`,
+                icon: 'error'
+            });
+        }
+    };
+
     if (isEditing.value) {
-        router.put(route('disciplines.update', editingDiscipline.value.id), form.value, {
-            onSuccess: () => {
-                closeModal();
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Discipline updated successfully',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            },
-            onError: (errors) => {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Failed to update discipline',
-                    icon: 'error'
-                });
-            }
-        });
+        router.put(route('disciplines.update', editingDiscipline.value.id), form.value, options);
     } else {
-        router.post(route('disciplines.store'), form.value, {
-            onSuccess: () => {
-                closeModal();
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Discipline created successfully',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            },
-            onError: (errors) => {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Failed to create discipline',
-                    icon: 'error'
-                });
-            }
-        });
+        router.post(route('disciplines.store'), form.value, options);
     }
 };
 
@@ -178,120 +164,126 @@ onMounted(() => {
 
     <Head title="Disciplines Management" />
 
-    <template name=header>
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Disciplines Management
-        </h2>
-    </template>
-
-    <div class="container mx-auto px-4 py-12">
+    <div class="py-6">
         <div class="mx-auto max-w-full sm:px-6 lg:px-8">
-            <div class="flex flex-wrap -mx-3">
-                <div class="flex-none w-full max-w-full px-3">
-                    <div
-                        class="relative flex flex-col min-w-0 mb-6 break-words bg-white border-0 border-transparent border-solid shadow-xl dark:bg-slate-850 dark:shadow-dark-xl sm:rounded-lg bg-clip-border">
-                        <div
-                            class="flex items-center justify-between p-6 pb-0 mb-0 border-b-0 border-b-solid border-b-transparent">
-                            <h6 class="dark:text-white text-base font-bold">
-                                Disciplines Management
-                            </h6>
-                            <div class="flex items-center justify-end">
-                                <button @click="openCreateModal"
-                                    class="bg-transparent px-2.5 text-xs rounded py-1.4 inline-block whitespace-nowrap text-center font-bold leading-none text-green-500 transition duration-300 hover:bg-gradient-to-tl hover:from-green-500 hover:to-teal-400 hover:text-white">
-                                    <i class="fas fa-plus mr-2 text-xs leading-none"></i>
-                                    <span>Add Discipline</span>
-                                </button>
+            <div
+                class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+                    <div class="flex flex-wrap justify-between items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                                <i class="fas fa-book text-white text-lg"></i>
                             </div>
-                        </div>
-
-                        <!-- Filters and search -->
-                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel for="search" value="Search Discipline" />
-                                <TextInput id="search" v-model="search" type="text" class="mt-1 block w-full"
-                                    placeholder="Search by name or description..." />
+                                <h1 class="text-xl font-bold text-gray-900 tracking-tight">
+                                    Disciplines Management
+                                </h1>
+                                <p class="text-sm text-gray-600">
+                                    Create, search, and manage disciplines.
+                                </p>
                             </div>
                         </div>
+                        <div class="flex items-center gap-2">
+                            <PrimaryButton @click="openCreateModal">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Discipline
+                            </PrimaryButton>
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="flex-auto px-0 pt-0 pb-2">
-                            <div class="p-0 overflow-x-auto">
-                                <table class="w-full table-auto">
-                                    <thead class="bg-gray-100">
-                                        <tr class="text-sm font-normal text-gray-600 border-t border-b text-left">
-                                            <th class="px-4 py-3">Discipline Name</th>
-                                            <th class="px-4 py-3">Description</th>
-                                            <th class="px-4 py-3">Created At</th>
-                                            <th class="px-4 py-3 text-center">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-sm font-normal text-gray-700">
-                                        <tr v-if="disciplines.data.length > 0" v-for="discipline in disciplines.data"
-                                            :key="discipline.id" class="border-b hover:bg-gray-50">
-                                            <td class="px-4 py-3 font-medium">
-                                                {{ discipline.name }}
-                                            </td>
-                                            <td class="px-4 py-3">
-                                                <span v-if="discipline.description" class="text-gray-600">
-                                                    {{ discipline.description.length > 50
-                                                    ? discipline.description.substring(0, 50) + '...'
-                                                    : discipline.description }}
-                                                </span>
-                                                <span v-else class="text-gray-400 italic">No description</span>
-                                            </td>
-                                            <td class="px-4 py-3 text-gray-500">
-                                                {{ new Date(discipline.created_at).toLocaleDateString() }}
-                                            </td>
-                                            <td class="px-4 py-3 text-center">
-                                                <div class="flex justify-center space-x-2">
-                                                    <button @click="openEditModal(discipline)"
-                                                        class="text-blue-500 hover:text-blue-700 transition-colors duration-200"
-                                                        title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button @click="deleteDiscipline(discipline)"
-                                                        class="text-red-500 hover:text-red-700 transition-colors duration-200"
-                                                        title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr v-else>
-                                            <td colspan="4" class="px-4 py-8 text-center text-gray-500">
-                                                <div class="flex flex-col items-center">
-                                                    <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
-                                                    <p class="text-lg">No disciplines found</p>
-                                                    <p class="text-sm text-gray-400 mt-1">
-                                                        {{ search ? 'Try adjusting your search criteria' : 'Click "Add Discipline" to create your first discipline' }}
-                                                    </p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                <!-- Main Content -->
+                <div class="p-6 space-y-6">
+                    <!-- Table Card -->
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                        <!-- Filters and search -->
+                        <div class="p-6 border-b border-gray-200">
+                            <InputLabel for="search" value="Search Discipline" />
+                            <TextInput id="search" v-model="search" type="text" class="mt-1 block w-full md:w-1/2"
+                                placeholder="Search by name or description..." />
+                        </div>
 
-                            <!-- Pagination -->
-                            <div v-if="disciplines.links && disciplines.links.length > 3" class="px-6 py-4">
-                                <nav class="flex justify-center">
-                                    <div class="flex space-x-1">
-                                        <template v-for="link in disciplines.links" :key="link.label">
-                                            <button v-if="link.url" @click="router.get(link.url)" :class="[
-                                                    'px-3 py-2 text-sm border rounded',
-                                                    link.active 
-                                                        ? 'bg-blue-500 text-white border-blue-500' 
-                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                                                ]" v-html="link.label">
-                                            </button>
-                                            <span v-else :class="[
-                                                    'px-3 py-2 text-sm border rounded',
-                                                    'bg-gray-100 text-gray-400 border-gray-300'
-                                                ]" v-html="link.label">
+                        <!-- Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full table-auto">
+                                <thead class="bg-gray-50">
+                                    <tr class="text-sm font-semibold text-gray-600 text-left">
+                                        <th class="px-6 py-3">Discipline Name</th>
+                                        <th class="px-6 py-3">Description</th>
+                                        <th class="px-6 py-3">Created At</th>
+                                        <th class="px-6 py-3 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm text-gray-700 divide-y divide-gray-200">
+                                    <tr v-if="disciplines.data.length > 0" v-for="discipline in disciplines.data"
+                                        :key="discipline.id" class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 font-medium">
+                                            {{ discipline.name }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span v-if="discipline.description" class="text-gray-600">
+                                                {{ discipline.description.length > 50
+                                                ? discipline.description.substring(0, 50) + '...'
+                                                : discipline.description }}
                                             </span>
-                                        </template>
-                                    </div>
-                                </nav>
-                            </div>
+                                            <span v-else class="text-gray-400 italic">No description</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-gray-500">
+                                            {{ new Date(discipline.created_at).toLocaleDateString() }}
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex justify-center space-x-3">
+                                                <button @click="openEditModal(discipline)"
+                                                    class="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button @click="deleteDiscipline(discipline)"
+                                                    class="text-red-500 hover:text-red-700 transition-colors duration-200"
+                                                    title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr v-else>
+                                        <td colspan="4" class="px-6 py-16 text-center text-gray-500">
+                                            <div class="flex flex-col items-center">
+                                                <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+                                                <p class="text-lg font-semibold">No disciplines found</p>
+                                                <p class="text-sm text-gray-400 mt-1">
+                                                    {{ search ? 'Try adjusting your search criteria' : 'Click "Add Discipline" to create one.' }}
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div v-if="disciplines.links && disciplines.links.length > 3"
+                            class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                            <nav class="flex justify-center">
+                                <div class="flex space-x-1">
+                                    <template v-for="(link, index) in disciplines.links" :key="index">
+                                        <button v-if="link.url" @click="router.get(link.url, {}, { preserveScroll: true })" :class="[
+                                                'px-3 py-1.5 text-sm border rounded-md transition',
+                                                link.active
+                                                    ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                                            ]" v-html="link.label">
+                                        </button>
+                                        <span v-else :class="[
+                                                'px-3 py-1.5 text-sm border rounded-md',
+                                                'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
+                                            ]" v-html="link.label">
+                                        </span>
+                                    </template>
+                                </div>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -300,7 +292,7 @@ onMounted(() => {
     </div>
 
     <!-- Modal for Add/Edit Discipline -->
-    <Modal :show="showModal" @close="closeModal" max-width="md">
+    <Modal :show="showModal" @close="closeModal" max-width="lg">
         <div class="p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4">
                 {{ isEditing ? 'Edit Discipline' : 'Add New Discipline' }}
@@ -318,8 +310,8 @@ onMounted(() => {
                     <textarea id="description" v-model="form.description"
                         class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                         rows="4" placeholder="Enter discipline description (optional)" maxlength="1000"></textarea>
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ form.description ? form.description.length : 0 }}/1000 characters
+                    <p class="text-xs text-gray-500 mt-1 text-right">
+                        {{ form.description ? form.description.length : 0 }}/1000
                     </p>
                 </div>
 
@@ -327,8 +319,8 @@ onMounted(() => {
                     <SecondaryButton @click="closeModal">
                         Cancel
                     </SecondaryButton>
-                    <PrimaryButton type="submit">
-                        {{ isEditing ? 'Update' : 'Create' }} Discipline
+                    <PrimaryButton type="submit" :disabled="!form.name">
+                        {{ isEditing ? 'Update' : 'Create' }}
                     </PrimaryButton>
                 </div>
             </form>

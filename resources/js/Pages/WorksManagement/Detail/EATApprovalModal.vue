@@ -65,71 +65,81 @@ defineExpose({ resetForm });
 </script>
 
 <template>
-    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-        <div class="bg-white rounded-md shadow-lg max-w-md w-full mx-4 overflow-hidden">
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto overflow-hidden transform transition-all">
             <!-- Header -->
-            <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h3 class="text-base font-medium">
-                    {{ action === 'approved' ? 'Setujui' : 'Tolak' }} Persetujuan
-                </h3>
-                <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+            <div class="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-gray-100 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div :class="[action === 'approved' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600']" class="w-10 h-10 rounded-full flex items-center justify-center">
+                        <i :class="[action === 'approved' ? 'fas fa-check' : 'fas fa-times']" class="text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">
+                        {{ action === 'approved' ? 'Setujui' : 'Tolak' }} Persetujuan
+                    </h3>
+                </div>
+                <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <!-- Content -->
-            <div class="px-5 py-4">
+            <div class="px-6 py-5">
                 <div class="space-y-4">
-                    <div class="flex gap-1">
-                        <span class="text-sm text-gray-500">Disetujui oleh:</span>
-                        <span class="text-sm">{{ approval?.approver || '-' }}</span>
+                    <div class="text-sm bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p class="text-blue-800">
+                            <span class="font-semibold">Approver:</span> {{ approval?.approver || '-' }}
+                        </p>
+                        <p class="text-blue-800">
+                            <span class="font-semibold">Disiplin:</span> {{ approval?.discipline || '-' }}
+                        </p>
                     </div>
                     
                     <div>
-                        <label class="block text-sm text-gray-500 mb-1">
-                            Catatan {{ action === 'approved' ? '(Opsional)' : '(Wajib)' }}
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                            Catatan {{ action === 'approved' ? '(Opsional)' : '' }}
+                            <span v-if="action === 'rejected'" class="text-red-500">*</span>
                         </label>
                         <textarea 
                             v-model="notes"
-                            class="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
-                            rows="3"
+                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                            rows="4"
                             :placeholder="action === 'approved' ? 'Tambahkan catatan...' : 'Berikan alasan penolakan...'">
                         </textarea>
-                        <p v-if="action === 'rejected' && !notes.trim() && showValidation" 
-                           class="text-xs text-red-500 mt-1">
-                            Catatan wajib diisi untuk penolakan
+                        <p v-if="showValidation && !isValid" 
+                           class="text-xs text-red-600 mt-1.5 flex items-center gap-1">
+                           <i class="fas fa-exclamation-circle"></i>
+                            Catatan wajib diisi untuk penolakan.
                         </p>
                     </div>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="px-5 py-3 bg-gray-50 flex justify-end gap-2">
+            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
                 <button 
                     @click="$emit('close')"
-                    class="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 transition">
+                    class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 shadow-sm transition">
                     Batal
                 </button>
                 <button 
                     @click="submitApproval"
-                    :disabled="submitting || (action === 'rejected' && !notes.trim())"
+                    :disabled="submitting || !isValid"
                     :class="[ 
-                        'px-3 py-1.5 text-xs font-medium text-white rounded transition',
+                        'px-4 py-2 text-sm font-semibold text-white rounded-md shadow-sm transition',
                         action === 'approved'
-                            ? 'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300'
-                            : 'bg-red-500 hover:bg-red-600 disabled:bg-red-300'
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-blue-300 disabled:to-blue-400'
+                            : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:from-red-300 disabled:to-red-400',
+                        'disabled:opacity-70 disabled:cursor-not-allowed'
                     ]">
                     <span v-if="submitting" class="inline-flex items-center">
-                        <svg class="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Memproses
+                        Memproses...
                     </span>
-                    <span v-else>
+                    <span v-else class="flex items-center gap-1.5">
+                        <i :class="[action === 'approved' ? 'fas fa-check' : 'fas fa-times']"></i>
                         {{ action === 'approved' ? 'Setujui' : 'Tolak' }}
                     </span>
                 </button>

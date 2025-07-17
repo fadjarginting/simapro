@@ -23,6 +23,7 @@ use App\Http\Requests\StoreWorkRequest;
 use App\Http\Requests\WorkIndexRequest;
 use App\Http\Requests\UpdateWorkRequest;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class WorkController extends Controller
 {
@@ -284,8 +285,8 @@ class WorkController extends Controller
             'lead_engineer_id' => 'nullable|exists:users,id'
         ]);
 
-        // Update catatan
-        if ($request->has('note_id')) {
+        // Update catatan, hanya jika pengguna adalah lead engineer
+        if ($request->has('note_id') && Auth::id() === $work->lead_engineer_id) {
             $work->update(['note_id' => $request->note_id]);
         }
 
@@ -316,10 +317,18 @@ class WorkController extends Controller
     public function updateStatus(Request $request, Work $work)
     {
         $request->validate([
-            'verification_status' => 'required|in:Belum Verifikasi,In Progress Verifikasi,Finish Verifikasi',
-            'project_status' => 'required|in:Not Started,In Progress,Finish,On Hold,Cancelled',
-            'current_phase' => 'required|in:Not started,Initiating,Executing,Closing,Hold,Reject'
+            'verification_status' => ['required', Rule::in(VerificationStatus::cases())],
+            'project_status' => ['required', Rule::in(ProjectStatus::cases())],
+            'current_phase' => ['required', Rule::in(CurrentPhase::cases())]
         ]);
+
+        $isAdmin = Auth::user()->hasRole('Admin');
+
+
+        // Hanya admin atau lead engineer yang dapat mengubah status
+        if (!$isAdmin && Auth::id() !== $work->lead_engineer_id) {
+            return back()->with('error', 'Hanya admin atau lead engineer yang dapat mengubah status.', 400);
+        }
 
         $work->update($request->only([
             'verification_status',
@@ -347,20 +356,112 @@ class WorkController extends Controller
             'work_id' => 'required|exists:works,id'
         ]);
 
+        // validasi user
+        $isAdmin = Auth::user()->hasRole('Admin');
+        $isWorkLead = Auth::id() === $work->lead_engineer_id;
+
+        if (!$isAdmin && !$isWorkLead) {
+            return back()->with('error', 'Hanya admin atau lead engineer yang dapat mengubah timeline.', 403);
+        }
+
         // Pastikan work_id sesuai dengan work yang diupdate
         if ($work->id != $validatedData['work_id']) {
             return back()->withErrors(['error' => 'Invalid work ID']);
         }
 
-        // Update field yang spesifik
         $fieldToUpdate = $validatedData['field'];
-        $dateValue = $validatedData['date'] ?: null; // Convert empty string to null
+        $dateValue = $validatedData['date'] ? new \DateTime($validatedData['date']) : null;
 
+        $dateFieldsOrder = [
+            'entry_date', 'erf_approved_date', 'clarification_date', 'erf_validated_date',
+            'initiating_target_date', 'executing_start_date', 'executing_target_date', 'executing_actual_date'
+        ];
+
+        $fieldIndex = array_search($fieldToUpdate, $dateFieldsOrder);
+
+        // Jika user mencoba mengisi tanggal baru
+        if ($dateValue !== null) {
+            // Periksa apakah tanggal sebelumnya sudah terisi
+            if ($fieldIndex > 0) {
+                $previousField = $dateFieldsOrder[$fieldIndex - 1];
+                if (is_null($work->$previousField)) {
+                    return back()->with('error', 'Harap isi tanggal sebelumnya terlebih dahulu.');
+                }
+            }
+        } else { // Jika user mencoba mengosongkan tanggal
+            // Periksa apakah ada tanggal setelahnya yang sudah terisi
+            if ($fieldIndex < count($dateFieldsOrder) - 1) {
+                for ($i = $fieldIndex + 1; $i < count($dateFieldsOrder); $i++) {
+                    $nextField = $dateFieldsOrder[$i];
+                    if (!is_null($work->$nextField)) {
+                        return back()->with('error', 'Tidak dapat mengosongkan tanggal ini karena tanggal berikutnya sudah terisi.');
+                    }
+                }
+            }
+        }
+
+        // Update field yang spesifik
         $work->update([
             $fieldToUpdate => $dateValue
         ]);
 
         return back()->with('success', 'Timeline berhasil diperbarui.');
+    }
+
+    /**
+     * Display the user's works.
+     */
+    public function myWorks(WorkIndexRequest $request)
+    {
+        // Get filter options
+        $filterOptions = $this->getFilterOptions();
+
+        // Get filters from request
+        $filters = $request->getFilters();
+        
+        $userId = Auth::id();
+
+        // Base query for user's works (as lead or PIC)
+        $worksQuery = Work::where(function ($query) use ($userId) {
+            $query->where('lead_engineer_id', $userId)
+                  ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
+                      $subQuery->where('users.id', $userId);
+                  });
+        });
+
+        // Apply search and filters from the request
+        $worksQuery->filterAndSearch($request->validated());
+        
+        // Hide finished works by default unless the filter explicitly includes finished status
+        if (!isset($filters['project_status']) || $filters['project_status'] !== ProjectStatus::FINISH->value) {
+            $worksQuery->where('project_status', '<>', ProjectStatus::FINISH->value);
+        }
+        
+        // Get statistics before pagination
+        $statistics = [
+            'total'    => Work::where('lead_engineer_id', $userId)
+                                ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
+                                    $subQuery->where('users.id', $userId);
+                                })->count(),
+            'filtered' => $worksQuery->count(),
+        ];
+        
+        // Apply pagination
+        $works = $worksQuery->paginate(
+            $request->get('per_page', 10),
+            ['*'],
+            'page', 
+            $request->get('page', 1)
+        )->appends($request->query());
+        
+        $statistics['showing'] = $works->count();
+
+        return Inertia::render('MyWorks/Index', [
+            'works'      => $works,
+            'filters'    => $filters,
+            'statistics' => $statistics,
+            ...$filterOptions
+        ]);
     }
 
 }

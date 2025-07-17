@@ -113,101 +113,117 @@ const cancel = () => {
 
     <Head title="Add User" />
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h2 class="text-2xl font-semibold mb-2">
-                        Please fill in user information
-                    </h2>
+    <div class="py-6">
+        <div class="mx-auto sm:px-6 lg:px-8">
+            <div
+                class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                            <i class="fas fa-user-plus text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900 tracking-tight">
+                                Add New User
+                            </h1>
+                            <p class="text-sm text-gray-600">
+                                Create a new user account and assign roles.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Form -->
-                <div class="max-w-full mt-0 p-6 bg-white rounded-lg shadow-md">
-                    <form @submit.prevent="submit" autocomplete="off">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Full Name -->
-                            <div class="mb-4">
-                                <InputLabel for="name" value="Full Name" />
-                                <TextInput id="name" v-model="form.name" placeholder="Enter Full Name"
-                                    class="mt-1 block w-full" :class="{ 'border-red-500': errors.name }" required
-                                    autofocus autocomplete="off" />
-                                <InputError :message="errors.name" />
+                <!-- Form Content -->
+                <div class="p-6">
+                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <h2 class="text-lg font-semibold mb-6 text-gray-800 border-b pb-3">
+                            Please fill in user information
+                        </h2>
+                        <form @submit.prevent="submit" autocomplete="off">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Full Name -->
+                                <div class="mb-4">
+                                    <InputLabel for="name" value="Full Name" />
+                                    <TextInput id="name" v-model="form.name" placeholder="Enter Full Name"
+                                        class="mt-1 block w-full" :class="{ 'border-red-500': errors.name }" required
+                                        autofocus autocomplete="off" />
+                                    <InputError :message="errors.name" />
+                                </div>
+
+                                <!-- Email -->
+                                <div class="mb-4">
+                                    <InputLabel for="email" value="Email" />
+                                    <TextInput id="email" v-model="form.email" type="email" placeholder="Enter Email"
+                                        class="mt-1 block w-full" :class="{ 'border-red-500': errors.email }" required
+                                        aria-autocomplete="false" />
+                                    <InputError :message="errors.email" />
+                                </div>
+
+                                <!-- Password -->
+                                <div class="mb-4">
+                                    <InputLabel for="password" value="Password" />
+                                    <TextInput id="password" v-model="form.password" type="password"
+                                        placeholder="Enter Password" class="mt-1 block w-full"
+                                        :class="{ 'border-red-500': errors.password }" required
+                                        autocomplete="new-password" />
+                                    <InputError :message="errors.password" />
+                                </div>
+
+                                <!-- Password Confirmation -->
+                                <div class="mb-4">
+                                    <InputLabel for="password_confirmation" value="Confirm Password" />
+                                    <TextInput id="password_confirmation" v-model="form.password_confirmation"
+                                        type="password" placeholder="Confirm Password" class="mt-1 block w-full"
+                                        :class="{ 'border-red-500': errors.password_confirmation }" required
+                                        autocomplete="new-password" />
+                                    <InputError :message="errors.password_confirmation" />
+                                </div>
+
+                                <!-- Discipline Selection -->
+                                <div class="mb-4">
+                                    <InputLabel for="discipline_id" value="Discipline" />
+                                    <select id="discipline_id" v-model="form.discipline_id" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        :class="{ 'border-red-500': errors.discipline_id }">
+                                        <option value="" disabled>Select Discipline</option>
+                                        <option v-for="discipline in disciplines" :key="discipline.id"
+                                            :value="discipline.id">
+                                            {{ discipline.name }}
+                                        </option>
+                                    </select>
+                                    <InputError :message="errors.discipline_id" />
+                                </div>
+
+                                <!-- Role Selection -->
+                                <div class="mb-4">
+                                    <InputLabel for="role" value="Role" />
+                                    <select id="role" v-model="form.role" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        :class="{ 'border-red-500': errors.role }">
+                                        <option value="" disabled>Select Role</option>
+                                        <option v-for="role in roles" :key="role.id" :value="role.name">
+                                            {{ role.name }}
+                                        </option>
+                                    </select>
+                                    <InputError :message="errors.role" />
+                                </div>
                             </div>
 
-                            <!-- Email -->
-                            <div class="mb-4">
-                                <InputLabel for="email" value="Email" />
-                                <TextInput id="email" v-model="form.email" type="email" placeholder="Enter Email"
-                                    class="mt-1 block w-full" :class="{ 'border-red-500': errors.email }" required
-                                    aria-autocomplete="false" />
-                                <InputError :message="errors.email" />
+                            <!-- Action Buttons -->
+                            <div class="flex mt-8 pt-6 border-t justify-end space-x-4">
+                                <button type="button" @click="cancel" :disabled="form.processing"
+                                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                                    <i class="fas fa-times mr-2"></i> Cancel
+                                </button>
+                                <button type="submit" :disabled="form.processing"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                                    <i class="fas fa-save mr-2"></i> Save User
+                                </button>
                             </div>
-
-                            <!-- Password -->
-                            <div class="mb-4">
-                                <InputLabel for="password" value="Password" />
-                                <TextInput id="password" v-model="form.password" type="password"
-                                    placeholder="Enter Password" class="mt-1 block w-full"
-                                    :class="{ 'border-red-500': errors.password }" required
-                                    autocomplete="new-password" />
-                                <InputError :message="errors.password" />
-                            </div>
-
-                            <!-- Password Confirmation -->
-                            <div class="mb-4">
-                                <InputLabel for="password_confirmation" value="Confirm Password" />
-                                <TextInput id="password_confirmation" v-model="form.password_confirmation"
-                                    type="password" placeholder="Confirm Password" class="mt-1 block w-full"
-                                    :class="{ 'border-red-500': errors.password_confirmation }" required
-                                    autocomplete="new-password" />
-                                <InputError :message="errors.password_confirmation" />
-                            </div>
-
-                            <!-- Discipline Selection -->
-                            <!-- Discipline Selection -->
-                            <div class="mb-4">
-                                <InputLabel for="discipline_id" value="Discipline" />
-                                <select id="discipline_id" v-model="form.discipline_id" required
-                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                                    :class="{ 'border-red-500': errors.discipline }">
-                                    <option value="">Select Discipline</option>
-                                    <option v-for="discipline in disciplines" :key="discipline.id"
-                                        :value="discipline.id">
-                                        {{ discipline.name }}
-                                    </option>
-                                </select>
-                                <InputError :message="errors.discipline" />
-                            </div>
-
-                            <!-- Role Selection -->
-                            <div class="mb-4">
-                                <InputLabel for="role" value="Role" />
-                                <select id="role" v-model="form.role" required
-                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                                    :class="{ 'border-red-500': errors.role }">
-                                    <option value="">Select Role</option>
-                                    <option v-for="role in roles" :key="role.id" :value="role.name">
-                                        {{ role.name }}
-                                    </option>
-                                </select>
-                                <InputError :message="errors.role" />
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex mt-6 space-x-2 justify-end">
-                            <button type="submit" class="bg-transparent px-4 rounded-lg text-blue-500 whitespace-nowrap text-center
-                                transition duration-300 hover:bg-blue-500 hover:text-white py-1"
-                                :disabled="form.processing">
-                                <i class="fas fa-save"></i> Save
-                            </button>
-                            <button type="button" @click="cancel" class="bg-transparent px-4 rounded-lg text-red-500 whitespace-nowrap text-center
-                                transition duration-300 hover:bg-red-500 hover:text-white py-1">
-                                <i class="fas fa-times"></i> Cancel
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

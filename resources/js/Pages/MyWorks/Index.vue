@@ -11,7 +11,7 @@ defineOptions({
 // Get data from backend props
 const { props } = usePage();
 
-// Form state yang sync dengan URL parameters - sama seperti Users Management
+// Form state that syncs with URL parameters
 const form = ref({
     search: props.filters?.search || '',
     plant_id: props.filters?.plant_id || '',
@@ -35,10 +35,10 @@ const form = ref({
 const showFilterModal = ref(false);
 const showDateFilter = ref(false);
 
-// Loading state untuk mencegah multiple requests
+// Loading state to prevent multiple requests
 const isLoading = ref(false);
 
-// Debounce search function - sama seperti Users Management
+// Debounce search function
 let timeout;
 const performSearch = () => {
     if (isLoading.value) return;
@@ -46,40 +46,25 @@ const performSearch = () => {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
         applyFilters();
-    }, 300); // Kurangi delay untuk response yang lebih cepat
+    }, 300);
 };
 
-// Watch for changes in search to trigger debounced search - sama seperti Users Management
+// Watch for changes in search to trigger debounced search
 watch(() => form.value.search, performSearch);
 
 // Watch for other filter changes
-watch(() => form.value.plant_id, () => {
+watch(() => [
+    form.value.plant_id,
+    form.value.work_priority,
+    form.value.work_type,
+    form.value.request_category,
+    form.value.verification_status,
+    form.value.project_status,
+    form.value.current_phase
+], () => {
     if (!isLoading.value) applyFilters();
 });
 
-watch(() => form.value.work_priority, () => {
-    if (!isLoading.value) applyFilters();
-});
-
-watch(() => form.value.work_type, () => {
-    if (!isLoading.value) applyFilters();
-});
-
-watch(() => form.value.request_category, () => {
-    if (!isLoading.value) applyFilters();
-});
-
-watch(() => form.value.verification_status, () => {
-    if (!isLoading.value) applyFilters();
-});
-
-watch(() => form.value.project_status, () => {
-    if (!isLoading.value) applyFilters();
-});
-
-watch(() => form.value.current_phase, () => {
-    if (!isLoading.value) applyFilters();
-});
 
 // Watch for per_page changes
 watch(() => form.value.per_page, () => {
@@ -89,7 +74,7 @@ watch(() => form.value.per_page, () => {
     }
 });
 
-// Apply filters function - diperbaiki untuk preserveState
+// Apply filters function
 function applyFilters() {
     if (isLoading.value) return;
 
@@ -104,11 +89,11 @@ function applyFilters() {
         }
     });
 
-    router.get(route('works.index'), filterData, {
-        preserveState: true,   // Ini yang penting untuk menjaga state input
+    router.get(route('my-works.index'), filterData, {
+        preserveState: true,
         preserveScroll: true,
         replace: true,
-        only: ['works', 'statistics'], // Hanya update data yang diperlukan
+        only: ['works', 'statistics'],
         onStart: () => {
             isLoading.value = true;
         },
@@ -122,7 +107,7 @@ function applyFilters() {
     });
 }
 
-// Handle page change - sama seperti Users Management
+// Handle page change
 const changePage = (url) => {
     if (!url || isLoading.value) return;
 
@@ -134,58 +119,33 @@ const changePage = (url) => {
 
 // Toggle methods for filter buttons
 function togglePriority(priority) {
-    if (form.value.work_priority === priority) {
-        form.value.work_priority = '';
-    } else {
-        form.value.work_priority = priority;
-    }
+    form.value.work_priority = form.value.work_priority === priority ? '' : priority;
 }
 
 function toggleWorkType(type) {
-    if (form.value.work_type === type) {
-        form.value.work_type = '';
-    } else {
-        form.value.work_type = type;
-    }
+    form.value.work_type = form.value.work_type === type ? '' : type;
 }
 
 function toggleProjectStatus(status) {
-    if (form.value.project_status === status) {
-        form.value.project_status = '';
-    } else {
-        form.value.project_status = status;
-    }
+    form.value.project_status = form.value.project_status === status ? '' : status;
 }
 
 function toggleCurrentPhase(phase) {
-    if (form.value.current_phase === phase) {
-        form.value.current_phase = '';
-    } else {
-        form.value.current_phase = phase;
-    }
+    form.value.current_phase = form.value.current_phase === phase ? '' : phase;
 }
 
 function toggleRequestCategory(category) {
-    if (form.value.request_category === category) {
-        form.value.request_category = '';
-    } else {
-        form.value.request_category = category;
-    }
+    form.value.request_category = form.value.request_category === category ? '' : category;
 }
 
 function toggleVerificationStatus(status) {
-    if (form.value.verification_status === status) {
-        form.value.verification_status = '';
-    } else {
-        form.value.verification_status = status;
-    }
+    form.value.verification_status = form.value.verification_status === status ? '' : status;
 }
 
-// Clear all filters - diperbaiki
+// Clear all filters
 function clearFilters() {
     if (isLoading.value) return;
 
-    // Reset semua filter
     const defaultForm = {
         search: '',
         plant_id: '',
@@ -205,18 +165,16 @@ function clearFilters() {
         page: 1
     };
 
-    // Update form
     Object.keys(defaultForm).forEach(key => {
         form.value[key] = defaultForm[key];
     });
 
-    // Apply filters immediately
     nextTick(() => {
         applyFilters();
     });
 }
 
-// Sort function - diperbaiki menggunakan form state
+// Sort function
 function sortBy(field) {
     if (isLoading.value) return;
 
@@ -227,9 +185,8 @@ function sortBy(field) {
         form.value.sort_order = 'asc';
     }
 
-    form.value.page = 1; // Reset to first page when sorting
+    form.value.page = 1;
 
-    // Apply immediately untuk sorting
     nextTick(() => {
         applyFilters();
     });
@@ -241,71 +198,9 @@ function getSortIcon(field) {
     return form.value.sort_order === 'asc' ? 'fas fa-sort-up text-blue-500' : 'fas fa-sort-down text-blue-500';
 }
 
-// Function to update work
-function updateWork(slug) {
-    router.visit(route("works.edit", slug));
-}
-
 // Function to view work details
 function viewWork(slug) {
     router.visit(route("works.show", slug));
-}
-
-// Function to delete work with SweetAlert2 confirmation
-function deleteWork(slug) {
-    Swal.fire({
-        title: "Konfirmasi Hapus",
-        text: "Apakah Anda yakin ingin menghapus pekerjaan ini? Tindakan ini tidak dapat dibatalkan.",
-        icon: "warning",
-        iconColor: '#F59E0B',
-        showCancelButton: true,
-        confirmButtonText: "Hapus",
-        confirmButtonColor: '#DC2626',
-        cancelButtonText: "Batal",
-        cancelButtonColor: '#374151',
-        width: '350px',
-        backdrop: 'rgba(0, 0, 0, 0.3)',
-        customClass: {
-            popup: 'rounded-xl shadow-lg',
-            confirmButton: 'px-4 py-2 rounded-lg font-medium bg-red-600 hover:bg-red-700',
-            cancelButton: 'px-4 py-2 rounded-lg font-medium bg-gray-700 hover:bg-gray-800 text-white'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            router.delete(route("works.destroy", slug), {
-                preserveState: true,
-                preserveScroll: true,
-                onSuccess: () => {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Terhapus!",
-                        text: "Data pekerjaan berhasil dihapus.",
-                        timer: 2000,
-                        showConfirmButton: false,
-                        customClass: {
-                            popup: 'rounded-xl shadow-lg'
-                        }
-                    });
-                },
-                onError: (errors) => {
-                    let errorMessage = "Terjadi kesalahan saat menghapus data pekerjaan!";
-                    if (errors && errors.message) {
-                        errorMessage = errors.message;
-                    } else if (typeof errors === 'string') {
-                        errorMessage = errors;
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage,
-                        customClass: {
-                            popup: 'rounded-xl shadow-lg'
-                        }
-                    });
-                },
-            });
-        }
-    });
 }
 
 // Format date for display
@@ -319,11 +214,9 @@ function formatDate(dateStr) {
     });
 }
 
-// Apply filters from modal - diperbaiki
+// Apply filters from modal
 function applyFiltersFromModal() {
     showFilterModal.value = false;
-
-    // Pastikan modal tertutup dulu, baru apply filter
     nextTick(() => {
         applyFilters();
     });
@@ -357,14 +250,9 @@ function getStatusClass(status) {
     return classes[status] || 'bg-gray-100 text-gray-800';
 }
 
-// Get works pagination data - diperbaiki dengan reactive computed
+// Get works pagination data
 const worksPagination = computed(() => {
     return usePage().props.works || { data: [], links: [] };
-});
-
-// Get available plants for filter dropdown
-const availablePlants = computed(() => {
-    return usePage().props.plants || [];
 });
 
 // Get filter options
@@ -386,7 +274,7 @@ const statistics = computed(() => {
 // Check if any filters are active
 const hasActiveFilters = computed(() => {
     return Object.keys(form.value).some(key => {
-        if (key === 'sort_by' || key === 'sort_order' || key === 'per_page' || key === 'page') return false;
+        if (['sort_by', 'sort_order', 'per_page', 'page'].includes(key)) return false;
         return form.value[key] !== '' && form.value[key] !== null && form.value[key] !== undefined;
     });
 });
@@ -394,31 +282,28 @@ const hasActiveFilters = computed(() => {
 
 <template>
 
-    <Head title="Manajemen Pekerjaan" />
+    <Head title="Pekerjaan Saya" />
     <div class="py-4">
         <div class="mx-auto sm:px-4 lg:px-6">
-            <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-xl shadow-md overflow-hidden">
+            <div
+                class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-xl shadow-md overflow-hidden">
                 <!-- Header -->
                 <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
                     <div class="flex items-center justify-between flex-wrap gap-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
-                                <i class="fas fa-briefcase text-white text-lg"></i>
+                            <div
+                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                                <i class="fas fa-user-check text-white text-lg"></i>
                             </div>
                             <div>
                                 <h2 class="text-xl font-bold text-gray-900 tracking-tight">
-                                    Manajemen Pekerjaan
+                                    Pekerjaan Saya
                                 </h2>
                                 <p class="text-xs text-gray-600">
-                                    Kelola semua data pekerjaan dan proyek
+                                    Lihat dan kelola semua pekerjaan yang ditugaskan kepada Anda
                                 </p>
                             </div>
                         </div>
-                        <Link :href="route('works.create')"
-                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow-md transition-all">
-                        <i class="fas fa-plus text-xs"></i>
-                        Tambah Pekerjaan
-                        </Link>
                     </div>
                 </div>
 
@@ -472,9 +357,15 @@ const hasActiveFilters = computed(() => {
                     <!-- Statistics -->
                     <div class="mt-3 flex items-center justify-between text-xs text-gray-600 flex-wrap gap-2">
                         <div class="flex items-center space-x-3 flex-wrap">
-                            <span class="flex items-center gap-1"><i class="fas fa-database text-gray-400"></i><span>Total: <strong>{{ statistics.total }}</strong></span></span>
-                            <span v-if="hasActiveFilters" class="flex items-center gap-1"><i class="fas fa-filter text-blue-500"></i><span>Difilter: <strong>{{ statistics.filtered }}</strong></span></span>
-                            <span class="flex items-center gap-1"><i class="fas fa-eye text-gray-400"></i><span>Menampilkan: <strong>{{ statistics.showing }}</strong></span></span>
+                            <span class="flex items-center gap-1"><i
+                                    class="fas fa-database text-gray-400"></i><span>Total Pekerjaan Anda: <strong>{{ statistics.total
+                                        }}</strong></span></span>
+                            <span v-if="hasActiveFilters" class="flex items-center gap-1"><i
+                                    class="fas fa-filter text-blue-500"></i><span>Difilter: <strong>{{
+                                        statistics.filtered }}</strong></span></span>
+                            <span class="flex items-center gap-1"><i
+                                    class="fas fa-eye text-gray-400"></i><span>Menampilkan: <strong>{{
+                                        statistics.showing }}</strong></span></span>
                         </div>
                     </div>
                 </div>
@@ -539,11 +430,12 @@ const hasActiveFilters = computed(() => {
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-if="!worksPagination.data || worksPagination.data.length === 0">
                                 <td colspan="8" class="px-6 py-10 text-center">
-                                    <div class="w-14 h-14 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
+                                    <div
+                                        class="w-14 h-14 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                                         <i class="fas fa-inbox text-blue-400 text-2xl"></i>
                                     </div>
-                                    <h3 class="text-lg font-bold text-gray-800">Tidak Ada Data Pekerjaan</h3>
-                                    <p class="text-xs text-gray-500">Data pekerjaan yang Anda cari tidak ditemukan atau belum ada.</p>
+                                    <h3 class="text-lg font-bold text-gray-800">Anda Belum Memiliki Pekerjaan</h3>
+                                    <p class="text-xs text-gray-500">Tidak ada pekerjaan yang ditugaskan kepada Anda, atau filter tidak cocok.</p>
                                 </td>
                             </tr>
                             <tr v-else v-for="work in worksPagination.data" :key="work.id"
@@ -593,14 +485,15 @@ const hasActiveFilters = computed(() => {
                                             class="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-indigo-100 rounded-full transition">
                                             <i class="fas fa-eye text-sm"></i>
                                         </button>
-                                        <button @click="updateWork(work.slug)" title="Edit"
+                                        <!-- Aksi edit dan hapus mungkin tidak tersedia untuk user biasa -->
+                                        <!-- <button @click="updateWork(work.slug)" title="Edit"
                                             class="w-7 h-7 flex items-center justify-center text-blue-600 hover:bg-blue-100 rounded-full transition">
                                             <i class="fas fa-edit text-sm"></i>
                                         </button>
                                         <button @click="deleteWork(work.slug)" title="Hapus"
                                             class="w-7 h-7 flex items-center justify-center text-red-600 hover:bg-red-100 rounded-full transition">
                                             <i class="fas fa-trash text-sm"></i>
-                                        </button>
+                                        </button> -->
                                     </div>
                                 </td>
                             </tr>
@@ -690,7 +583,8 @@ const hasActiveFilters = computed(() => {
     <div v-if="showFilterModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-0 border w-11/12 md:w-[600px] shadow-lg rounded-xl bg-white">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-xl">
+            <div
+                class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-xl">
                 <h3 class="text-base font-semibold text-gray-900">Filter Berdasarkan</h3>
                 <button @click="showFilterModal = false" class="text-gray-400 hover:text-gray-600 text-lg">
                     <i class="fas fa-times"></i>
@@ -817,7 +711,8 @@ const hasActiveFilters = computed(() => {
 
             <!-- Modal Footer -->
             <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-                <button @click="clearFilters" class="text-xs font-medium text-gray-600 hover:text-red-600 transition-colors">
+                <button @click="clearFilters"
+                    class="text-xs font-medium text-gray-600 hover:text-red-600 transition-colors">
                     Reset Filter
                 </button>
                 <button @click="applyFiltersFromModal"

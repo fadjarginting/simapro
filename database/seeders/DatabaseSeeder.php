@@ -1,9 +1,6 @@
 <?php
 
 namespace Database\Seeders;
-
-use App\Models\Note;
-use App\Models\Plant;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UsersSeeder::class);
         $this->call(PlantSeeder::class);
         $this->call(NotedSeeder::class);
+        $this->call(WorkSeeder::class);
         // $this->call(PrioritySeeder::class);
 
 

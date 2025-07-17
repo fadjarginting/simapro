@@ -1,24 +1,36 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 import axios from 'axios'
+import { usePermissions } from "@/composables/permissions";
+
+
+const { hasPermission, hasRole } = usePermissions();
 
 const props = defineProps({
     work: Object,
     notes: Array,
 })
 
+const currentUser = computed(() => usePage().props.auth.user.data);
+
+const isWorkLead = computed(() => {
+    return props.work.lead_engineer_id === currentUser.value.id;
+});
+
+
 // Fungsi untuk menentukan class berdasarkan prioritas
 const getPriorityClass = (priority) => {
     switch (priority) {
         case 'HIGH':
-            return 'bg-red-100 text-red-800 ring-red-600/20'
+            return 'bg-red-100 text-red-800 shadow-sm'
         case 'MEDIUM':
-            return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20'
+            return 'bg-yellow-100 text-yellow-800 shadow-sm'
         default:
-            return 'bg-gray-100 text-gray-800 ring-gray-600/20'
+            return 'bg-gray-100 text-gray-800 shadow-sm'
     }
 }
+
 
 // Modal dan search state
 const showLeadModal = ref(false)
@@ -273,51 +285,64 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="bg-white shadow-sm border border-gray-200 sm:rounded-lg">
-        <div class="px-4 py-4 sm:px-6 sm:py-5">
-            <!-- Header dengan tombol edit -->
-            <div class="flex items-center justify-between mb-3 lg:mb-4">
-                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                    Informasi Dasar
-                </h3>
+    <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="border-b p-3 bg-gradient-to-r from-blue-100 via-white to-purple-100">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div
+                        class="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                        <i class="fas fa-info-circle text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 tracking-tight">
+                            Informasi Dasar
+                        </h2>
+                    </div>
+                </div>
                 <div class="flex items-center space-x-2">
-                    <button v-if="!isEditing" @click="toggleEditMode"
-                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                        <i class="fas fa-edit mr-2"></i>
-                        Edit
-                    </button>
-                    <div v-else class="flex items-center space-x-2">
-                        <button @click="saveChanges" :disabled="isSubmitting"
-                            class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <i class="fas fa-save mr-2" v-if="!isSubmitting"></i>
-                            <i class="fas fa-spinner fa-spin mr-2" v-else></i>
-                            {{ isSubmitting ? 'Menyimpan...' : 'Simpan' }}
+                    <div v-if="hasRole('Admin') || isWorkLead" class="flex items-center space-x-2">
+                        <button v-if="!isEditing" @click="toggleEditMode"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition">
+                            <i class="fas fa-edit text-xs"></i>
+                            Edit
                         </button>
-                        <button @click="toggleEditMode" :disabled="isSubmitting"
-                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <i class="fas fa-times mr-2"></i>
-                            Batal
-                        </button>
+                        <div v-else class="flex items-center space-x-2">
+                            <button @click="saveChanges" :disabled="isSubmitting"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-md hover:from-blue-700 hover:to-purple-700 shadow transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fas fa-save text-xs" v-if="!isSubmitting"></i>
+                                <i class="fas fa-spinner fa-spin text-xs" v-else></i>
+                                {{ isSubmitting ? 'Menyimpan...' : 'Simpan' }}
+                            </button>
+                            <button @click="toggleEditMode" :disabled="isSubmitting"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-md hover:bg-gray-50 shadow-sm transition disabled:opacity-50">
+                                <i class="fas fa-times text-xs"></i>
+                                Batal
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Content Body -->
+        <div class="p-4">
             <!-- Error message untuk edit -->
-            <div v-if="error && isEditing" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <div class="flex">
-                    <i class="fas fa-exclamation-triangle text-red-400 mr-2 mt-0.5"></i>
-                    <span class="text-sm text-red-700">{{ error }}</span>
+            <div v-if="error && isEditing" class="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg shadow-sm">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    <span class="text-sm font-medium text-red-800">{{ error }}</span>
                 </div>
             </div>
 
-            <dl class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:gap-y-6">
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Deskripsi Pekerjaan</dt>
+                    <dt class="text-sm font-semibold text-gray-700">Deskripsi Pekerjaan</dt>
                     <dd class="mt-1 text-sm text-gray-900 break-words">{{ work.description }}</dd>
                 </div>
 
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Lead Engineer</dt>
+                    <dt class="text-sm font-semibold text-gray-700">Lead Engineer</dt>
                     <dd class="mt-1 flex items-center gap-2">
                         <!-- Mode Edit -->
                         <div v-if="isEditing" class="flex items-center gap-2 flex-1">
@@ -327,7 +352,7 @@ onBeforeUnmount(() => {
                                     {{ selectedUser.name.charAt(0).toUpperCase() }}
                                 </div>
                                 <span class="text-sm text-gray-900">{{ selectedUser.name }}</span>
-                                <button @click="openLeadModal"
+                                <button v-if="hasRole('Admin')" @click="openLeadModal"
                                     class="text-blue-600 hover:text-blue-800 transition-colors"
                                     title="Ganti Lead Engineer">
                                     <i class="fas fa-edit text-xs"></i>
@@ -335,12 +360,12 @@ onBeforeUnmount(() => {
                             </div>
                             <div v-else class="flex items-center gap-2">
                                 <span
-                                    class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                                    class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800 shadow-sm">
                                     <i class="fas fa-exclamation-triangle mr-1"></i>
                                     Belum ditentukan
                                 </span>
                                 <button @click="openLeadModal"
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow"
                                     title="Pilih Lead Engineer">
                                     <i class="fas fa-plus text-xs"></i>
                                 </button>
@@ -350,7 +375,7 @@ onBeforeUnmount(() => {
                         <!-- Mode View -->
                         <div v-else class="flex items-center gap-2">
                             <span v-if="!work.lead_engineer?.name || work.lead_engineer.name === ''"
-                                class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                                class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800 shadow-sm">
                                 <i class="fas fa-exclamation-triangle mr-1"></i>
                                 Belum ditentukan
                             </span>
@@ -360,32 +385,32 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Unit Peminta</dt>
+                    <dt class="text-sm font-semibold text-gray-700">Unit Peminta</dt>
                     <dd class="mt-1 text-sm text-gray-900">{{ work.requester_unit }}</dd>
                 </div>
 
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Prioritas</dt>
+                    <dt class="text-sm font-semibold text-gray-700">Prioritas</dt>
                     <dd class="mt-1">
                         <span :class="getPriorityClass(work.work_priority)"
-                            class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                            class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold">
                             {{ work.work_priority }}
                         </span>
                     </dd>
                 </div>
 
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Jenis Pekerjaan</dt>
+                    <dt class="text-sm font-semibold text-gray-700">Jenis Pekerjaan</dt>
                     <dd class="mt-1 text-sm text-gray-900">{{ work.work_type }}</dd>
                 </div>
 
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Kategori Permintaan</dt>
+                    <dt class="text-sm font-semibold text-gray-700">Kategori Permintaan</dt>
                     <dd class="mt-1 text-sm text-gray-900">{{ work.request_category }}</dd>
                 </div>
 
                 <div class="sm:col-span-2">
-                    <dt class="text-sm font-medium text-gray-500">Catatan</dt>
+                    <dt class="text-sm font-semibold text-gray-700">Catatan</dt>
                     <dd class="mt-1">
                         <!-- Mode Edit with searchable dropdown -->
                         <div v-if="isEditing" class="relative" ref="notesDropdownRef">
@@ -394,14 +419,14 @@ onBeforeUnmount(() => {
                                 <div v-if="isNotesDropdownOpen"
                                     class="absolute z-50 w-full bottom-full mb-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                                     <!-- No results -->
-                                    <div v-if="filteredNotes.length === 0" class="p-3 text-center text-gray-500">
+                                    <div v-if="filteredNotes.length === 0" class="p-2 text-center text-gray-500 text-sm">
                                         {{ notesSearchQuery ? 'Tidak ada catatan yang ditemukan' : 'Ketik untuk mencari catatan' }}
                                     </div>
                                     <!-- Notes list -->
                                     <div v-else>
                                         <button v-for="note in filteredNotes" :key="note.id" type="button"
                                             @click="selectNote(note)"
-                                            class="w-full px-3 py-2 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                                            class="w-full px-3 py-1.5 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors duration-150"
                                             :class="{ 'bg-blue-50': selectedNote && selectedNote.id === note.id }">
                                             <div
                                                 class="whitespace-normal leading-relaxed text-sm text-gray-900 break-words">
@@ -412,7 +437,7 @@ onBeforeUnmount(() => {
                                 </div>
                                 <input type="text" v-model="notesSearchQuery" @focus="handleNotesInputFocus"
                                     @input="isNotesDropdownOpen = true" placeholder="Cari dan pilih catatan..."
-                                    class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm pr-10"
+                                    class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm pr-10"
                                     autocomplete="off" />
                                 <!-- Clear button -->
                                 <button v-if="selectedNote" type="button" @click="clearNotesSelection"
@@ -425,14 +450,14 @@ onBeforeUnmount(() => {
                                 </div>
                             </div>
                             <!-- Selected note display -->
-                            <div v-if="selectedNote" class="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200">
-                                <div class="flex items-start space-x-3">
+                            <div v-if="selectedNote" class="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
+                                <div class="flex items-start space-x-2">
                                     <div
-                                        class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0 mt-0.5">
+                                        class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-xs text-white flex-shrink-0 mt-0.5">
                                         <i class="fas fa-sticky-note"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="text-xs text-blue-600 font-medium mb-1">Catatan terpilih:</div>
+                                        <div class="text-xs text-blue-600 font-medium mb-0.5">Catatan terpilih:</div>
                                         <div
                                             class="text-sm text-blue-900 whitespace-normal leading-relaxed break-words">
                                             {{ selectedNote.content }}
@@ -440,7 +465,7 @@ onBeforeUnmount(() => {
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-1 text-xs text-gray-500">Ketik untuk mencari catatan yang tersedia</div>
+                            <div v-if="!selectedNote" class="mt-1 text-xs text-gray-500">Ketik untuk mencari catatan yang tersedia</div>
                         </div>
                         <!-- Mode View -->
                         <div v-else class="text-sm text-gray-900 break-words">
@@ -461,7 +486,7 @@ onBeforeUnmount(() => {
     <div v-if="showLeadModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] flex flex-col">
             <!-- Header Modal -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
                 <h4 class="text-lg font-semibold text-gray-900">
                     {{ isEditing ? 'Ubah Lead Engineer' : 'Pilih Lead Engineer' }}
                 </h4>
@@ -472,13 +497,13 @@ onBeforeUnmount(() => {
             </div>
 
             <!-- Body Modal -->
-            <div class="flex-1 overflow-hidden p-6">
+            <div class="flex-1 overflow-hidden p-4">
                 <!-- Search Input -->
-                <div class="mb-4" ref="userSelectRef">
+                <div class="mb-3" ref="userSelectRef">
                     <div class="relative">
                         <input type="text" v-model="searchQuery" @focus="handleInputFocus"
                             placeholder="Cari nama atau email pengguna..."
-                            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                            class="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
                             autocomplete="off" :disabled="isSubmitting" />
 
                         <!-- Clear button -->
@@ -497,8 +522,8 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Selected user display -->
-                <div v-if="selectedUser" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <div class="flex items-center space-x-3">
+                <div v-if="selectedUser" class="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                    <div class="flex items-center space-x-2">
                         <div
                             class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-sm font-semibold text-white">
                             {{ selectedUser.name.charAt(0).toUpperCase() }}
@@ -516,7 +541,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <div v-if="error" class="mb-3 p-2 bg-red-50 border border-red-200 rounded-md">
                     <div class="flex">
                         <i class="fas fa-exclamation-triangle text-red-400 mr-2 mt-0.5"></i>
                         <span class="text-sm text-red-700">{{ error }}</span>
@@ -524,15 +549,15 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Results Container (hanya tampil jika belum ada yang dipilih) -->
-                <div v-if="!selectedUser" class="border border-gray-200 rounded-md max-h-80 overflow-y-auto">
+                <div v-if="!selectedUser" class="border border-gray-200 rounded-md max-h-72 overflow-y-auto">
                     <!-- Loading state -->
-                    <div v-if="isLoading" class="p-4 text-center text-gray-500">
+                    <div v-if="isLoading" class="p-3 text-center text-gray-500">
                         <i class="fas fa-spinner fa-spin mr-2"></i>
                         <span>Mencari pengguna...</span>
                     </div>
 
                     <!-- No results -->
-                    <div v-else-if="filteredUsers.length === 0" class="p-4 text-center text-gray-500">
+                    <div v-else-if="filteredUsers.length === 0" class="p-3 text-center text-gray-500">
                         <i class="fas fa-search mr-2"></i>
                         <span>{{ searchQuery ? 'Tidak ada pengguna yang ditemukan' : 'Ketik untuk mencari pengguna'
                             }}</span>
@@ -541,11 +566,11 @@ onBeforeUnmount(() => {
                     <!-- User list -->
                     <div v-else class="divide-y divide-gray-100">
                         <button v-for="user in filteredUsers" :key="user.id" type="button" @click="selectUser(user)"
-                            class="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors flex items-center space-x-3"
+                            class="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors flex items-center space-x-2"
                             :disabled="isSubmitting">
                             <!-- User avatar -->
                             <div
-                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-sm font-semibold text-white shadow-sm">
+                                class="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-sm font-semibold text-white shadow-sm">
                                 {{ user.name.charAt(0).toUpperCase() }}
                             </div>
 
@@ -564,23 +589,23 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Help text -->
-                <div v-if="!selectedUser" class="mt-4 text-xs text-gray-500 text-center">
+                <div v-if="!selectedUser" class="mt-2 text-xs text-gray-500 text-center">
                     Ketik minimal 2 karakter untuk mencari pengguna
                 </div>
             </div>
 
             <!-- Footer Modal dengan tombol submit -->
-            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div class="px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
                 <button type="button" @click="closeLeadModal"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                     :disabled="isSubmitting">
                     Batal
                 </button>
                 <button type="button" @click="confirmLeadSelection"
-                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     :disabled="isSubmitting">
                     <span >
-                        <i class="fas fa-check mr-2"></i>
+                        <i class="fas fa-check mr-1"></i>
                         Konfirmasi Pilihan
                     </span>
                 </button>
