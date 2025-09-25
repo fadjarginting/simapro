@@ -7,6 +7,7 @@ use App\Models\Activity;
 use App\Models\EatApproval;
 use App\Models\Discipline;
 use App\Models\User;
+use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;

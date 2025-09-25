@@ -81,7 +81,8 @@ class MyDashboardController extends Controller
             ->get()
             ->map(function ($task) use ($now) {
                 $targetDate = Carbon::parse($task->executing_target_date);
-                $diffDays = $now->diffInDays($targetDate, false);
+                $diffHours = $now->diffInHours($targetDate, false);
+                $diffDays = round($diffHours / 24);
 
                 if ($diffDays < 0) {
                     $task->urgency_status = 'Terlambat ' . abs($diffDays) . ' hari';
