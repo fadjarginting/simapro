@@ -15,14 +15,25 @@ defineOptions({
 
 // Ambil props yang dikirim dari MyDashboardController
 const props = defineProps({
+    // Common
+    userRole: String,
+
+    // Props untuk role selain 'pic'
     workloadSummary: Object,
     priorityTasks: Array,
     performanceSnapshot: Object,
     workBreakdown: Object,
+
+    // Props untuk role 'pic'
+    activitySummary: Object,
+    priorityActivities: Array,
+    activityPerformance: Object,
+    activityBreakdown: Object,
 });
 
 // Ambil data pengguna yang sedang login
 const user = computed(() => usePage().props.auth.user.data);
+const isPicRole = computed(() => props.userRole === 'pic');
 
 // --- Konfigurasi dan Helper untuk Chart ---
 
@@ -32,6 +43,15 @@ const CHART_COLORS = {
         'Tepat Waktu': '#48BB78', // green
         'Terlambat': '#F56565', // red
         'Lebih Cepat': '#44BFD6', // blue
+    },
+    progress: {
+        'Selesai': '#48BB78', // green
+        'Dalam Progress': '#44BFD6', // blue
+        'Belum Mulai': '#F56565', // red
+    },
+    schedule: {
+        'Sesuai Jadwal': '#48BB78', // green
+        'Terlambat': '#F56565', // red
     },
     general: ["#6A39F7", "#44BFD6", "#93CAED", "#CABFEB", "#F9A825", "#FDD835", "#FB8C00"],
 };
@@ -99,20 +119,46 @@ const formatChartDataObject = (dataObject, colors, label = 'Total') => {
 
 // --- Computed Properties untuk Data Chart ---
 
-// Data untuk chart "Ketepatan Waktu Saya"
+// Data untuk chart "Ketepatan Waktu Saya" (Non-PIC)
 const onTimeDeliveryData = computed(() => {
-    return formatChartDataObject(props.performanceSnapshot.on_time_delivery, CHART_COLORS.onTime);
+    return formatChartDataObject(props.performanceSnapshot?.on_time_delivery, CHART_COLORS.onTime);
 });
 
-// Data untuk chart "Komposisi Pekerjaan per Jenis"
+// Data untuk chart "Komposisi Pekerjaan per Jenis" (Non-PIC)
 const breakdownByWorkTypeData = computed(() => {
-    return formatChartDataObject(props.workBreakdown.by_work_type, CHART_COLORS.general, 'Jumlah Pekerjaan');
+    return formatChartDataObject(props.workBreakdown?.by_work_type, CHART_COLORS.general, 'Jumlah Pekerjaan');
 });
 
-// Data untuk chart "Komposisi Pekerjaan per Status"
+// Data untuk chart "Komposisi Pekerjaan per Status" (Non-PIC)
 const breakdownByStatusData = computed(() => {
-    return formatChartDataObject(props.workBreakdown.by_project_status, CHART_COLORS.general, 'Jumlah Pekerjaan');
+    return formatChartDataObject(props.workBreakdown?.by_project_status, CHART_COLORS.general, 'Jumlah Pekerjaan');
 });
+
+// Data untuk chart "Ringkasan Progress Aktivitas" (PIC)
+const progressSummaryData = computed(() => {
+    return formatChartDataObject(props.activityPerformance?.progress_summary, CHART_COLORS.progress);
+});
+
+// Data untuk chart "Status Jadwal Aktivitas" (PIC)
+const scheduleStatusData = computed(() => {
+    if (!props.activityPerformance) return formatChartDataObject({});
+    const data = {
+        'Sesuai Jadwal': props.activityPerformance.on_schedule,
+        'Terlambat': props.activityPerformance.behind_schedule,
+    };
+    return formatChartDataObject(data, CHART_COLORS.schedule);
+});
+
+// Data untuk chart "Rincian per Disiplin" (PIC)
+const breakdownByDisciplineData = computed(() => {
+    return formatChartDataObject(props.activityBreakdown?.by_discipline, CHART_COLORS.general, 'Jumlah Aktivitas');
+});
+
+// Data untuk chart "Rincian per Status Progress" (PIC)
+const breakdownByProgressStatusData = computed(() => {
+    return formatChartDataObject(props.activityBreakdown?.by_progress_status, CHART_COLORS.general, 'Jumlah Aktivitas');
+});
+
 
 // Helper untuk format tanggal
 const formatDate = (dateString) => {
@@ -153,7 +199,135 @@ const formatDate = (dateString) => {
                     </div>
                 </div>
 
-                <div class="p-6 space-y-6">
+                <!-- ================================================== -->
+                <!-- Tampilan untuk Role PIC -->
+                <!-- ================================================== -->
+                <div v-if="isPicRole" class="p-6 space-y-6">
+                    <!-- 1. Ringkasan Aktivitas Saya -->
+                    <section>
+                        <h2 class="text-base font-bold text-gray-900 mb-4">Ringkasan Aktivitas Saya</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500 text-sm font-medium">Aktivitas Aktif</span>
+                                        <span class="text-3xl font-bold text-blue-600">{{ activitySummary.active_activities }}</span>
+                                    </div>
+                                    <div class="p-3 rounded-lg bg-blue-100 text-blue-600">
+                                        <i class="fas fa-tasks h-6 w-6"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500 text-sm font-medium">Mendekati Deadline</span>
+                                        <span class="text-3xl font-bold text-yellow-500">{{ activitySummary.nearing_deadline }}</span>
+                                    </div>
+                                    <div class="p-3 rounded-lg bg-yellow-100 text-yellow-600">
+                                        <i class="fas fa-hourglass-half h-6 w-6"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-xs text-gray-500">
+                                    Dalam 7 hari ke depan.
+                                </div>
+                            </div>
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500 text-sm font-medium">Aktivitas Terlambat</span>
+                                        <span class="text-3xl font-bold text-red-600">{{ activitySummary.overdue_activities }}</span>
+                                    </div>
+                                    <div class="p-3 rounded-lg bg-red-100 text-red-600">
+                                        <i class="fas fa-exclamation-triangle h-6 w-6"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. Daftar Aktivitas Prioritas -->
+                    <section>
+                        <Card>
+                            <h2 class="text-base font-bold text-gray-900 mb-4">Daftar Aktivitas Prioritas</h2>
+                            <div class="overflow-y-auto max-h-[350px]">
+                                <table class="min-w-full bg-white text-sm">
+                                    <thead class="sticky top-0 bg-gray-50">
+                                        <tr>
+                                            <th class="p-3 text-center font-semibold text-gray-600">Aktivitas</th>
+                                            <th class="p-3 text-center font-semibold text-gray-600">Disiplin</th>
+                                            <th class="p-3 text-center font-semibold text-gray-600">Target Selesai</th>
+                                            <th class="p-3 text-center font-semibold text-gray-600">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="activity in priorityActivities" :key="activity.id" class="hover:bg-gray-50">
+                                            <td class="p-3 text-left text-gray-700 truncate max-w-md">{{ activity.activity_name }}</td>
+                                            <td class="p-3 text-left text-gray-700">{{ activity.discipline_name }}</td>
+                                            <td class="p-3 text-left text-gray-700">{{ formatDate(activity.end_date) }}</td>
+                                            <td class="p-3 text-left font-bold" :class="activity.urgency_type === 'overdue' ? 'text-red-600' : 'text-yellow-600'">
+                                                {{ activity.urgency_status }}
+                                            </td>
+                                        </tr>
+                                        <tr v-if="priorityActivities.length === 0">
+                                            <td colspan="4" class="p-4 text-center text-gray-500">
+                                                Tidak ada aktivitas mendesak saat ini. Kerja bagus!
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Card>
+                    </section>
+
+                    <!-- 3. Analisis Performa Aktivitas -->
+                    <section>
+                        <h2 class="text-base font-bold text-gray-900 mb-4">Analisis Performa Aktivitas</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <Card class="flex flex-col">
+                                <h3 class="font-bold mb-2 text-gray-900">Ringkasan Progress</h3>
+                                <div class="flex-grow flex items-center justify-center min-h-[300px]">
+                                    <PieChart :chart-data="progressSummaryData" :options="pieChartOptions" />
+                                </div>
+                            </Card>
+                            <Card class="flex flex-col">
+                                <h3 class="font-bold mb-2 text-gray-900">Status Jadwal</h3>
+                                <div class="flex-grow flex items-center justify-center min-h-[300px]">
+                                    <PieChart :chart-data="scheduleStatusData" :options="pieChartOptions" />
+                                </div>
+                            </Card>
+                            <Card class="flex flex-col justify-center text-center">
+                                <h3 class="font-semibold text-gray-500">Rata-rata Progress</h3>
+                                <p class="text-5xl font-bold text-blue-600 mt-4">{{ activityPerformance.average_progress.toFixed(1) }}%</p>
+                                <p class="text-lg text-gray-600">Selesai</p>
+                            </Card>
+                        </div>
+                    </section>
+
+                    <!-- 4. Rincian Aktivitas Saya -->
+                    <section>
+                        <h2 class="text-base font-bold text-gray-900 mb-4">Rincian Aktivitas Saya</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                                <h3 class="font-bold mb-2 text-gray-900">Berdasarkan Disiplin</h3>
+                                <div class="min-h-[300px]">
+                                    <BarChart :chart-data="breakdownByDisciplineData" :options="barChartOptions" />
+                                </div>
+                            </Card>
+                            <Card>
+                                <h3 class="font-bold mb-2 text-gray-900">Berdasarkan Status Progress</h3>
+                                <div class="min-h-[300px]">
+                                    <BarChart :chart-data="breakdownByProgressStatusData" :options="barChartOptions" />
+                                </div>
+                            </Card>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ================================================== -->
+                <!-- Tampilan untuk Role Selain PIC (Tampilan Lama) -->
+                <!-- ================================================== -->
+                <div v-else class="p-6 space-y-6">
                     <!-- 1. Ringkasan Beban Kerja Saya -->
                     <section>
                         <h2 class="text-base font-bold text-gray-900 mb-4">Ringkasan Beban Kerja Saya</h2>

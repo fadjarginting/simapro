@@ -85,4 +85,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Discipline::class);
     }
+
+    public function activityPics()
+    {
+        return $this->hasMany(ActivityPic::class);
+    }
+
+    public function eatApprovals()
+    {
+        return $this->hasMany(EatApproval::class);
+    }
 }
