@@ -421,11 +421,14 @@ class WorkController extends Controller
         
         $userId = Auth::id();
 
-        // Base query for user's works (as lead or PIC)
+        // Base query for user's works (as lead, PIC, or approver)
         $worksQuery = Work::where(function ($query) use ($userId) {
             $query->where('lead_engineer_id', $userId)
                   ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
                       $subQuery->where('users.id', $userId);
+                  })
+                  ->orWhereHas('eat.approvals', function ($subQuery) use ($userId) {
+                      $subQuery->where('approver_id', $userId);
                   });
         });
 
@@ -439,10 +442,15 @@ class WorkController extends Controller
         
         // Get statistics before pagination
         $statistics = [
-            'total'    => Work::where('lead_engineer_id', $userId)
-                                ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
-                                    $subQuery->where('users.id', $userId);
-                                })->count(),
+            'total'    => Work::where(function ($query) use ($userId) {
+                                $query->where('lead_engineer_id', $userId)
+                                    ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
+                                        $subQuery->where('users.id', $userId);
+                                    })
+                                    ->orWhereHas('eat.approvals', function ($subQuery) use ($userId) {
+                                        $subQuery->where('approver_id', $userId);
+                                    });
+                            })->count(),
             'filtered' => $worksQuery->count(),
         ];
         

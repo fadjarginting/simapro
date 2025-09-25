@@ -364,4 +364,76 @@ class EatController extends Controller
         $users = User::with('discipline')->get();
         return response()->json($users);
     }
+
+    /**
+     * Display the specified resource by Work ID.
+     */
+    public function showByWorkId(Work $work)
+    {
+        $user = auth()->user();
+
+        // Eager load relationships for efficiency
+        $eat = Eat::with([
+            'activities.pics',
+            'activities.latestProgress',
+            'activities.discipline',
+            'approvals.approver',
+            'approvals.discipline'
+        ])->where('work_id', $work->id)->first();
+
+        // If EAT does not exist, return 404
+        if (!$eat) {
+            return response()->json(null, 404);
+        }
+
+        // Authorization Check
+        $isLeadEngineer = $work->lead_engineer_id === $user->id;
+        $isPic = $eat->activities->flatMap->pics->pluck('id')->contains($user->id);
+        $isApprover = $eat->approvals->pluck('approver_id')->contains($user->id);
+        $hasGeneralViewPermission = $user->can('manajemen_pekerjaan.view');
+
+        if (!$isLeadEngineer && !$isPic && !$isApprover && !$hasGeneralViewPermission) {
+            return response()->json(['message' => 'Anda tidak memiliki izin untuk mengakses EAT ini.'], 403);
+        }
+
+        $eatData = $this->formatEatData($eat);
+
+        return response()->json($eatData);
+    }
+
+    private function formatEatData(Eat $eat)
+    {
+        // Format data as needed for the response
+        return [
+            'id' => $eat->id,
+            'work_id' => $eat->work_id,
+            'start_date' => $eat->start_date,
+            'end_date' => $eat->end_date,
+            'status' => $eat->status,
+            'activities' => $eat->activities->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'activity_name' => $activity->activity_name,
+                    'discipline_id' => $activity->discipline_id,
+                    'activity_description' => $activity->activity_description,
+                    'start_date' => $activity->start_date,
+                    'end_date' => $activity->end_date,
+                    'pics' => $activity->pics->map(fn($pic) => ['id' => $pic->id, 'name' => $pic->name]),
+                    'latest_progress' => $activity->latestProgress ? [
+                        'description' => $activity->latestProgress->progress_description,
+                        'percentage' => $activity->latestProgress->progress_percentage,
+                        'reporter' => $activity->latestProgress->reporter->name,
+                        'updated_at' => $activity->latestProgress->updated_at,
+                    ] : null,
+                ];
+            }),
+            'approvals' => $eat->approvals->map(function ($approval) {
+                return [
+                    'approver_id' => $approval->approver_id,
+                    'status' => $approval->status,
+                    'notes' => $approval->notes,
+                ];
+            }),
+        ];
+    }
 }

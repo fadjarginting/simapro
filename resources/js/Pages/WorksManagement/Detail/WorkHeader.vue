@@ -26,7 +26,7 @@ const props = defineProps({
                         </div>
                         <div class="mt-1 flex items-center text-xs text-gray-500">
                             <i class="fas fa-industry mr-1.5 text-gray-400"></i>
-                            <span>Plant: {{ work.plant.name }}</span>
+                            <span>Plant: {{ work.plant?.name || "-" }}</span>
                         </div>
                     </div>
                 </div>

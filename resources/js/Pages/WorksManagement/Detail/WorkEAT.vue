@@ -55,21 +55,11 @@ const canUpdateEAT = computed(() => {
 });
 
 const canViewEAT = computed(() => {
-    // This check allows anyone with the base permission or the work lead to attempt to view.
-    // The backend will ultimately decide if they can see the specific EAT data.
-    // We add a check for PIC status after data is loaded.
-    if (eatData.value) {
-        const isPic = eatData.value.activities?.some(activity =>
-            activity.pics?.some(pic => pic.id === currentUser.value.id)
-        );
-        const isApprover = eatData.value.approvals?.some(approval =>
-            approval.approver_id === currentUser.value.id
-        );
-        return isWorkLead.value || hasPermission('manajemen_pekerjaan.view') || isPic || isApprover;
-    }
-    // Before data is loaded, we allow the fetch to proceed if the user is lead or has general view permission.
-    // The backend will return 403/404 if they are not involved (e.g., as PIC/Approver) and lack general permissions.
-    return isWorkLead.value || hasPermission('manajemen_pekerjaan.view');
+    // Always allow the component to attempt to fetch data.
+    // The backend will be the single source of truth for authorization.
+    // If the user is not authorized, the API will return a 403 error,
+    // which will be caught and displayed by the fetchEATData function.
+    return true;
 });
 
 const canUpdateProgress = computed(() => {
