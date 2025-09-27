@@ -58,7 +58,6 @@ class MyDashboardController extends Controller
         $baseQuery = Work::where('lead_engineer_id', $userId);
         $workloadSummary = $this->getWorkloadSummary(clone $baseQuery);
         $priorityTasks = $this->getPriorityTasks(clone $baseQuery);
-        $performanceSnapshot = $this->getPerformanceSnapshot(clone $baseQuery);
         $workBreakdown = $this->getWorkBreakdown(clone $baseQuery);
 
         // Data PIC
@@ -72,7 +71,6 @@ class MyDashboardController extends Controller
             // Lead Engineer Data
             'workloadSummary' => $workloadSummary,
             'priorityTasks' => $priorityTasks,
-            'performanceSnapshot' => $performanceSnapshot,
             'workBreakdown' => $workBreakdown,
             // PIC Data
             'activitySummary' => $activitySummary,
@@ -91,14 +89,12 @@ class MyDashboardController extends Controller
 
         $workloadSummary = $this->getWorkloadSummary(clone $baseQuery);
         $priorityTasks = $this->getPriorityTasks(clone $baseQuery);
-        $performanceSnapshot = $this->getPerformanceSnapshot(clone $baseQuery);
         $workBreakdown = $this->getWorkBreakdown(clone $baseQuery);
 
         return Inertia::render('MyDashboard/MyDashboard', [
             'userRole' => 'lead_engineer',
             'workloadSummary' => $workloadSummary,
             'priorityTasks' => $priorityTasks,
-            'performanceSnapshot' => $performanceSnapshot,
             'workBreakdown' => $workBreakdown,
         ]);
     }
@@ -193,51 +189,7 @@ class MyDashboardController extends Controller
 
         return $tasks;
     }
-
-    /**
-     * 3. Mengambil data untuk analisis performa pribadi.
-     */
-    private function getPerformanceSnapshot(Builder $query): array
-    {
-        $finishedWorks = (clone $query)
-            ->where('project_status', ProjectStatus::FINISH)
-            ->whereNotNull('entry_date')
-            ->whereNotNull('executing_actual_date')
-            ->whereNotNull('executing_target_date')
-            ->select('entry_date', 'executing_actual_date', 'executing_target_date')
-            ->get();
-
-        if ($finishedWorks->isEmpty()) {
-            return [
-                'on_time_delivery' => ['Tepat Waktu' => 0, 'Terlambat' => 0, 'Lebih Cepat' => 0],
-                'average_completion_time' => 0,
-            ];
-        }
-
-        // Analisis Ketepatan Waktu
-        $onTimeDelivery = ['Tepat Waktu' => 0, 'Terlambat' => 0, 'Lebih Cepat' => 0];
-        foreach ($finishedWorks as $work) {
-            $diff = Carbon::parse($work->executing_actual_date)->diffInDays(Carbon::parse($work->executing_target_date), false);
-            if ($diff < 0) {
-                $onTimeDelivery['Terlambat']++;
-            } elseif ($diff > 0) {
-                $onTimeDelivery['Lebih Cepat']++;
-            } else {
-                $onTimeDelivery['Tepat Waktu']++;
-            }
-        }
-
-        // Rata-rata Waktu Penyelesaian
-        $totalCompletionDays = $finishedWorks->sum(function ($work) {
-            return Carbon::parse($work->executing_actual_date)->diffInDays(Carbon::parse($work->entry_date));
-        });
-        $averageCompletionTime = round($totalCompletionDays / $finishedWorks->count());
-
-        return [
-            'on_time_delivery' => $onTimeDelivery,
-            'average_completion_time' => $averageCompletionTime,
-        ];
-    }
+   
 
     /**
      * 4. Mengambil rincian pekerjaan berdasarkan jenis atau status.

@@ -17,6 +17,7 @@ defineOptions({
 const props = defineProps({
     // Common
     userRole: String,
+    message: String,
 
     // Props untuk role selain 'pic'
     workloadSummary: Object,
@@ -34,6 +35,7 @@ const props = defineProps({
 // Ambil data pengguna yang sedang login
 const user = computed(() => usePage().props.auth.user.data);
 const isPicRole = computed(() => props.userRole === 'pic');
+const isEmptyRole = computed(() => props.userRole === 'empty');
 
 // --- Konfigurasi dan Helper untuk Chart ---
 
@@ -325,6 +327,19 @@ const formatDate = (dateString) => {
                 </div>
 
                 <!-- ================================================== -->
+                <!-- Tampilan untuk Role 'empty' -->
+                <!-- ================================================== -->
+                <div v-else-if="isEmptyRole" class="p-6">
+                    <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
+                        <div class="p-5 rounded-full bg-blue-100 text-blue-500 mb-4">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-800">Informasi</h2>
+                        <p class="text-gray-600 mt-2 max-w-md">{{ message }}</p>
+                    </div>
+                </div>
+
+                <!-- ================================================== -->
                 <!-- Tampilan untuk Role Selain PIC (Tampilan Lama) -->
                 <!-- ================================================== -->
                 <div v-else class="p-6 space-y-6">
@@ -412,24 +427,7 @@ const formatDate = (dateString) => {
                         </Card>
                     </section>
 
-                    <!-- 3. Analisis Performa Pribadi -->
-                    <section>
-                        <h2 class="text-base font-bold text-gray-900 mb-4">Analisis Performa Pribadi</h2>
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <Card class="lg:col-span-2 flex flex-col">
-                                <h3 class="font-bold mb-2 text-gray-900">Ketepatan Waktu Saya</h3>
-                                <div class="flex-grow flex items-center justify-center min-h-[300px]">
-                                    <PieChart :chart-data="onTimeDeliveryData" :options="pieChartOptions" />
-                                </div>
-                            </Card>
-                            <Card class="flex flex-col justify-center text-center">
-                                <h3 class="font-semibold text-gray-500">Rata-rata Waktu Penyelesaian</h3>
-                                <p class="text-5xl font-bold text-green-600 mt-4">{{
-                                    performanceSnapshot.average_completion_time }}</p>
-                                <p class="text-lg text-gray-600">Hari</p>
-                            </Card>
-                        </div>
-                    </section>
+                   
 
                     <!-- 4. Rincian Pekerjaan Saya -->
                     <section>
