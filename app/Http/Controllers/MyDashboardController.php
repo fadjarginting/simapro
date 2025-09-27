@@ -63,7 +63,6 @@ class MyDashboardController extends Controller
         // Data PIC
         $activitySummary = $this->getActivityPicSummary($userId);
         $priorityActivities = $this->getPriorityActivities($userId);
-        $activityPerformance = $this->getActivityPerformance($userId);
         $activityBreakdown = $this->getActivityBreakdown($userId);
 
         return Inertia::render('MyDashboard/MyDashboard', [
@@ -75,7 +74,6 @@ class MyDashboardController extends Controller
             // PIC Data
             'activitySummary' => $activitySummary,
             'priorityActivities' => $priorityActivities,
-            'activityPerformance' => $activityPerformance,
             'activityBreakdown' => $activityBreakdown,
         ]);
     }
@@ -106,20 +104,12 @@ class MyDashboardController extends Controller
     {
         $activitySummary = $this->getActivityPicSummary($userId);
         $priorityActivities = $this->getPriorityActivities($userId);
-        $activityPerformance = $this->getActivityPerformance($userId);
         $activityBreakdown = $this->getActivityBreakdown($userId);
-        // dd([
-        //     'userRole' => 'pic',
-        //     'activitySummary' => $activitySummary,
-        //     'priorityActivities' => $priorityActivities,
-        //     'activityPerformance' => $activityPerformance,
-        //     'activityBreakdown' => $activityBreakdown,
-        // ]);
+        
         return Inertia::render('MyDashboard/MyDashboard', [
             'userRole' => 'pic',
             'activitySummary' => $activitySummary,
             'priorityActivities' => $priorityActivities,
-            'activityPerformance' => $activityPerformance,
             'activityBreakdown' => $activityBreakdown,
         ]);
     }
@@ -298,100 +288,30 @@ class MyDashboardController extends Controller
         return $activities;
     }
 
-    /**
-     * 3. Performa aktivitas untuk user PIC (berdasarkan progress)
-     */
-    private function getActivityPerformance($userId): array
-    {
-        // Mengambil aktivitas dengan progress terbaru
-        $activitiesWithProgress = ActivityPic::where('user_id', $userId)
-            ->join('activities', 'activity_pics.activity_id', '=', 'activities.id')
-            ->leftJoin('activity_progress as latest_progress', function($join) {
-                $join->on('latest_progress.activity_id', '=', 'activities.id')
-                     ->whereRaw('latest_progress.id = (SELECT MAX(id) FROM activity_progress WHERE activity_id = activities.id)');
-            })
-            ->select(
-                'activities.id',
-                'activities.activity_name',
-                'activities.start_date',
-                'activities.end_date',
-                'latest_progress.progress_percentage',
-                DB::raw('COALESCE(latest_progress.progress_percentage, 0) as current_progress')
-            )
-            ->get();
-
-        if ($activitiesWithProgress->isEmpty()) {
-            return [
-                'progress_summary' => ['Selesai' => 0, 'Dalam Progress' => 0, 'Belum Mulai' => 0],
-                'average_progress' => 0,
-                'on_schedule' => 0,
-                'behind_schedule' => 0,
-            ];
-        }
-
-        // Analisis progress
-        $progressSummary = ['Selesai' => 0, 'Dalam Progress' => 0, 'Belum Mulai' => 0];
-        $totalProgress = 0;
-        $onSchedule = 0;
-        $behindSchedule = 0;
-
-        foreach ($activitiesWithProgress as $activity) {
-            $progress = $activity->current_progress;
-            $totalProgress += $progress;
-
-            if ($progress >= 100) {
-                $progressSummary['Selesai']++;
-            } elseif ($progress > 0) {
-                $progressSummary['Dalam Progress']++;
-            } else {
-                $progressSummary['Belum Mulai']++;
-            }
-
-            // Analisis ketepatan jadwal (jika ada start_date dan end_date)
-            if ($activity->start_date && $activity->end_date) {
-                $startDate = Carbon::parse($activity->start_date);
-                $endDate = Carbon::parse($activity->end_date);
-                $now = Carbon::now();
-                
-                if ($now->between($startDate, $endDate)) {
-                    $totalDuration = $startDate->diffInDays($endDate);
-                    $elapsed = $startDate->diffInDays($now);
-                    $expectedProgress = $totalDuration > 0 ? ($elapsed / $totalDuration) * 100 : 0;
-                    
-                    if ($progress >= $expectedProgress) {
-                        $onSchedule++;
-                    } else {
-                        $behindSchedule++;
-                    }
-                }
-            }
-        }
-
-        $averageProgress = $activitiesWithProgress->count() > 0 
-            ? round($totalProgress / $activitiesWithProgress->count()) 
-            : 0;
-
-        return [
-            'progress_summary' => $progressSummary,
-            'average_progress' => $averageProgress,
-            'on_schedule' => $onSchedule,
-            'behind_schedule' => $behindSchedule,
-        ];
-    }
+   
 
     /**
      * 4. Breakdown aktivitas untuk user PIC
      */
     private function getActivityBreakdown($userId): array
     {
-        // Breakdown berdasarkan disiplin
-        $byDiscipline = ActivityPic::where('user_id', $userId)
+        
+
+        // Breakdown berdasarkan jenis pekerjaan (Work Type)
+        $byWorkType = ActivityPic::where('user_id', $userId)
             ->join('activities', 'activity_pics.activity_id', '=', 'activities.id')
-            ->join('disciplines', 'activities.discipline_id', '=', 'disciplines.id')
-            ->select('disciplines.name', DB::raw('count(*) as total'))
-            ->groupBy('disciplines.name')
+            ->join('eat', 'activities.eat_id', '=', 'eat.id')
+            ->join('works', 'eat.work_id', '=', 'works.id') // Join on works.id instead of erf_number
+            ->select('works.work_type', DB::raw('count(DISTINCT activities.id) as total'))
+            ->groupBy('works.work_type')
             ->get()
-            ->pluck('total', 'name');
+            ->mapWithKeys(function ($item) {
+            // Handle potential Enum casting
+            $workType = is_object($item->work_type) && method_exists($item->work_type, 'value') 
+                ? $item->work_type->value 
+                : $item->work_type;
+            return [$workType => $item->total];
+            });
 
         // Breakdown berdasarkan status progress (menggunakan progress terbaru)
         $byProgressStatus = ActivityPic::where('user_id', $userId)
@@ -417,7 +337,7 @@ class MyDashboardController extends Controller
             ->pluck('total', 'status');
 
         return [
-            'by_discipline' => $byDiscipline,
+            'by_work_type' => $byWorkType,
             'by_progress_status' => $byProgressStatus,
         ];
     }

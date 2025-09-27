@@ -32,6 +32,13 @@ class ActivityProgress extends Model
         return $this->belongsTo(User::class, 'reported_by');
     }
 
+    public function scopeByWorkType($query, $workType)
+    {
+        return $query->whereHas('activity.eat.work', function ($q) use ($workType) {
+            $q->where('work_type', $workType);
+        });
+    }
+
     // Scopes
     public function scopeByActivity($query, $activityId)
     {

@@ -22,13 +22,11 @@ const props = defineProps({
     // Props untuk role selain 'pic'
     workloadSummary: Object,
     priorityTasks: Array,
-    performanceSnapshot: Object,
     workBreakdown: Object,
 
     // Props untuk role 'pic'
     activitySummary: Object,
     priorityActivities: Array,
-    activityPerformance: Object,
     activityBreakdown: Object,
 });
 
@@ -152,9 +150,9 @@ const scheduleStatusData = computed(() => {
 });
 
 // Data untuk chart "Rincian per Disiplin" (PIC)
-const breakdownByDisciplineData = computed(() => {
-    return formatChartDataObject(props.activityBreakdown?.by_discipline, CHART_COLORS.general, 'Jumlah Aktivitas');
-});
+const breakdownByWorkTypeDataActivity = computed(() => {
+    return formatChartDataObject(props.activityBreakdown?.by_work_type, CHART_COLORS.general, '');
+}); 
 
 // Data untuk chart "Rincian per Status Progress" (PIC)
 const breakdownByProgressStatusData = computed(() => {
@@ -282,38 +280,14 @@ const formatDate = (dateString) => {
                         </Card>
                     </section>
 
-                    <!-- 3. Analisis Performa Aktivitas -->
-                    <section>
-                        <h2 class="text-base font-bold text-gray-900 mb-4">Analisis Performa Aktivitas</h2>
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <Card class="flex flex-col">
-                                <h3 class="font-bold mb-2 text-gray-900">Ringkasan Progress</h3>
-                                <div class="flex-grow flex items-center justify-center min-h-[300px]">
-                                    <PieChart :chart-data="progressSummaryData" :options="pieChartOptions" />
-                                </div>
-                            </Card>
-                            <Card class="flex flex-col">
-                                <h3 class="font-bold mb-2 text-gray-900">Status Jadwal</h3>
-                                <div class="flex-grow flex items-center justify-center min-h-[300px]">
-                                    <PieChart :chart-data="scheduleStatusData" :options="pieChartOptions" />
-                                </div>
-                            </Card>
-                            <Card class="flex flex-col justify-center text-center">
-                                <h3 class="font-semibold text-gray-500">Rata-rata Progress</h3>
-                                <p class="text-5xl font-bold text-blue-600 mt-4">{{ activityPerformance.average_progress.toFixed(1) }}%</p>
-                                <p class="text-lg text-gray-600">Selesai</p>
-                            </Card>
-                        </div>
-                    </section>
-
                     <!-- 4. Rincian Aktivitas Saya -->
                     <section>
                         <h2 class="text-base font-bold text-gray-900 mb-4">Rincian Aktivitas Saya</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <Card>
-                                <h3 class="font-bold mb-2 text-gray-900">Berdasarkan Disiplin</h3>
+                                <h3 class="font-bold mb-2 text-gray-900">Berdasarkan Tipe Pekerjaan</h3>
                                 <div class="min-h-[300px]">
-                                    <BarChart :chart-data="breakdownByDisciplineData" :options="barChartOptions" />
+                                    <BarChart :chart-data="breakdownByWorkTypeDataActivity" :options="barChartOptions" />
                                 </div>
                             </Card>
                             <Card>

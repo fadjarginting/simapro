@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-            Schema::create('eat', function (Blueprint $table) {
-                $table->id();
-                $table->string('work_id')->unique();
-                $table->date('start_date')->nullable();
-                $table->date('end_date')->nullable();
-                $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
-                $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
-                $table->enum('status', ['draft', 'submitted', 'approved', 'rejected'])->default('draft');
-                $table->timestamps();
-            });
+        Schema::create('eat', function (Blueprint $table) {
+            $table->id();
+            $table->string('work_id')->unique();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected'])->default('draft');
+            $table->timestamps();
+        });
         
         // tabel aktivitas pekerjaan
         Schema::create('activities', function (Blueprint $table) {
