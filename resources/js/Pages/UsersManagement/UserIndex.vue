@@ -185,7 +185,8 @@ const deleteUser = (userId) => {
                         <!-- Filters and search -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
-                                <InputLabel for="search" value="Search" class="text-sm font-medium text-gray-700 mb-1" />
+                                <InputLabel for="search" value="Search"
+                                    class="text-sm font-medium text-gray-700 mb-1" />
                                 <div class="relative">
                                     <TextInput v-model="form.search" type="text" placeholder="Search by Name or Email"
                                         class="w-full text-sm" />
@@ -200,7 +201,7 @@ const deleteUser = (userId) => {
                                 <InputLabel for="role" value="Role" class="text-sm font-medium text-gray-700 mb-1" />
                                 <div class="relative">
                                     <select v-model="form.role"
-                                        class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        class="focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding p-3 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none">
                                         <option :value="null">All Roles</option>
                                         <option v-for="role in roles" :key="role.id" :value="role.name">
                                             {{ role.name }}
@@ -255,8 +256,8 @@ const deleteUser = (userId) => {
                                                 class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">
                                             <i class="fas fa-edit"></i>
                                             </Link>
-                                            <button @click="deleteUser(user.id)"
-                                                class="text-red-600 hover:text-red-800" title="Delete">
+                                            <button @click="deleteUser(user.id)" class="text-red-600 hover:text-red-800"
+                                                title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </td>

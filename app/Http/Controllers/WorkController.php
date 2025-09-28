@@ -420,137 +420,8 @@ class WorkController extends Controller
         $filters = $request->getFilters();
         
         $userId = Auth::id();
-        $user = Auth::user();
-        $userRole = $user->role; // Assuming role is stored in user model
 
-        if ($userRole === 'user') {
-            // For regular users: only show works where they are PIC in EAT activities
-            // Include FINISHED works (don't hide them)
-            $worksQuery = Work::whereHas('eat.activities.pics', function ($query) use ($userId) {
-                $query->where('users.id', $userId);
-            });
-
-            // Apply search and filters from the request
-            $worksQuery->filterAndSearch($request->validated());
-
-            // Get statistics
-            $statistics = [
-                'total'    => Work::whereHas('eat.activities.pics', function ($query) use ($userId) {
-                                $query->where('users.id', $userId);
-                            })->count(),
-                'filtered' => $worksQuery->count(),
-            ];
-
-            // Apply pagination
-            $works = $worksQuery->paginate(
-                $request->get('per_page', 10),
-                ['*'],
-                'page', 
-                $request->get('page', 1)
-            )->appends($request->query());
-
-            $statistics['showing'] = $works->count();
-
-            return Inertia::render('MyWorks/Index', [
-                'works'      => $works,
-                'filters'    => $filters,
-                'statistics' => $statistics,
-                'user_role'  => $userRole,
-                ...$filterOptions
-            ]);
-
-        } elseif ($userRole === 'lead') {
-            // For lead users: show all works categorized by role
-            // Include FINISHED works (don't hide them)
-            
-            // Get works as Lead Engineer
-            $worksAsLead = Work::where('lead_engineer_id', $userId)
-                ->filterAndSearch($request->validated())
-                ->get();
-
-            // Get works as PIC
-            $worksAsPIC = Work::whereHas('eat.activities.pics', function ($query) use ($userId) {
-                $query->where('users.id', $userId);
-            })->filterAndSearch($request->validated())->get();
-
-            // Get works as Approver
-            $worksAsApprover = Work::whereHas('eat.approvals', function ($query) use ($userId) {
-                $query->where('approver_id', $userId);
-            })->filterAndSearch($request->validated())->get();
-
-            // Combine all works and remove duplicates
-            $allWorkIds = collect()
-                ->merge($worksAsLead->pluck('id'))
-                ->merge($worksAsPIC->pluck('id'))
-                ->merge($worksAsApprover->pluck('id'))
-                ->unique();
-
-            // Get paginated results from all combined works
-            $worksQuery = Work::whereIn('id', $allWorkIds);
-            $worksQuery->filterAndSearch($request->validated());
-
-            // Get statistics
-            $statistics = [
-                'total' => $allWorkIds->count(),
-                'filtered' => $worksQuery->count(),
-                'categories' => [
-                    'lead' => $worksAsLead->count(),
-                    'pic' => $worksAsPIC->count(),
-                    'approver' => $worksAsApprover->count(),
-                ]
-            ];
-
-            // Apply pagination
-            $works = $worksQuery->paginate(
-                $request->get('per_page', 10),
-                ['*'],
-                'page', 
-                $request->get('page', 1)
-            )->appends($request->query());
-
-            $statistics['showing'] = $works->count();
-
-            // Categorize each work for the lead user
-            $categorizedWorks = $works->map(function ($work) use ($userId) {
-                $categories = [];
-                
-                if ($work->lead_engineer_id == $userId) {
-                    $categories[] = 'lead';
-                }
-                
-                if ($work->eat && $work->eat->activities) {
-                    foreach ($work->eat->activities as $activity) {
-                        if ($activity->pics && $activity->pics->contains('id', $userId)) {
-                            $categories[] = 'pic';
-                            break;
-                        }
-                    }
-                }
-                
-                if ($work->eat && $work->eat->approvals && $work->eat->approvals->contains('approver_id', $userId)) {
-                    $categories[] = 'approver';
-                }
-                
-                $work->user_categories = array_unique($categories);
-                return $work;
-            });
-
-            return Inertia::render('MyWorks/Index', [
-                'works'      => $works,
-                'categorized_works' => $categorizedWorks,
-                'filters'    => $filters,
-                'statistics' => $statistics,
-                'user_role'  => $userRole,
-                'work_categories' => [
-                    'lead' => $worksAsLead,
-                    'pic' => $worksAsPIC,
-                    'approver' => $worksAsApprover,
-                ],
-                ...$filterOptions
-            ]);
-        }
-
-        // Fallback for other roles (original logic but without hiding finished works)
+        // Base query for user's works (as lead, PIC, or approver)
         $worksQuery = Work::where(function ($query) use ($userId) {
             $query->where('lead_engineer_id', $userId)
                   ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
@@ -564,17 +435,22 @@ class WorkController extends Controller
         // Apply search and filters from the request
         $worksQuery->filterAndSearch($request->validated());
         
+        // Hide finished works by default unless the filter explicitly includes finished status
+        if (!isset($filters['project_status']) || $filters['project_status'] !== ProjectStatus::FINISH->value) {
+            $worksQuery->where('project_status', '<>', ProjectStatus::FINISH->value);
+        }
+        
         // Get statistics before pagination
         $statistics = [
             'total'    => Work::where(function ($query) use ($userId) {
-                            $query->where('lead_engineer_id', $userId)
-                                ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
-                                    $subQuery->where('users.id', $userId);
-                                })
-                                ->orWhereHas('eat.approvals', function ($subQuery) use ($userId) {
-                                    $subQuery->where('approver_id', $userId);
-                                });
-                        })->count(),
+                                $query->where('lead_engineer_id', $userId)
+                                    ->orWhereHas('eat.activities.pics', function ($subQuery) use ($userId) {
+                                        $subQuery->where('users.id', $userId);
+                                    })
+                                    ->orWhereHas('eat.approvals', function ($subQuery) use ($userId) {
+                                        $subQuery->where('approver_id', $userId);
+                                    });
+                            })->count(),
             'filtered' => $worksQuery->count(),
         ];
         
@@ -592,7 +468,6 @@ class WorkController extends Controller
             'works'      => $works,
             'filters'    => $filters,
             'statistics' => $statistics,
-            'user_role'  => $userRole ?? 'default',
             ...$filterOptions
         ]);
     }

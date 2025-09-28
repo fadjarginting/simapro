@@ -106,7 +106,7 @@ onMounted(() => {
         <div ref="sideElement" class="flex-1 overflow-y-auto w-64 p-3">
             <ul class="flex flex-col pl-0 mb-0 space-y-1">
                 <!-- Dashboard -->
-                <li v-if="hasPermission('dashboard.view') && hasRole('Admin')" @click="scrollToMenuItem">
+                <li v-if="hasPermission('dashboard.view')" @click="scrollToMenuItem">
                     <Link :href="route('dashboard')"
                         class="flex items-center gap-3 text-sm font-semibold dark:text-slate-300 text-slate-700 transition-all px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
                         :class="{ 'sidebar-active-item bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm': isActiveRoute('dashboard') }">
@@ -118,7 +118,7 @@ onMounted(() => {
                     </Link>
                 </li>
 
-                <li v-if="hasPermission('my_dashboard.view') && hasRole('User') || hasRole('Lead')" @click="scrollToMenuItem">
+                <li v-if="hasPermission('my_dashboard.view')" @click="scrollToMenuItem">
                     <Link :href="route('my-dashboard')"
                         class="flex items-center gap-3 text-sm font-semibold dark:text-slate-300 text-slate-700 transition-all px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
                         :class="{ 'sidebar-active-item bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm': isActiveRoute('my-dashboard') }">

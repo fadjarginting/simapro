@@ -113,12 +113,14 @@ const cancel = () => {
 
     <div class="py-2">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
+            <div
+                class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
                 <!-- Header -->
                 <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                            <div
+                                class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
                                 <i class="fas fa-pencil-alt text-white text-lg"></i>
                             </div>
                             <div>
@@ -156,8 +158,8 @@ const cancel = () => {
                                     <span>Full Name <span class="text-red-500">*</span></span>
                                 </InputLabel>
                                 <TextInput id="name" v-model="form.name" placeholder="Enter Full Name"
-                                    class="mt-1 block w-full text-sm" :class="{ 'border-red-500': errors.name }" required
-                                    autofocus autocomplete="off" />
+                                    class="mt-1 block w-full text-sm" :class="{ 'border-red-500': errors.name }"
+                                    required autofocus autocomplete="off" />
                                 <InputError :message="errors.name" class="mt-1" />
                             </div>
 
@@ -167,7 +169,8 @@ const cancel = () => {
                                     <span>Email <span class="text-red-500">*</span></span>
                                 </InputLabel>
                                 <TextInput id="email" v-model="form.email" type="email" placeholder="Enter Email"
-                                    class="mt-1 block w-full text-sm" :class="{ 'border-red-500': errors.email }" required aria-autocomplete="false" />
+                                    class="mt-1 block w-full text-sm" :class="{ 'border-red-500': errors.email }"
+                                    required aria-autocomplete="false" />
                                 <InputError :message="errors.email" class="mt-1" />
                             </div>
 
@@ -185,7 +188,8 @@ const cancel = () => {
                                 <InputLabel for="password_confirmation" value="Confirm New Password" class="text-xs" />
                                 <TextInput id="password_confirmation" v-model="form.password_confirmation"
                                     type="password" placeholder="Confirm New Password" class="mt-1 block w-full text-sm"
-                                    :class="{ 'border-red-500': errors.password_confirmation }" autocomplete="new-password" />
+                                    :class="{ 'border-red-500': errors.password_confirmation }"
+                                    autocomplete="new-password" />
                                 <InputError :message="errors.password_confirmation" class="mt-1" />
                             </div>
 
@@ -196,7 +200,7 @@ const cancel = () => {
                                 </InputLabel>
                                 <div class="relative mt-1">
                                     <select id="discipline" v-model="form.discipline_id" required
-                                        class="block w-full px-2.5 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm appearance-none pr-8"
+                                        class="focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding p-3 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
                                         :class="{ 'border-red-500': errors.discipline_id }">
                                         <option value="">Select Discipline</option>
                                         <option v-for="discipline in disciplines" :key="discipline.id"
@@ -218,7 +222,7 @@ const cancel = () => {
                                 </InputLabel>
                                 <div class="relative mt-1">
                                     <select id="role" v-model="form.role" required
-                                        class="block w-full px-2.5 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm appearance-none pr-8"
+                                        class="focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding p-3 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
                                         :class="{ 'border-red-500': errors.role }">
                                         <option value="">Select Role</option>
                                         <option v-for="role in roles" :key="role.id" :value="role.name">

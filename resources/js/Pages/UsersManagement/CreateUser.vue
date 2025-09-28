@@ -185,7 +185,7 @@ const cancel = () => {
                                 <div class="mb-4">
                                     <InputLabel for="discipline_id" value="Discipline" />
                                     <select id="discipline_id" v-model="form.discipline_id" required
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        class="focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding p-3 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
                                         :class="{ 'border-red-500': errors.discipline_id }">
                                         <option value="" disabled>Select Discipline</option>
                                         <option v-for="discipline in disciplines" :key="discipline.id"
@@ -200,7 +200,7 @@ const cancel = () => {
                                 <div class="mb-4">
                                     <InputLabel for="role" value="Role" />
                                     <select id="role" v-model="form.role" required
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        class="focus:shadow-primary-outline dark:bg-gray-950 dark:placeholder:text-white/80 dark:text-white/80 text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding p-3 font-normal text-gray-700 outline-none transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none"
                                         :class="{ 'border-red-500': errors.role }">
                                         <option value="" disabled>Select Role</option>
                                         <option v-for="role in roles" :key="role.id" :value="role.name">

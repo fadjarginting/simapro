@@ -62,9 +62,7 @@ class UserManagementController extends Controller
             ['name' => 'Users', 'url' => route('users.index')],
             ['name' => 'Create User', 'url' => route('users.create')],
         ];
-        $roles = Cache::remember('roles_list', 3600, function () {
-            return Role::select('name')->get();
-        });
+        $roles = Role::select('name')->get();
         $disciplines = Discipline::select('id', 'name')->get();
         // Only fetch necessary fields to optimize performance
         return Inertia::render('UsersManagement/CreateUser', [

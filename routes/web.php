@@ -38,7 +38,7 @@ use App\Http\Controllers\MorningReportController;
 // Redirect to login page
 Route::get('/', function () {
     if (Auth::check()) {
-        if (Auth::user()->hasRole('Admin')) {
+        if (Auth::user()->hasPermissionTo('dashboard.view')) {
             return redirect()->route('dashboard');
         } else {
             return redirect()->route('my-dashboard');
@@ -51,7 +51,7 @@ Route::get('/', function () {
 // Dashboard Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('permission:dashboard.view' , 'role:Admin')
+        ->middleware('permission:dashboard.view')
         ->name('dashboard');
 });
 
