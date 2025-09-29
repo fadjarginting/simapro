@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Work;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,20 +11,26 @@ class MorningReportController extends Controller
 {
     public function index()
     {
-        // Kumpulan data untuk Laporan Pagi
+        // Hanya kirim COUNT untuk initial load - jauh lebih cepat!
         $reportData = [
-            'new_works' => $this->getNewWorks(),
-            'priority_high_works' => $this->getPriorityHighWorks(),
-            'finished_works' => $this->getFinishedWorks(),
-            'needs_assignment' => $this->getWorksNeedingAssignment(),
-            'on_hold_works' => $this->getOnHoldWorks(),
-            'nearing_deadline_executing' => $this->getNearingDeadlineExecuting(),
-            'executing_phase_works' => $this->getExecutingPhaseWorks(),
-            'initiating_planning_works' => $this->getInitiatingPlanningWorks(),
-            'nearing_deadline_initiating' => $this->getNearingDeadlineInitiating(),
-            'needs_validation' => $this->getWorksNeedingValidation(),
-            'needs_eat' => $this->getWorksNeedingEat(),
-            'needs_eat_approval' => $this->getWorksNeedingEatApproval(),
+            'new_works' => [
+                'today' => $this->getNewWorksQuery('today')->count(),
+                'this_week' => $this->getNewWorksQuery('this_week')->count(),
+            ],
+            'priority_high_works' => $this->getPriorityHighWorksQuery()->count(),
+            'finished_works' => [
+                'today' => $this->getFinishedWorksQuery('today')->count(),
+                'this_week' => $this->getFinishedWorksQuery('this_week')->count(),
+            ],
+            'needs_assignment' => $this->getWorksNeedingAssignmentQuery()->count(),
+            'on_hold_works' => $this->getOnHoldWorksQuery()->count(),
+            'nearing_deadline_executing' => $this->getNearingDeadlineExecutingQuery()->count(),
+            'executing_phase_works' => $this->getExecutingPhaseWorksQuery()->count(),
+            'initiating_planning_works' => $this->getInitiatingPlanningWorksQuery()->count(),
+            'nearing_deadline_initiating' => $this->getNearingDeadlineInitiatingQuery()->count(),
+            'needs_validation' => $this->getWorksNeedingValidationQuery()->count(),
+            'needs_eat' => $this->getWorksNeedingEatQuery()->count(),
+            'needs_eat_approval' => $this->getWorksNeedingEatApprovalQuery()->count(),
         ];
 
         return Inertia::render('MorningReport/Morning', [
@@ -34,133 +38,144 @@ class MorningReportController extends Controller
         ]);
     }
 
-    // 1. ERF YANG MASUK HARI INI & MINGGU INI
-    private function getNewWorks(): array
+    // API endpoint untuk load data detail on-demand
+    public function loadCardData(Request $request, string $cardType)
     {
-        $today = Carbon::today();
-        $startOfWeek = Carbon::now()->startOfWeek();
+        $period = $request->get('period'); // untuk card yang punya today/this_week
+        
+        $data = match($cardType) {
+            'new_works' => $this->getNewWorksQuery($period)->get(),
+            'priority_high_works' => $this->getPriorityHighWorksQuery()->get(),
+            'finished_works' => $this->getFinishedWorksQuery($period)->get(),
+            'needs_assignment' => $this->getWorksNeedingAssignmentQuery()->get(),
+            'on_hold_works' => $this->getOnHoldWorksQuery()->get(),
+            'nearing_deadline_executing' => $this->getNearingDeadlineExecutingQuery()->get(),
+            'executing_phase_works' => $this->getExecutingPhaseWorksQuery()->get(),
+            'initiating_planning_works' => $this->getInitiatingPlanningWorksQuery()->get(),
+            'nearing_deadline_initiating' => $this->getNearingDeadlineInitiatingQuery()->get(),
+            'needs_validation' => $this->getWorksNeedingValidationQuery()->get(),
+            'needs_eat' => $this->getWorksNeedingEatQuery()->get(),
+            'needs_eat_approval' => $this->getWorksNeedingEatApprovalQuery()->get(),
+            default => [],
+        };
 
-        $query = Work::with('plant', 'leadEngineer')->orderBy('entry_date', 'desc');
-
-        return [
-            'today' => (clone $query)->whereDate('entry_date', $today)->get(),
-            'this_week' => (clone $query)->whereBetween('entry_date', [$startOfWeek, $today])->get(),
-        ];
+        return response()->json($data);
     }
 
-    // 2. PEKERJAAN ENGINEERING PRIORITAS HIGH
-    private function getPriorityHighWorks()
+    // QUERY BUILDERS - Return query builder untuk reusability
+    
+    private function getNewWorksQuery(string $period = 'today')
+    {
+        $query = Work::with('plant', 'leadEngineer')->orderBy('entry_date', 'desc');
+        
+        if ($period === 'today') {
+            return $query->whereDate('entry_date', Carbon::today());
+        }
+        
+        return $query->whereBetween('entry_date', [
+            Carbon::now()->startOfWeek(), 
+            Carbon::today()
+        ]);
+    }
+
+    private function getPriorityHighWorksQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->where('work_priority', 'HIGH')
             ->whereNotIn('project_status', ['Finish', 'Cancel'])
-            ->orderBy('entry_date', 'desc')
-            ->get();
+            ->orderBy('entry_date', 'desc');
     }
 
-    // 3. PEKERJAAN ENGINEERING YANG SELESAI HARI INI & MINGGU INI
-    private function getFinishedWorks(): array
+    private function getFinishedWorksQuery(string $period = 'today')
     {
-        $today = Carbon::today();
-        $startOfWeek = Carbon::now()->startOfWeek();
-
         $query = Work::with('plant', 'leadEngineer')
             ->where('project_status', 'Finish')
             ->orderBy('executing_actual_date', 'desc');
-
-        return [
-            'today' => (clone $query)->whereDate('executing_actual_date', $today)->get(),
-            'this_week' => (clone $query)->whereBetween('executing_actual_date', [$startOfWeek, $today])->get(),
-        ];
+        
+        if ($period === 'today') {
+            return $query->whereDate('executing_actual_date', Carbon::today());
+        }
+        
+        return $query->whereBetween('executing_actual_date', [
+            Carbon::now()->startOfWeek(),
+            Carbon::today()
+        ]);
     }
 
-    // 4. PEKERJAAN YANG PERLU PENUNJUKAN LEAD ENGINEERING (TBD)
-    private function getWorksNeedingAssignment()
+    private function getWorksNeedingAssignmentQuery()
     {
         return Work::with('plant')
             ->whereNull('lead_engineer_id')
             ->whereNotIn('project_status', ['Finish', 'Cancel'])
-            ->orderBy('entry_date', 'asc')
-            ->get();
+            ->orderBy('entry_date', 'asc');
     }
 
-    // 5. PEKERJAAN ENGINEERING DENGAN STATUS PENGERJAAN HOLD
-    private function getOnHoldWorks()
+    private function getOnHoldWorksQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->where('project_status', 'On Hold')
-            ->orderBy('entry_date', 'desc')
-            ->get();
+            ->orderBy('entry_date', 'desc');
     }
 
-    // 6. PEKERJAAN DENGAN TARGET FASE EXECUTING SELESAI <= 2 MINGGU
-    private function getNearingDeadlineExecuting()
+    private function getNearingDeadlineExecutingQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->where('project_status', 'In Progress')
-            ->whereBetween('executing_target_date', [Carbon::now(), Carbon::now()->addWeeks(2)])
-            ->orderBy('executing_target_date', 'asc')
-            ->get();
+            ->whereBetween('executing_target_date', [
+                Carbon::now(), 
+                Carbon::now()->addWeeks(2)
+            ])
+            ->orderBy('executing_target_date', 'asc');
     }
 
-    // 7. PEKERJAAN ENGINEERING FASE EXECUTING
-    private function getExecutingPhaseWorks()
+    private function getExecutingPhaseWorksQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->where('current_phase', 'Executing')
-            ->orderBy('executing_start_date', 'desc')
-            ->get();
+            ->orderBy('executing_start_date', 'desc');
     }
 
-    // 8. PEKERJAAN ENGINEERING FASE INITIATING DAN PLANNING
-    private function getInitiatingPlanningWorks()
+    private function getInitiatingPlanningWorksQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->whereIn('current_phase', ['Initiating', 'Planning'])
-            ->orderBy('entry_date', 'desc')
-            ->get();
+            ->orderBy('entry_date', 'desc');
     }
     
-    // 9. PEKERJAAN DENGAN TARGET FASE INITIATING/PLANNING SELESAI <= 2 MINGGU
-    private function getNearingDeadlineInitiating()
+    private function getNearingDeadlineInitiatingQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->whereIn('current_phase', ['Initiating', 'Planning'])
-            ->whereBetween('initiating_target_date', [Carbon::now(), Carbon::now()->addWeeks(2)])
-            ->orderBy('initiating_target_date', 'asc')
-            ->get();
+            ->whereBetween('initiating_target_date', [
+                Carbon::now(), 
+                Carbon::now()->addWeeks(2)
+            ])
+            ->orderBy('initiating_target_date', 'asc');
     }
 
-    // 10. PEKERJAAN YANG erf_validated_date NYA MASIH NULL
-    private function getWorksNeedingValidation()
+    private function getWorksNeedingValidationQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->whereNull('erf_validated_date')
             ->whereNotIn('project_status', ['Finish', 'Cancel', 'Not Started'])
-            ->orderBy('entry_date', 'asc')
-            ->get();
+            ->orderBy('entry_date', 'asc');
     }
 
-    // 11. PEKERJAAN YANG BELUM ADA EAT / AKAN DIBUATKAN EAT
-    private function getWorksNeedingEat()
+    private function getWorksNeedingEatQuery()
     {
         return Work::with('plant', 'leadEngineer')
             ->whereDoesntHave('eat')
             ->whereNotIn('project_status', ['Finish', 'Cancel', 'On Hold'])
-            ->orderBy('entry_date', 'asc')
-            ->get();
+            ->orderBy('entry_date', 'asc');
     }
     
-    // 12. PEKERJAAN YANG EAT PERLU APPROVAL
-    private function getWorksNeedingEatApproval()
+    private function getWorksNeedingEatApprovalQuery()
     {
-        // Asumsi: pekerjaan yang sudah divalidasi dan punya target, tapi belum mulai eksekusi
         return Work::with('plant', 'leadEngineer')
             ->whereNotNull('erf_validated_date')
             ->whereNotNull('initiating_target_date')
             ->whereNull('executing_start_date')
             ->where('project_status', 'In Progress')
-            ->orderBy('erf_validated_date', 'asc')
-            ->get();
+            ->orderBy('erf_validated_date', 'asc');
     }
 }

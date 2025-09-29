@@ -184,6 +184,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/morning', [MorningReportController::class, 'index'])
         ->middleware('permission:morning_report.view')
         ->name('morning.index');
+        
+    Route::get('/morning-report', [MorningReportController::class, 'index'])
+        ->name('morning-report.index');
+    
+    // API endpoint untuk lazy load data
+    Route::get('/morning-report/load/{cardType}', [MorningReportController::class, 'loadCardData'])
+        ->name('morning-report.load');
 });
 
 // Route Key Performance Indicator

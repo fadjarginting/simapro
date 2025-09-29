@@ -18,16 +18,33 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Menghasilkan opsi tahun untuk filter
+        // Validasi input filter
+        $validated = $request->validate([
+            'filter_type' => 'in:all,yearly,monthly',
+            'year' => 'nullable|integer|min:2000|max:' . (Carbon::now()->year + 1),
+            'month' => 'nullable|integer|min:1|max:12',
+        ]);
+
+        $filterType = $validated['filter_type'] ?? 'yearly';
         $currentYear = Carbon::now()->year;
+        $selectedYear = $validated['year'] ?? $currentYear;
+        $selectedMonth = $validated['month'] ?? Carbon::now()->month;
+
+        // Menghasilkan opsi tahun untuk filter
         $availableYears = range($currentYear, $currentYear - 4);
-        $selectedYear = $request->input('year', $currentYear);
 
         // Breadcrumb
         $breadcrumbs = [['name' => 'Dashboard', 'url' => route('dashboard')]];
 
-        // Query dasar untuk tahun yang dipilih
-        $queryForYear = Work::whereYear('entry_date', $selectedYear);
+        // Query dasar berdasarkan filter
+        $query = Work::query();
+        if ($filterType === 'yearly') {
+            $query->whereYear('entry_date', $selectedYear);
+        } elseif ($filterType === 'monthly') {
+            $query->whereYear('entry_date', $selectedYear)
+                  ->whereMonth('entry_date', $selectedMonth);
+        }
+        // Jika 'all', tidak ada filter waktu yang diterapkan
 
         // Mengambil nilai dari Enum untuk digunakan kembali
         $allStatuses = array_column(ProjectStatus::cases(), 'value');
@@ -35,20 +52,20 @@ class DashboardController extends Controller
         $allPhases = array_column(CurrentPhase::cases(), 'value');
 
         // Mengumpulkan data dari fungsi privat
-        $statCardsData = $this->getStatCardsData(clone $queryForYear, $selectedYear);
-        $weeklySummary = $this->getWeeklySummary(clone $queryForYear, $allWorkTypes);
-        $phaseDetails = $this->getPhaseDetails(clone $queryForYear, $allWorkTypes, $allPhases);
-        $worksByStatus = $this->getWorkCountsByStatus(clone $queryForYear, $allStatuses);
-        $worksByType = $this->getWorkCountsByType(clone $queryForYear, $allWorkTypes);
-        $worksByPlant = $this->getWorkCountsByPlant(clone $queryForYear, $allStatuses);
-        $worksByTypeAndStatus = $this->getWorkCountsByTypeAndStatus(clone $queryForYear, $allWorkTypes, $allStatuses);
-        $worksByLeadEngineer = $this->getWorkCountsByLeadEngineer(clone $queryForYear, $allStatuses);
+        $statCardsData = $this->getStatCardsData(clone $query, $selectedYear);
+        $weeklySummary = $this->getWeeklySummary(clone $query, $allWorkTypes);
+        $phaseDetails = $this->getPhaseDetails(clone $query, $allWorkTypes, $allPhases);
+        $worksByStatus = $this->getWorkCountsByStatus(clone $query, $allStatuses);
+        $worksByType = $this->getWorkCountsByType(clone $query, $allWorkTypes);
+        $worksByPlant = $this->getWorkCountsByPlant(clone $query, $allStatuses);
+        $worksByTypeAndStatus = $this->getWorkCountsByTypeAndStatus(clone $query, $allWorkTypes, $allStatuses);
+        $worksByLeadEngineer = $this->getWorkCountsByLeadEngineer(clone $query, $allStatuses);
 
         // Data insight baru
-        $completionTimeData = $this->getCompletionTimeData(clone $queryForYear, $allWorkTypes);
-        $onTimeCompletionData = $this->getOnTimeCompletionData(clone $queryForYear);
-        $engineerWorkload = $this->getEngineerWorkload(clone $queryForYear);
-        $kpiMonitoringData = $this->getKpiMonitoringData(clone $queryForYear, $allWorkTypes);
+        $completionTimeData = $this->getCompletionTimeData(clone $query, $allWorkTypes);
+        $onTimeCompletionData = $this->getOnTimeCompletionData(clone $query);
+        $engineerWorkload = $this->getEngineerWorkload(clone $query);
+        $kpiMonitoringData = $this->getKpiMonitoringData(clone $query, $allWorkTypes);
 
         return Inertia::render('Dashboard', [
             'breadcrumbs' => $breadcrumbs,
@@ -57,9 +74,6 @@ class DashboardController extends Controller
                 'total' => $statCardsData['total'],
                 'onProgress' => $statCardsData['onProgress'],
                 'overdue' => $statCardsData['overdue'],
-                'totalWorkChange' => $statCardsData['totalWorkChange'],
-                'onProgressWorkChange' => $statCardsData['onProgressWorkChange'],
-                'overdueWorkChange' => $statCardsData['overdueWorkChange'],
                 'closed' => $statCardsData['closed'],
                 'byStatus' => $worksByStatus,
                 'byType' => $worksByType,
@@ -70,11 +84,15 @@ class DashboardController extends Controller
             'allStatuses' => $allStatuses,
             'weeklySummary' => $weeklySummary,
             'phaseDetails' => $phaseDetails,
-            'availableYears' => $availableYears,
-            'selectedYear' => (int)$selectedYear,
+            'filters' => [
+                'type' => $filterType,
+                'year' => (int)$selectedYear,
+                'month' => (int)$selectedMonth,
+                'available_years' => $availableYears,
+            ],
             // Data insight baru ditambahkan ke props
             'completionTime' => $completionTimeData,
-            'kpiMonitoring' => $kpiMonitoringData, // Data baru ditambahkan di sini
+            'kpiMonitoring' => $kpiMonitoringData,
             'onTimeCompletion' => $onTimeCompletionData,
             'engineerWorkload' => $engineerWorkload,
         ]);
@@ -95,20 +113,11 @@ class DashboardController extends Controller
 
         $startOfLastWeek = Carbon::now()->subWeek()->startOfWeek();
         $endOfLastWeek = Carbon::now()->subWeek()->endOfWeek();
-        $totalWorksLastWeek = Work::whereYear('entry_date', $selectedYear)
-            ->whereBetween('entry_date', [$startOfLastWeek, $endOfLastWeek])
-            ->count();
-
-        $calculateChange = fn($current, $previous) => $previous == 0 ? ($current > 0 ? 100.0 : 0.0) : (($current - $previous) / $previous) * 100;
-
         return [
             'total' => $totalWorks,
             'onProgress' => $onProgressWorks,
             'overdue' => $overdueWorks,
             'closed' => $closedWorks,
-            'totalWorkChange' => round($calculateChange($totalWorks, $totalWorksLastWeek), 1),
-            'onProgressWorkChange' => round($calculateChange($onProgressWorks, $totalWorksLastWeek), 1),
-            'overdueWorkChange' => round($calculateChange($overdueWorks, $totalWorksLastWeek), 1),
         ];
     }
 
@@ -300,6 +309,7 @@ class DashboardController extends Controller
      */
     private function getOnTimeCompletionData(Builder $query)
     {
+        // Ambil semua pekerjaan yang sudah selesai dan punya tanggal target & aktual
         $finishedWorks = (clone $query)
             ->with('leadEngineer:id,name')
             ->where('project_status', ProjectStatus::FINISH)
@@ -312,25 +322,22 @@ class DashboardController extends Controller
             'Terlambat' => 0,
             'Lebih Cepat' => 0,
         ];
-        $lateWorks = [];
+        $lateFinishedWorks = [];
 
         foreach ($finishedWorks as $work) {
             $targetDate = Carbon::parse($work->executing_target_date);
             $actualDate = Carbon::parse($work->executing_actual_date);
-            
-            // Hitung selisih hari: positif jika terlambat, negatif jika lebih cepat
-            $diffDays = $actualDate->diffInDays($targetDate, false);
 
-            if ($diffDays < 0) {
+            if ($actualDate->gt($targetDate)) {
                 // Actual date > Target date = Terlambat
                 $summary['Terlambat']++;
-                $lateWorks[] = [
+                $lateFinishedWorks[] = [
                     'erf_number' => $work->erf_number,
                     'slug' => $work->slug,
                     'lead_engineer' => $work->leadEngineer?->name,
-                    'days_late' => abs($diffDays),
+                    'days_late' => $actualDate->diffInDays($targetDate),
                 ];
-            } elseif ($diffDays > 0) {
+            } elseif ($actualDate->lt($targetDate)) {
                 // Actual date < Target date = Lebih Cepat
                 $summary['Lebih Cepat']++;
             } else {
@@ -339,9 +346,31 @@ class DashboardController extends Controller
             }
         }
 
+        // Ambil pekerjaan yang belum selesai tapi sudah lewat target
+        $unfinishedLateWorks = (clone $query)
+            ->with('leadEngineer:id,name')
+            ->whereNotIn('project_status', [ProjectStatus::FINISH, ProjectStatus::CANCEL])
+            ->whereNotNull('executing_target_date')
+            ->where('executing_target_date', '<', Carbon::now())
+            ->get()
+            ->map(function ($work) {
+                return [
+                    'erf_number' => $work->erf_number,
+                    'slug' => $work->slug,
+                    'lead_engineer' => $work->leadEngineer?->name,
+                    'days_late' => round(Carbon::now()->diffInDays(Carbon::parse($work->executing_target_date))),
+                ];
+            })
+            ->sortByDesc('days_late')
+            ->values()
+            ->all();
+
         return [
             'summary' => $summary,
-            'lateWorks' => collect($lateWorks)->sortByDesc('days_late')->values()->all(),
+            // lateFinishedWorks: pekerjaan selesai tapi terlambat
+            'lateFinishedWorks' => collect($lateFinishedWorks)->sortByDesc('days_late')->values()->all(),
+            // unfinishedLateWorks: pekerjaan belum selesai tapi sudah lewat target
+            'unfinishedLateWorks' => $unfinishedLateWorks,
         ];
     }
 

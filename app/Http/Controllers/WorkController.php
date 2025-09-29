@@ -323,8 +323,6 @@ class WorkController extends Controller
         ]);
 
         $isAdmin = Auth::user()->hasRole('Admin');
-
-
         // Hanya admin atau lead engineer yang dapat mengubah status
         if (!$isAdmin && Auth::id() !== $work->lead_engineer_id) {
             return back()->with('error', 'Hanya admin atau lead engineer yang dapat mengubah status.', 400);

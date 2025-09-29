@@ -3,6 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage, Link, router } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
 import GaugeChart from "@/Components/GaugeChart.vue"; // Import komponen baru
+import html2pdf from 'html2pdf.js';
 
 // Import Components
 import Card from "@/Components/Card.vue";
@@ -18,29 +19,54 @@ defineOptions({
 const props = defineProps({
     stats: Object,
     weeklySummary: Object,
-    availableYears: Array,
-    selectedYear: Number,
+    filters: Object, // Menggantikan availableYears dan selectedYear
     allStatuses: Array,
-    phaseDetails: Object, // Prop untuk data fase
-    // New props for additional insights
+    phaseDetails: Object,
     completionTime: Object,
     onTimeCompletion: Object,
     engineerWorkload: Object,
-    kpiMonitoring: Object, // New prop for KPI monitoring data
+    kpiMonitoring: Object,
 });
 
 // Get authenticated user from Inertia
 const user = computed(() => usePage().props.auth.user.data);
 
-// Year filter state
-const yearFilter = ref(props.selectedYear);
+// Filter state
+const localFilters = ref({
+    type: props.filters.type,
+    year: props.filters.year,
+    month: props.filters.month,
+});
 
-// Watch for changes in the year filter and reload the page
-watch(yearFilter, (newYear) => {
-    router.get(route('dashboard'), { year: newYear }, {
+// Watch for changes in filters and reload the page
+watch(localFilters, (newFilters) => {
+    router.get(route('dashboard'), {
+        filter_type: newFilters.type,
+        year: newFilters.year,
+        month: newFilters.month,
+    }, {
         preserveState: true,
         replace: true,
     });
+}, { deep: true });
+
+// Computed property for month names
+const monthNames = computed(() => {
+    return Array.from({ length: 12 }, (e, i) => {
+        return { value: i + 1, name: new Date(null, i, 1).toLocaleDateString('id-ID', { month: 'long' }) };
+    });
+});
+
+// Computed property for dynamic header
+const dynamicHeaderText = computed(() => {
+    if (localFilters.value.type === 'monthly') {
+        const monthName = monthNames.value.find(m => m.value === localFilters.value.month)?.name;
+        return `Ringkasan untuk ${monthName} ${localFilters.value.year}.`;
+    }
+    if (localFilters.value.type === 'yearly') {
+        return `Ringkasan untuk tahun ${localFilters.value.year}.`;
+    }
+    return 'Ringkasan semua pekerjaan.';
 });
 
 // Helper to convert status from "Title Case" to "snake_case" for CSS classes
@@ -375,20 +401,36 @@ const getStatusClass = (status) => {
     };
     return statusClasses[status] || statusClasses['default'];
 };
+
+// Function to generate PDF
+const generatePDF = () => {
+    const element = document.getElementById('dashboard-content');
+    if (!element) return;
+    html2pdf()
+        .set({
+            margin: 0.5,
+            filename: `dashboard-${new Date().toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        })
+        .from(element)
+        .save();
+};
 </script>
 
 <template>
 
-    <Head title="Dashboard" />
+    <Head title="Dasbor" />
 
-    <div class="py-6">
-        <div class="mx-auto sm:px-6 lg:px-8">
+    <div class="py-4">
+        <div class="mx-auto sm:px-4 lg:px-6">
             <div
                 class="bg-gradient-to-br from-blue-50 via-white to-purple-50 border rounded-2xl shadow-lg overflow-hidden">
-                <!-- Header and Year Filter -->
+                <!-- Header dan Filter Tahun -->
                 <div class="border-b p-4 bg-gradient-to-r from-blue-100 via-white to-purple-100">
-                    <div class="flex flex-wrap justify-between items-center gap-4">
-                        <div class="flex items-center gap-3">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <div class="flex items-center gap-3 mb-2 md:mb-0">
                             <div
                                 class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow">
                                 <i class="fas fa-chart-pie text-white text-lg"></i>
@@ -398,30 +440,52 @@ const getStatusClass = (status) => {
                                     Selamat Datang, {{ user.name }}!
                                 </h1>
                                 <p class="text-sm text-gray-600">
-                                    Ringkasan pekerjaan untuk tahun {{ selectedYear }}.
+                                    {{ dynamicHeaderText }}
                                 </p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <label for="year-filter" class="text-sm font-medium text-gray-700">Tahun:</label>
-                            <select id="year-filter" v-model="yearFilter"
-                                class="block w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-md text-sm leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm">
-                                <option v-for="year in availableYears" :key="year" :value="year">
-                                {{ year }}
-                                </option>
-                            </select>
+                        <div class="flex flex-wrap gap-2 md:gap-4 items-center">
+                            <!-- Filter Jenis -->
+                            <div class="flex items-center gap-2">
+                                <label for="filter-type" class="text-sm font-medium text-gray-700">Filter:</label>
+                                <select id="filter-type" v-model="localFilters.type"
+                                    class="block w-full pl-3 pr-8 py-1.5 border border-gray-300 rounded-md text-sm bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">Semua</option>
+                                    <option value="yearly">Tahunan</option>
+                                    <option value="monthly">Bulanan</option>
+                                </select>
+                            </div>
+                            <!-- Filter Tahun -->
+                            <div v-if="localFilters.type !== 'all'" class="flex items-center gap-2">
+                                <label for="year-filter" class="text-sm font-medium text-gray-700">Tahun:</label>
+                                <select id="year-filter" v-model="localFilters.year"
+                                    class="block w-full pl-3 pr-8 py-1.5 border border-gray-300 rounded-md text-sm bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option v-for="year in filters.available_years" :key="year" :value="year">
+                                        {{ year }}
+                                    </option>
+                                </select>
+                            </div>
+                            <!-- Filter Bulan -->
+                            <div v-if="localFilters.type === 'monthly'" class="flex items-center gap-2">
+                                <label for="month-filter" class="text-sm font-medium text-gray-700">Bulan:</label>
+                                <select id="month-filter" v-model="localFilters.month"
+                                    class="block w-full pl-3 pr-8 py-1.5 border border-gray-300 rounded-md text-sm bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option v-for="month in monthNames" :key="month.value" :value="month.value">
+                                        {{ month.name }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="p-6 space-y-6">
-                    <!-- Statistic Cards -->
+                    <!-- Kartu Statistik -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <!-- Total Work Card -->
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="bg-white border-2 border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-start">
                                 <div class="flex flex-col">
-                                    <span class="text-gray-500 text-sm font-medium">Total Work</span>
+                                    <span class="text-gray-500 text-sm font-medium">Total Pekerjaan</span>
                                     <span class="text-3xl font-bold text-gray-800">{{ stats.total }}</span>
                                 </div>
                                 <div class="p-3 rounded-lg bg-yellow-100 text-yellow-600">
@@ -432,26 +496,12 @@ const getStatusClass = (status) => {
                                     </svg>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-1 mt-3 text-xs"
-                                :class="stats.totalWorkChange >= 0 ? 'text-green-600' : 'text-red-600'">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 18L9 11.25l4.3-4.3a2.25 2.25 0 013.182 0l2.909 2.909"
-                                        v-if="stats.totalWorkChange >= 0" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 6L9 12.75l4.3 4.3a2.25 2.25 0 003.182 0l2.909-2.909" v-else />
-                                </svg>
-                                <span>{{ Math.abs(stats.totalWorkChange) }}%</span>
-                                <span class="text-gray-500">from last week</span>
-                            </div>
                         </div>
 
-                        <!-- In-Progress Work Card -->
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="bg-white border-2 border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-start">
                                 <div class="flex flex-col">
-                                    <span class="text-gray-500 text-sm font-medium">In-Progress</span>
+                                    <span class="text-gray-500 text-sm font-medium">In Progress</span>
                                     <span class="text-3xl font-bold text-gray-800">{{ stats.onProgress }}</span>
                                 </div>
                                 <div class="p-3 rounded-lg bg-blue-100 text-blue-600">
@@ -462,26 +512,12 @@ const getStatusClass = (status) => {
                                     </svg>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-1 mt-3 text-xs"
-                                :class="stats.onProgressWorkChange >= 0 ? 'text-green-600' : 'text-red-600'">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 18L9 11.25l4.3-4.3a2.25 2.25 0 013.182 0l2.909 2.909"
-                                        v-if="stats.onProgressWorkChange >= 0" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 6L9 12.75l4.3 4.3a2.25 2.25 0 003.182 0l2.909-2.909" v-else />
-                                </svg>
-                                <span>{{ Math.abs(stats.onProgressWorkChange) }}%</span>
-                                <span class="text-gray-500">from last week</span>
-                            </div>
                         </div>
 
-                        <!-- Work Overdue Card -->
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="bg-white border-2 border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-start">
                                 <div class="flex flex-col">
-                                    <span class="text-gray-500 text-sm font-medium">Work Overdue</span>
+                                    <span class="text-gray-500 text-sm font-medium">Pekerjaan Terlambat</span>
                                     <span class="text-3xl font-bold text-gray-800">{{ stats.overdue }}</span>
                                 </div>
                                 <div class="p-3 rounded-lg bg-red-100 text-red-600">
@@ -492,26 +528,12 @@ const getStatusClass = (status) => {
                                     </svg>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-1 mt-3 text-xs"
-                                :class="stats.overdueWorkChange >= 0 ? 'text-green-600' : 'text-red-600'">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 18L9 11.25l4.3-4.3a2.25 2.25 0 013.182 0l2.909 2.909"
-                                        v-if="stats.overdueWorkChange >= 0" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 6L9 12.75l4.3 4.3a2.25 2.25 0 003.182 0l2.909-2.909" v-else />
-                                </svg>
-                                <span>{{ Math.abs(stats.overdueWorkChange) }}%</span>
-                                <span class="text-gray-500">from last week</span>
-                            </div>
                         </div>
 
-                        <!-- NEW: Average Completion Time Card -->
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="bg-white border-2 border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-start">
                                 <div class="flex flex-col">
-                                    <span class="text-gray-500 text-sm font-medium">Avg. Completion Time</span>
+                                    <span class="text-gray-500 text-sm font-medium">Rata-rata Waktu Penyelesaian</span>
                                     <span class="text-3xl font-bold text-gray-800">
                                         {{ completionTime.averageOverall }} <span class="text-xl">Hari</span>
                                     </span>
@@ -523,13 +545,10 @@ const getStatusClass = (status) => {
                                     </svg>
                                 </div>
                             </div>
-                            <div class="mt-3 text-xs text-gray-500">
-                                Rata-rata penyelesaian pekerjaan.
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Charts Section: Pie Charts -->
+                    <!-- Bagian Grafik: Pie Chart -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <Card class="flex flex-col">
                             <h2 class="text-base font-bold text-gray-900 mb-2">Total Pekerjaan Berdasarkan Status</h2>
@@ -549,7 +568,7 @@ const getStatusClass = (status) => {
                         </Card>
                     </div>
 
-                    <!-- NEW: On-Time Completion & Engineer Workload -->
+                    <!-- Ketepatan Waktu & Beban Kerja Engineer -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <Card>
                             <h2 class="text-base font-bold text-gray-900 mb-2">Ketepatan Waktu Penyelesaian</h2>
@@ -560,7 +579,8 @@ const getStatusClass = (status) => {
                             </div>
                         </Card>
                         <Card>
-                            <h2 class="text-base font-bold text-gray-900 mb-4">Beban Kerja Engineer (In Progress)</h2>
+                            <h2 class="text-base font-bold text-gray-900 mb-4">Beban Kerja Engineer (Sedang Berjalan)
+                            </h2>
                             <div class="min-h-[300px]">
                                 <BarChart v-if="engineerWorkloadData.labels.length" :chart-data="engineerWorkloadData"
                                     :options="horizontalBarOptions" />
@@ -571,7 +591,7 @@ const getStatusClass = (status) => {
                         </Card>
                     </div>
 
-                    <!-- NEW: Average Completion Time by Type & Late Works Table -->
+                    <!-- Rata-rata Penyelesaian per Jenis & Tabel Terlambat -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <Card>
                             <h2 class="text-base font-bold text-gray-900 mb-4">Rata-rata Waktu Penyelesaian per Jenis
@@ -587,7 +607,8 @@ const getStatusClass = (status) => {
                         <Card>
                             <h2 class="text-base font-bold text-gray-900 mb-4">Daftar Pekerjaan Terlambat</h2>
                             <div class="overflow-y-auto max-h-[350px]">
-                                <table v-if="onTimeCompletion.lateWorks.length" class="min-w-full bg-white text-sm">
+                                <table v-if="onTimeCompletion.unfinishedLateWorks.length"
+                                    class="min-w-full bg-white text-sm">
                                     <thead class="sticky top-0 bg-gray-50">
                                         <tr>
                                             <th class="p-2 text-left font-semibold text-gray-600">ERF</th>
@@ -596,15 +617,15 @@ const getStatusClass = (status) => {
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
-                                        <tr v-for="work in onTimeCompletion.lateWorks" :key="work.slug"
+                                        <tr v-for="work in onTimeCompletion.unfinishedLateWorks" :key="work.slug"
                                             class="hover:bg-gray-50">
                                             <td class="p-2">
                                                 <Link :href="route('works.show', work.slug)"
                                                     class="text-blue-600 hover:underline">{{ work.erf_number }}</Link>
                                             </td>
-                                            <td class="p-2 text-gray-700">{{ work.lead_engineer || 'N/A' }}</td>
+                                            <td class="p-2 text-gray-700">{{ work.lead_engineer || 'Tidak ada' }}</td>
                                             <td class="p-2 text-right text-red-600 font-medium">{{ work.days_late }}
-                                                hari</td>
+                                                Hari</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -615,7 +636,7 @@ const getStatusClass = (status) => {
                         </Card>
                     </div>
 
-                    <!-- Charts Section: Bar Charts -->
+                    <!-- Bagian Grafik: Bar Chart -->
                     <div class="grid grid-cols-1 gap-6">
                         <Card>
                             <h2 class="text-base font-bold text-gray-900 mb-4">Detail Pekerjaan Berdasarkan Status per
@@ -670,7 +691,7 @@ const getStatusClass = (status) => {
                         </Card>
                     </div>
 
-                    <!-- Weekly Summary Table -->
+                    <!-- Tabel Rekap Mingguan -->
                     <div>
                         <Card>
                             <h2 class="text-base font-bold text-gray-900 mb-4">Total Pekerjaan Minggu Ini ({{
@@ -700,7 +721,7 @@ const getStatusClass = (status) => {
                                             <th class="p-3 border-b border-gray-200 font-semibold text-gray-600">Fase
                                                 Executing</th>
                                             <th class="p-3 border-b border-gray-200 font-semibold text-gray-600">Total
-                                                In Progress</th>
+                                                Sedang Berjalan</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
@@ -729,24 +750,24 @@ const getStatusClass = (status) => {
                         </Card>
                     </div>
 
-                    <section>
+                    <!-- <section>
                         <div
                             class="bg-yellow-200 border-l-4 border-yellow-500 text-yellow-700 p-4 text-center mb-4 rounded-r-lg">
-                            <h2 class="font-bold">KPI MONITORING UNIT SITE ENGINEERING SEMESTER {{
-                                kpiMonitoring.currentSemester }} TAHUN {{ yearFilter }}</h2>
+                            <h2 class="font-bold">MONITORING KPI UNIT SITE ENGINEERING SEMESTER {{
+                                kpiMonitoring.currentSemester }} TAHUN {{ filters.year }}</h2>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <Card v-for="(data, workType) in kpiMonitoring.data" :key="workType">
                                 <div class="text-center space-y-1">
                                     <h3 class="font-bold text-gray-800">{{ workType }}</h3>
-                                    <p class="text-xs text-gray-600">Design & Engineering</p>
+                                    <p class="text-xs text-gray-600">Desain & Engineering</p>
                                     <p class="text-sm font-semibold text-red-600">Periode {{ data.period_start }} s/d {{
                                         data.period_end }}</p>
                                 </div>
                                 <GaugeChart :percentage="data.percentage" :target="85" />
                             </Card>
                         </div>
-                    </section>
+                    </section> -->
                 </div>
             </div>
         </div>

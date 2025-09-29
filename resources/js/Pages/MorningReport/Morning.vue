@@ -1,48 +1,35 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import { ref, computed, onMounted } from "vue";
+import axios from 'axios';
 
-// Definisikan layout default
 defineOptions({
     layout: AuthenticatedLayout,
 });
 
-// Ambil props yang dikirim dari controller
 const props = defineProps({
     reportData: Object,
 });
 
-// State untuk melacak accordion mana yang sedang terbuka
+// State Management
 const openAccordion = ref(null);
-const isLoading = ref(true);
+const isLoading = ref(false);
 const searchTerm = ref('');
 const selectedFilter = ref('all');
-
-// Animation state
 const animatedCards = ref([]);
 
-const toggleAccordion = (name) => {
-    openAccordion.value = openAccordion.value === name ? null : name;
-};
+// Data cache untuk menghindari request berulang
+const loadedCardData = ref({});
+const loadingCards = ref(new Set());
 
-// Helper untuk format tanggal
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(new Date(dateString));
-};
-
-// Objek untuk mendefinisikan setiap kartu laporan dengan gradien dan ikon
+// Report Cards Configuration
 const reportCards = ref([
     {
         name: 'new_works_today',
         title: 'ERF Masuk Hari Ini',
-        count: props.reportData.new_works.today.length,
-        data: props.reportData.new_works.today,
+        count: props.reportData.new_works.today,
+        apiParams: { cardType: 'new_works', period: 'today' },
         color: 'blue',
         icon: 'fas fa-inbox',
         priority: 'normal',
@@ -56,8 +43,8 @@ const reportCards = ref([
     {
         name: 'new_works_this_week',
         title: 'ERF Masuk Minggu Ini',
-        count: props.reportData.new_works.this_week.length,
-        data: props.reportData.new_works.this_week,
+        count: props.reportData.new_works.this_week,
+        apiParams: { cardType: 'new_works', period: 'this_week' },
         color: 'blue',
         icon: 'fas fa-calendar-week',
         priority: 'normal',
@@ -71,8 +58,8 @@ const reportCards = ref([
     {
         name: 'priority_high',
         title: 'Pekerjaan Prioritas HIGH',
-        count: props.reportData.priority_high_works.length,
-        data: props.reportData.priority_high_works,
+        count: props.reportData.priority_high_works,
+        apiParams: { cardType: 'priority_high_works' },
         color: 'red',
         icon: 'fas fa-fire',
         priority: 'high',
@@ -86,8 +73,8 @@ const reportCards = ref([
     {
         name: 'finished_today',
         title: 'Pekerjaan Selesai Hari Ini',
-        count: props.reportData.finished_works.today.length,
-        data: props.reportData.finished_works.today,
+        count: props.reportData.finished_works.today,
+        apiParams: { cardType: 'finished_works', period: 'today' },
         color: 'green',
         icon: 'fas fa-check-circle',
         priority: 'normal',
@@ -101,8 +88,8 @@ const reportCards = ref([
     {
         name: 'finished_this_week',
         title: 'Pekerjaan Selesai Minggu Ini',
-        count: props.reportData.finished_works.this_week.length,
-        data: props.reportData.finished_works.this_week,
+        count: props.reportData.finished_works.this_week,
+        apiParams: { cardType: 'finished_works', period: 'this_week' },
         color: 'green',
         icon: 'fas fa-calendar-check',
         priority: 'normal',
@@ -116,8 +103,8 @@ const reportCards = ref([
     {
         name: 'needs_assignment',
         title: 'Perlu Penunjukan Lead',
-        count: props.reportData.needs_assignment.length,
-        data: props.reportData.needs_assignment,
+        count: props.reportData.needs_assignment,
+        apiParams: { cardType: 'needs_assignment' },
         color: 'purple',
         icon: 'fas fa-user-plus',
         priority: 'medium',
@@ -131,8 +118,8 @@ const reportCards = ref([
     {
         name: 'on_hold',
         title: 'Pekerjaan Status "Hold"',
-        count: props.reportData.on_hold_works.length,
-        data: props.reportData.on_hold_works,
+        count: props.reportData.on_hold_works,
+        apiParams: { cardType: 'on_hold_works' },
         color: 'yellow',
         icon: 'fas fa-pause-circle',
         priority: 'medium',
@@ -145,8 +132,8 @@ const reportCards = ref([
     {
         name: 'nearing_deadline_exec',
         title: 'Target Selesai <= 2 Minggu',
-        count: props.reportData.nearing_deadline_executing.length,
-        data: props.reportData.nearing_deadline_executing,
+        count: props.reportData.nearing_deadline_executing,
+        apiParams: { cardType: 'nearing_deadline_executing' },
         color: 'orange',
         icon: 'fas fa-hourglass-half',
         priority: 'high',
@@ -160,8 +147,8 @@ const reportCards = ref([
     {
         name: 'executing_phase_works',
         title: 'Pekerjaan Fase Eksekusi',
-        count: props.reportData.executing_phase_works.length,
-        data: props.reportData.executing_phase_works,
+        count: props.reportData.executing_phase_works,
+        apiParams: { cardType: 'executing_phase_works' },
         color: 'cyan',
         icon: 'fas fa-cogs',
         priority: 'normal',
@@ -175,8 +162,8 @@ const reportCards = ref([
     {
         name: 'initiating_planning_works',
         title: 'Pekerjaan Fase Inisiasi & Perencanaan',
-        count: props.reportData.initiating_planning_works.length,
-        data: props.reportData.initiating_planning_works,
+        count: props.reportData.initiating_planning_works,
+        apiParams: { cardType: 'initiating_planning_works' },
         color: 'teal',
         icon: 'fas fa-pencil-ruler',
         priority: 'normal',
@@ -190,8 +177,8 @@ const reportCards = ref([
     {
         name: 'nearing_deadline_initiating',
         title: 'Target Inisiasi/Perencanaan <= 2 Minggu',
-        count: props.reportData.nearing_deadline_initiating.length,
-        data: props.reportData.nearing_deadline_initiating,
+        count: props.reportData.nearing_deadline_initiating,
+        apiParams: { cardType: 'nearing_deadline_initiating' },
         color: 'amber',
         icon: 'fas fa-hourglass-start',
         priority: 'high',
@@ -205,8 +192,8 @@ const reportCards = ref([
     {
         name: 'needs_validation',
         title: 'Perlu Validasi ERF',
-        count: props.reportData.needs_validation.length,
-        data: props.reportData.needs_validation,
+        count: props.reportData.needs_validation,
+        apiParams: { cardType: 'needs_validation' },
         color: 'indigo',
         icon: 'fas fa-stamp',
         priority: 'medium',
@@ -220,8 +207,8 @@ const reportCards = ref([
     {
         name: 'needs_eat',
         title: 'Perlu Dibuatkan EAT',
-        count: props.reportData.needs_eat.length,
-        data: props.reportData.needs_eat,
+        count: props.reportData.needs_eat,
+        apiParams: { cardType: 'needs_eat' },
         color: 'lime',
         icon: 'fas fa-file-signature',
         priority: 'medium',
@@ -235,8 +222,8 @@ const reportCards = ref([
     {
         name: 'needs_eat_approval',
         title: 'EAT Perlu Approval',
-        count: props.reportData.needs_eat_approval.length,
-        data: props.reportData.needs_eat_approval,
+        count: props.reportData.needs_eat_approval,
+        apiParams: { cardType: 'needs_eat_approval' },
         color: 'pink',
         icon: 'fas fa-thumbs-up',
         priority: 'medium',
@@ -249,7 +236,49 @@ const reportCards = ref([
     },
 ]);
 
-// Computed properties untuk filtering
+// Load data ketika accordion dibuka
+const toggleAccordion = async (cardName) => {
+    const isOpening = openAccordion.value !== cardName;
+    openAccordion.value = isOpening ? cardName : null;
+
+    // Jika membuka accordion dan data belum di-load
+    if (isOpening && !loadedCardData.value[cardName]) {
+        await loadCardData(cardName);
+    }
+};
+
+// Fungsi untuk load data dari API
+const loadCardData = async (cardName) => {
+    const card = reportCards.value.find(c => c.name === cardName);
+    if (!card || loadingCards.value.has(cardName)) return;
+
+    loadingCards.value.add(cardName);
+
+    try {
+        const params = new URLSearchParams(card.apiParams);
+        const response = await axios.get(`/morning-report/load/${card.apiParams.cardType}?${params}`);
+
+        // Simpan data ke cache
+        loadedCardData.value[cardName] = response.data;
+    } catch (error) {
+        console.error(`Error loading data for ${cardName}:`, error);
+        loadedCardData.value[cardName] = [];
+    } finally {
+        loadingCards.value.delete(cardName);
+    }
+};
+
+// Get data untuk card tertentu
+const getCardData = (cardName) => {
+    return loadedCardData.value[cardName] || [];
+};
+
+// Check apakah card sedang loading
+const isCardLoading = (cardName) => {
+    return loadingCards.value.has(cardName);
+};
+
+// Filtered cards
 const filteredCards = computed(() => {
     let filtered = reportCards.value;
 
@@ -263,7 +292,6 @@ const filteredCards = computed(() => {
         );
     }
 
-    // Filter out cards with no data
     return filtered.filter(card => card.count > 0);
 });
 
@@ -282,27 +310,21 @@ const totalStats = computed(() => {
     };
 });
 
-// Helper untuk mengambil nilai nested object
+// Helper functions
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    }).format(new Date(dateString));
+};
+
 const getNestedValue = (obj, path) => {
     if (!path) return obj;
     return path.split('.').reduce((value, key) => value && value[key], obj);
-}
+};
 
-// Animation on mount
-onMounted(() => {
-    setTimeout(() => {
-        isLoading.value = false;
-    }, 500);
-
-    // Animate cards sequentially
-    reportCards.value.forEach((card, index) => {
-        setTimeout(() => {
-            animatedCards.value.push(card.name);
-        }, index * 100);
-    });
-});
-
-// Get priority badge color
 const getPriorityColor = (priority) => {
     switch (priority) {
         case 'high': return 'bg-red-100 text-red-800 border-red-200';
@@ -311,7 +333,6 @@ const getPriorityColor = (priority) => {
     }
 };
 
-// Format priority text
 const formatPriority = (priority) => {
     switch (priority) {
         case 'high': return 'Tinggi';
@@ -342,6 +363,14 @@ const getIconBgClass = (color) => {
     return colorMap[color] || 'bg-gray-100 text-gray-600';
 };
 
+// Animation on mount
+onMounted(() => {
+    reportCards.value.forEach((card, index) => {
+        setTimeout(() => {
+            animatedCards.value.push(card.name);
+        }, index * 50);
+    });
+});
 </script>
 
 <template>
@@ -349,14 +378,6 @@ const getIconBgClass = (color) => {
     <Head title="Laporan Pagi" />
 
     <div class="min-h-screen bg-gray-50">
-        <!-- Loading Animation -->
-        <div v-if="isLoading" class="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-            <div class="text-center">
-                <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="mt-4 text-gray-600">Memuat laporan...</p>
-            </div>
-        </div>
-
         <div class="py-6">
             <div class="mx-auto sm:px-6 lg:px-8 max-w-7xl">
                 <!-- Header dengan Statistik -->
@@ -377,11 +398,12 @@ const getIconBgClass = (color) => {
                             </div>
                         </div>
                     </div>
+
                     <!-- Quick Stats -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200">
                         <div class="bg-white p-4 text-center">
                             <div class="text-2xl font-bold text-gray-800">{{ totalStats.total }}</div>
-                            <div class="text-sm text-gray-500">Total Pekerjaan  </div>
+                            <div class="text-sm text-gray-500">Total Pekerjaan</div>
                         </div>
                         <div class="bg-white p-4 text-center">
                             <div class="text-2xl font-bold text-red-600">{{ totalStats.high }}</div>
@@ -436,8 +458,7 @@ const getIconBgClass = (color) => {
 
                 <!-- Konten Utama -->
                 <div class="space-y-4">
-                    <div v-for="(card, index) in filteredCards" :key="card.name"
-                        class="transition-all duration-500"
+                    <div v-for="(card, index) in filteredCards" :key="card.name" class="transition-all duration-500"
                         :class="animatedCards.includes(card.name) ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'"
                         :style="{ transitionDelay: `${index * 50}ms` }">
                         <div
@@ -455,18 +476,22 @@ const getIconBgClass = (color) => {
                                         <div>
                                             <h3 class="text-md font-bold text-gray-800">{{ card.title }}</h3>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span
-                                                    class="px-2.5 py-0.5 text-xs font-semibold rounded-full border"
+                                                <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border"
                                                     :class="getPriorityColor(card.priority)">
                                                     {{ formatPriority(card.priority) }}
+                                                </span>
+                                                <span v-if="!loadedCardData[card.name] && openAccordion === card.name"
+                                                    class="text-xs text-gray-500 italic">
+                                                    Klik untuk memuat data
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-4">
                                         <div class="text-center">
-                                            <div class="text-2xl font-bold" :class="getTextColorClass(card.color)">{{
-                                                card.count }}</div>
+                                            <div class="text-2xl font-bold" :class="getTextColorClass(card.color)">
+                                                {{ card.count }}
+                                            </div>
                                             <div class="text-xs text-gray-500">Item</div>
                                         </div>
                                         <div
@@ -480,7 +505,16 @@ const getIconBgClass = (color) => {
 
                             <!-- Konten Accordion (Tabel) -->
                             <div v-show="openAccordion === card.name" class="bg-gray-50/50">
-                                <div v-if="card.data.length > 0" class="overflow-x-auto">
+                                <!-- Loading State -->
+                                <div v-if="isCardLoading(card.name)" class="text-center py-12">
+                                    <div
+                                        class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto">
+                                    </div>
+                                    <p class="mt-4 text-gray-600">Memuat data...</p>
+                                </div>
+
+                                <!-- Data Table -->
+                                <div v-else-if="getCardData(card.name).length > 0" class="overflow-x-auto">
                                     <table class="w-full text-sm">
                                         <thead class="bg-gray-100">
                                             <tr class="border-b border-gray-200">
@@ -491,7 +525,7 @@ const getIconBgClass = (color) => {
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100">
-                                            <tr v-for="(item, itemIndex) in card.data" :key="item.id"
+                                            <tr v-for="(item, itemIndex) in getCardData(card.name)" :key="item.id"
                                                 class="hover:bg-white transition-colors duration-200"
                                                 :style="{ animationDelay: `${itemIndex * 50}ms` }">
                                                 <td v-for="col in card.columns" :key="col.key"
@@ -521,6 +555,8 @@ const getIconBgClass = (color) => {
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <!-- Empty State -->
                                 <div v-else class="text-center py-12">
                                     <div
                                         class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -568,5 +604,17 @@ const getIconBgClass = (color) => {
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+}
+/* Animation for table rows */
+tbody tr {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.3s forwards;
+}
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
